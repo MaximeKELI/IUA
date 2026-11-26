@@ -65,7 +65,7 @@ def provision_user(
 
     if "student" in roles:
         number = student_number or f"STU-{timezone.now().strftime('%y%m%d%H%M%S')}"
-        StudentProfile.objects.update_or_create(
+        profile, _ = StudentProfile.objects.update_or_create(
             user=user,
             defaults={
                 "student_number": number,
@@ -75,6 +75,30 @@ def provision_user(
                 "status": "active" if is_active else "inactive",
             },
         )
+        # Auto-enroll when program is known (use provided cohort or current year cohort).
+        if program_id:
+            from apps.academic.models import AcademicYear, Cohort, Enrollment
+
+            year = AcademicYear.objects.filter(is_current=True).order_by("-starts_on").first()
+            cohort = None
+            if cohort_id:
+                cohort = Cohort.objects.filter(pk=cohort_id).first()
+            if cohort is None and year:
+                cohort = (
+                    Cohort.objects.filter(program_id=program_id, academic_year=year)
+                    .order_by("code")
+                    .first()
+                )
+            if year and cohort:
+                Enrollment.objects.get_or_create(
+                    student=profile,
+                    program_id=program_id,
+                    academic_year=year,
+                    defaults={"cohort": cohort, "status": "active"},
+                )
+                if not profile.cohort_id:
+                    profile.cohort = cohort
+                    profile.save(update_fields=["cohort", "updated_at"])
 
     staff_roles = {
         "teacher",

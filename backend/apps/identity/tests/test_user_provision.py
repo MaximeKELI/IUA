@@ -1,6 +1,7 @@
 import pytest
 from rest_framework.test import APIClient
 
+from apps.academic.models import Faculty, Institution, Program
 from apps.identity.bootstrap import seed_roles_and_permissions
 from apps.identity.models import User
 from apps.identity.services import assign_role
@@ -16,6 +17,10 @@ def test_admin_can_provision_student():
         last_name="IUA",
     )
     assign_role(admin, "super_admin")
+
+    institution = Institution.objects.create(code="IUA-T", name="IUA Test")
+    faculty = Faculty.objects.create(institution=institution, code="F1", name="Fac Test")
+    program = Program.objects.create(faculty=faculty, code="L-TEST", name="Licence Test")
 
     client = APIClient()
     login = client.post(
@@ -36,6 +41,7 @@ def test_admin_can_provision_student():
             "last_name": "Koffi",
             "roles": ["student"],
             "level": "L1",
+            "program_id": str(program.id),
         },
         format="json",
     )
@@ -45,3 +51,4 @@ def test_admin_can_provision_student():
 
     created = User.objects.get(email="nouveau@test.iua.local")
     assert hasattr(created, "student_profile")
+    assert created.student_profile.program_id == program.id

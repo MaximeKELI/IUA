@@ -89,6 +89,21 @@ class UserProvisionSerializer(serializers.Serializer):
             raise serializers.ValidationError("Un compte existe déjà avec cet email.")
         return email
 
+    def validate(self, attrs):
+        roles = attrs.get("roles") or []
+        if "student" in roles and not attrs.get("program_id"):
+            # Allow update that keeps existing program, but creation needs one.
+            updating = self.instance or self.context.get("updating_user")
+            has_program = False
+            if updating is not None:
+                profile = getattr(updating, "student_profile", None)
+                has_program = bool(getattr(profile, "program_id", None))
+            if not has_program:
+                raise serializers.ValidationError(
+                    {"program_id": "Une formation est obligatoire pour un étudiant."}
+                )
+        return attrs
+
     def create(self, validated_data):
         return provision_user(**validated_data)
 

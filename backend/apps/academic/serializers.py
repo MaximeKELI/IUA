@@ -11,6 +11,7 @@ from apps.academic.models import (
     Grade,
     Institution,
     Program,
+    StaffProfile,
     StudentProfile,
     Subject,
     TeachingAssignment,
@@ -84,6 +85,28 @@ class StudentProfileSerializer(serializers.ModelSerializer):
         )
 
 
+class StaffProfileSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(source="user.email", read_only=True)
+    full_name = serializers.CharField(source="user.full_name", read_only=True)
+    user_email = serializers.EmailField(source="user.email", read_only=True)
+
+    class Meta:
+        model = StaffProfile
+        fields = (
+            "id",
+            "user",
+            "staff_number",
+            "staff_type",
+            "faculty",
+            "department",
+            "title",
+            "email",
+            "full_name",
+            "user_email",
+            "created_at",
+        )
+
+
 class EnrollmentSerializer(serializers.ModelSerializer):
     program_name = serializers.CharField(source="program.name", read_only=True)
     program_code = serializers.CharField(source="program.code", read_only=True)
@@ -100,6 +123,8 @@ class EnrollmentSerializer(serializers.ModelSerializer):
 class TeachingAssignmentSerializer(serializers.ModelSerializer):
     subject_name = serializers.CharField(source="subject.name", read_only=True)
     subject_code = serializers.CharField(source="subject.code", read_only=True)
+    teacher_name = serializers.CharField(source="teacher.user.full_name", read_only=True)
+    teacher_email = serializers.EmailField(source="teacher.user.email", read_only=True)
 
     class Meta:
         model = TeachingAssignment

@@ -198,7 +198,11 @@ export default function AdminUsersPage() {
                         <p className="text-[11px] uppercase tracking-wide text-red-600">Inactif</p>
                       )}
                     </td>
-                    <td className="py-3 pr-2 text-xs text-iua-muted">{u.roles.join(", ") || "—"}</td>
+                    <td className="py-3 pr-2 text-xs text-iua-muted">
+                      {u.roles
+                        .map((code) => roles.find((r) => r.code === code)?.name || code)
+                        .join(", ") || "—"}
+                    </td>
                     <td className="py-3">
                       <div className="flex flex-wrap gap-2">
                         <button
@@ -309,13 +313,14 @@ export default function AdminUsersPage() {
                     className="w-full rounded-md border border-iua-navy/15 px-3 py-2 text-sm"
                   />
                 </Field>
-                <Field label="Formation">
+                <Field label="Formation (obligatoire)">
                   <select
+                    required
                     value={form.program_id}
                     onChange={(e) => setForm({ ...form, program_id: e.target.value })}
                     className="w-full rounded-md border border-iua-navy/15 px-3 py-2 text-sm"
                   >
-                    <option value="">—</option>
+                    <option value="">Choisir une formation…</option>
                     {programs.map((p) => (
                       <option key={p.id} value={p.id}>
                         {p.code} — {p.name}

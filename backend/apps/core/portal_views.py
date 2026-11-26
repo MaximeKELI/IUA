@@ -30,14 +30,37 @@ class StudentDashboardView(APIView):
                 )
                 .first()
             )
-            enrollments_count = Enrollment.objects.filter(student__user_id=request.user.id).count()
+            enrollments = (
+                Enrollment.objects.filter(student__user_id=request.user.id, status="active")
+                .select_related("program", "cohort")
+                .order_by("-created_at")
+            )
+            enrollments_count = enrollments.count()
+            latest = enrollments.first()
+            program_name = getattr(getattr(profile, "program", None), "name", None)
+            cohort_name = getattr(getattr(profile, "cohort", None), "name", None)
+            if not program_name and latest:
+                program_name = latest.program.name
+            if not cohort_name and latest:
+                cohort_name = latest.cohort.name
+            # Heal profile drift from enrollment
+            if profile and latest:
+                dirty = []
+                if not profile.program_id and latest.program_id:
+                    profile.program_id = latest.program_id
+                    dirty.append("program_id")
+                if not profile.cohort_id and latest.cohort_id:
+                    profile.cohort_id = latest.cohort_id
+                    dirty.append("cohort_id")
+                if dirty:
+                    profile.save(update_fields=[*dirty, "updated_at"])
             unread = Notification.objects.filter(recipient_id=request.user.id, is_read=False).count()
             return {
                 "role": "student",
                 "profile": {
                     "student_number": getattr(profile, "student_number", None),
-                    "program": getattr(getattr(profile, "program", None), "name", None),
-                    "cohort": getattr(getattr(profile, "cohort", None), "name", None),
+                    "program": program_name,
+                    "cohort": cohort_name,
                     "level": getattr(profile, "level", None),
                 },
                 "enrollments_count": enrollments_count,

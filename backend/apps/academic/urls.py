@@ -11,6 +11,7 @@ from apps.academic.views import (
     GradeViewSet,
     InstitutionViewSet,
     ProgramViewSet,
+    StaffProfileViewSet,
     StudentProfileViewSet,
     SubjectViewSet,
     TeachingAssignmentViewSet,
@@ -26,6 +27,7 @@ router.register(r"cohorts", CohortViewSet, basename="cohorts")
 router.register(r"course-units", CourseUnitViewSet, basename="course-units")
 router.register(r"subjects", SubjectViewSet, basename="subjects")
 router.register(r"students", StudentProfileViewSet, basename="students")
+router.register(r"staff", StaffProfileViewSet, basename="staff")
 router.register(r"enrollments", EnrollmentViewSet, basename="enrollments")
 router.register(r"teaching-assignments", TeachingAssignmentViewSet, basename="teaching-assignments")
 router.register(r"grades", GradeViewSet, basename="grades")

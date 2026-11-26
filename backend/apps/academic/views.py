@@ -14,6 +14,7 @@ from apps.academic.models import (
     Grade,
     Institution,
     Program,
+    StaffProfile,
     StudentProfile,
     Subject,
     TeachingAssignment,
@@ -29,6 +30,7 @@ from apps.academic.serializers import (
     GradeSerializer,
     InstitutionSerializer,
     ProgramSerializer,
+    StaffProfileSerializer,
     StudentProfileSerializer,
     SubjectSerializer,
     TeachingAssignmentSerializer,
@@ -136,6 +138,23 @@ class SubjectViewSet(AcademicReadWriteMixin, viewsets.ModelViewSet):
         return qs
 
 
+class StaffProfileViewSet(viewsets.ReadOnlyModelViewSet):
+    permission_classes = [IsAuthenticated]
+    queryset = StaffProfile.objects.select_related("user", "faculty", "department").all()
+    serializer_class = StaffProfileSerializer
+    search_fields = ("staff_number", "user__email", "user__first_name", "user__last_name")
+    filterset_fields = ("staff_type", "faculty", "department")
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        user = self.request.user
+        if is_staff_user(user):
+            return qs
+        if is_teacher_only(user):
+            return qs.filter(user=user)
+        return qs.none()
+
+
 class StudentProfileViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticated]
     queryset = StudentProfile.objects.select_related("user", "program", "cohort").all()
@@ -155,11 +174,12 @@ class StudentProfileViewSet(viewsets.ReadOnlyModelViewSet):
             program_ids = list(
                 assignments.values_list("subject__course_unit__program_id", flat=True)
             )
-            cohort_ids = [c for c in assignments.values_list("cohort_id", flat=True) if c]
-            q = Q(program_id__in=program_ids)
-            if cohort_ids:
-                q &= Q(cohort_id__in=cohort_ids) | Q(cohort__isnull=True)
-            return qs.filter(q).distinct()
+            enrolled_ids = Enrollment.objects.filter(
+                program_id__in=program_ids, status="active"
+            ).values_list("student_id", flat=True)
+            return qs.filter(
+                Q(program_id__in=program_ids) | Q(id__in=enrolled_ids)
+            ).distinct()
         if is_staff_user(user):
             return qs
         return qs.none()
@@ -184,6 +204,32 @@ class EnrollmentViewSet(AcademicReadWriteMixin, viewsets.ModelViewSet):
             )
             return qs.filter(program_id__in=program_ids)
         return qs
+
+    def perform_create(self, serializer):
+        enrollment = serializer.save()
+        student = enrollment.student
+        updates = []
+        if enrollment.program_id and student.program_id != enrollment.program_id:
+            student.program_id = enrollment.program_id
+            updates.append("program_id")
+        if enrollment.cohort_id and student.cohort_id != enrollment.cohort_id:
+            student.cohort_id = enrollment.cohort_id
+            updates.append("cohort_id")
+        if updates:
+            student.save(update_fields=[*updates, "updated_at"])
+
+    def perform_update(self, serializer):
+        enrollment = serializer.save()
+        student = enrollment.student
+        updates = []
+        if enrollment.program_id and not student.program_id:
+            student.program_id = enrollment.program_id
+            updates.append("program_id")
+        if enrollment.cohort_id and not student.cohort_id:
+            student.cohort_id = enrollment.cohort_id
+            updates.append("cohort_id")
+        if updates:
+            student.save(update_fields=[*updates, "updated_at"])
 
 
 class TeachingAssignmentViewSet(AcademicReadWriteMixin, viewsets.ModelViewSet):
