@@ -4,6 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.core.pagination import NotificationPagination
 from apps.notifications.models import Notification
 from apps.notifications.serializers import NotificationSerializer
 
@@ -11,9 +12,20 @@ from apps.notifications.serializers import NotificationSerializer
 class NotificationListView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = NotificationSerializer
+    pagination_class = NotificationPagination
 
     def get_queryset(self):
-        return Notification.objects.filter(recipient=self.request.user)
+        return Notification.objects.filter(recipient_id=self.request.user.id).only(
+            "id",
+            "title",
+            "body",
+            "category",
+            "priority",
+            "is_read",
+            "read_at",
+            "data",
+            "created_at",
+        )
 
 
 class NotificationMarkReadView(APIView):

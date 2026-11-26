@@ -59,6 +59,18 @@ docker compose up --build
 
 Services : Postgres/PostGIS, Redis, MinIO, Mailhog, backend, celery, frontend.
 
+## Performance & gros volumes
+
+Le socle est préparé pour des tables à millions de lignes :
+
+- pagination **cursor** (étudiants, inscriptions, notifications)
+- indexes métier
+- cache Redis/local des dashboards
+- imports `bulk_create_chunked`
+- throttle API + optimisation Next.js (AVIF/WebP, cache assets)
+
+Détails : [`docs/SCALABILITY.md`](./docs/SCALABILITY.md)
+
 ## Documentation
 
 Voir le dossier [`docs/`](./docs/) :

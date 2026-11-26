@@ -27,6 +27,7 @@ from apps.academic.serializers import (
     SubjectSerializer,
     TeachingAssignmentSerializer,
 )
+from apps.core.pagination import EnrollmentPagination, StudentPagination
 from apps.core.permissions import HasPermission
 
 
@@ -99,10 +100,25 @@ class StudentProfileViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticated]
     queryset = StudentProfile.objects.select_related("user", "program", "cohort").all()
     serializer_class = StudentProfileSerializer
+    pagination_class = StudentPagination
     search_fields = ("student_number", "user__email", "user__first_name", "user__last_name")
+    filterset_fields = ("status", "program", "cohort", "level")
+    ordering_fields = ("student_number", "created_at")
 
     def get_queryset(self):
-        qs = super().get_queryset()
+        qs = super().get_queryset().only(
+            "id",
+            "student_number",
+            "level",
+            "status",
+            "program_id",
+            "cohort_id",
+            "user_id",
+            "created_at",
+            "user__email",
+            "user__first_name",
+            "user__last_name",
+        )
         user = self.request.user
         if user.has_any_role("student") and not user.has_any_role(
             "admin", "super_admin", "academic_dir", "direction", "teacher"
@@ -115,7 +131,9 @@ class EnrollmentViewSet(AcademicReadWriteMixin, viewsets.ModelViewSet):
     queryset = Enrollment.objects.select_related("student", "program", "cohort", "academic_year").all()
     serializer_class = EnrollmentSerializer
     required_permission = "academic.enrollment.manage"
+    pagination_class = EnrollmentPagination
     filterset_fields = ("program", "cohort", "academic_year", "status")
+    ordering_fields = ("created_at", "enrolled_at")
 
 
 class TeachingAssignmentViewSet(AcademicReadWriteMixin, viewsets.ModelViewSet):

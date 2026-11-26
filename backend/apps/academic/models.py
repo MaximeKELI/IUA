@@ -170,6 +170,12 @@ class StudentProfile(UUIDModel, TimeStampedModel, SoftDeleteModel):
 
     class Meta:
         ordering = ["student_number"]
+        indexes = [
+            models.Index(fields=["status", "program"]),
+            models.Index(fields=["cohort", "status"]),
+            models.Index(fields=["level", "status"]),
+            models.Index(fields=["created_at"]),
+        ]
 
     def __str__(self) -> str:
         return self.student_number
@@ -199,11 +205,16 @@ class Enrollment(UUIDModel, TimeStampedModel):
     program = models.ForeignKey(Program, on_delete=models.PROTECT, related_name="enrollments")
     cohort = models.ForeignKey(Cohort, on_delete=models.PROTECT, related_name="enrollments")
     academic_year = models.ForeignKey(AcademicYear, on_delete=models.PROTECT, related_name="enrollments")
-    status = models.CharField(max_length=32, default="active")
-    enrolled_at = models.DateField(auto_now_add=True)
+    status = models.CharField(max_length=32, default="active", db_index=True)
+    enrolled_at = models.DateField(auto_now_add=True, db_index=True)
 
     class Meta:
         unique_together = ("student", "academic_year", "program")
+        indexes = [
+            models.Index(fields=["academic_year", "status"]),
+            models.Index(fields=["program", "status"]),
+            models.Index(fields=["-created_at"]),
+        ]
 
 
 class TeachingAssignment(UUIDModel, TimeStampedModel):
@@ -214,3 +225,7 @@ class TeachingAssignment(UUIDModel, TimeStampedModel):
 
     class Meta:
         unique_together = ("teacher", "subject", "academic_year")
+        indexes = [
+            models.Index(fields=["academic_year", "teacher"]),
+            models.Index(fields=["subject", "academic_year"]),
+        ]

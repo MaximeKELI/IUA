@@ -74,6 +74,14 @@
 
 ---
 
+## Performance (2026-11-26)
+
+- Cursor pagination + indexes volume
+- Cache dashboards (Redis/locmem)
+- Next.js : AVIF/WebP, cache brand, optimizePackageImports
+- Throttle API / login
+- Doc `docs/SCALABILITY.md`
+
 ## Prochaines tâches
 
 1. Module **03 Admissions** (workflow candidature + événements)
@@ -81,6 +89,7 @@
 3. Durcir permissions académiques (lecture publique catalogue)
 4. Channels WebSocket notifications
 5. CI GitHub Actions (lint + pytest + build)
+6. Load tests k6 avant rentrée
 
 ---
 

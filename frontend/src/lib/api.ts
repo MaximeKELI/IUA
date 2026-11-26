@@ -16,6 +16,14 @@ export type LoginResponse = {
   user: AuthUser;
 };
 
+export type CursorPage<T> = {
+  next: string | null;
+  previous: string | null;
+  results: T[];
+};
+
+const DEFAULT_TIMEOUT_MS = 12_000;
+
 async function parseError(res: Response): Promise<string> {
   try {
     const data = await res.json();
@@ -28,8 +36,22 @@ async function parseError(res: Response): Promise<string> {
   return `Erreur HTTP ${res.status}`;
 }
 
+async function fetchWithTimeout(
+  input: RequestInfo | URL,
+  init: RequestInit = {},
+  timeoutMs = DEFAULT_TIMEOUT_MS,
+): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(input, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 export async function apiLogin(email: string, password: string): Promise<LoginResponse> {
-  const res = await fetch(`${API_URL}/auth/login/`, {
+  const res = await fetchWithTimeout(`${API_URL}/auth/login/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
@@ -38,16 +60,45 @@ export async function apiLogin(email: string, password: string): Promise<LoginRe
   return res.json();
 }
 
-export async function apiGet<T>(path: string, token: string): Promise<T> {
-  const res = await fetch(`${API_URL}${path}`, {
+export async function apiGet<T>(
+  path: string,
+  token: string,
+  options?: { cacheSeconds?: number },
+): Promise<T> {
+  const cacheSeconds = options?.cacheSeconds;
+  const res = await fetchWithTimeout(`${API_URL}${path}`, {
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
+      Accept: "application/json",
     },
-    cache: "no-store",
-  });
+    cache: cacheSeconds ? "force-cache" : "no-store",
+    next: cacheSeconds ? { revalidate: cacheSeconds } : undefined,
+  } as RequestInit);
   if (!res.ok) throw new Error(await parseError(res));
   return res.json();
+}
+
+/** Client-side in-memory cache for dashboards (short TTL). */
+const memoryCache = new Map<string, { expires: number; data: unknown }>();
+
+export async function apiGetCached<T>(
+  path: string,
+  token: string,
+  ttlMs = 15_000,
+): Promise<T> {
+  const key = `${token.slice(0, 12)}:${path}`;
+  const hit = memoryCache.get(key);
+  if (hit && hit.expires > Date.now()) {
+    return hit.data as T;
+  }
+  const data = await apiGet<T>(path, token);
+  memoryCache.set(key, { expires: Date.now() + ttlMs, data });
+  return data;
+}
+
+export function clearApiMemoryCache() {
+  memoryCache.clear();
 }
 
 export { API_URL };

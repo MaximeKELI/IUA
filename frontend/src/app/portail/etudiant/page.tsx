@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { PortalShell } from "@/components/PortalShell";
-import { apiGet } from "@/lib/api";
+import { apiGetCached } from "@/lib/api";
 import { getAccessToken } from "@/lib/auth";
 import { studentNav } from "@/lib/navigation";
 
@@ -27,7 +27,7 @@ export default function StudentPortalPage() {
   useEffect(() => {
     const token = getAccessToken();
     if (!token) return;
-    apiGet<StudentDashboard>("/portal/student/dashboard/", token)
+    apiGetCached<StudentDashboard>("/portal/student/dashboard/", token, 15_000)
       .then(setData)
       .catch((err) => setError(err instanceof Error ? err.message : "Erreur"));
   }, []);

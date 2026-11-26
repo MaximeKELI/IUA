@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.academic.models import Enrollment, Faculty, Program, StudentProfile, TeachingAssignment
+from apps.core.cache import cache_key, cached_value
 from apps.identity.models import User
 from apps.notifications.models import Notification
 
@@ -15,12 +16,23 @@ class StudentDashboardView(APIView):
         if not request.user.has_role("student") and not request.user.is_superuser:
             return Response({"code": "forbidden", "message": "Accès réservé aux étudiants."}, status=403)
 
-        profile = StudentProfile.objects.filter(user=request.user).select_related("program", "cohort").first()
-        enrollments = Enrollment.objects.filter(student__user=request.user).select_related("program", "cohort")
-        unread = Notification.objects.filter(recipient=request.user, is_read=False).count()
+        user_id = str(request.user.id)
 
-        return Response(
-            {
+        def build():
+            profile = (
+                StudentProfile.objects.filter(user_id=request.user.id)
+                .select_related("program", "cohort")
+                .only(
+                    "student_number",
+                    "level",
+                    "program__name",
+                    "cohort__name",
+                )
+                .first()
+            )
+            enrollments_count = Enrollment.objects.filter(student__user_id=request.user.id).count()
+            unread = Notification.objects.filter(recipient_id=request.user.id, is_read=False).count()
+            return {
                 "role": "student",
                 "profile": {
                     "student_number": getattr(profile, "student_number", None),
@@ -28,7 +40,7 @@ class StudentDashboardView(APIView):
                     "cohort": getattr(getattr(profile, "cohort", None), "name", None),
                     "level": getattr(profile, "level", None),
                 },
-                "enrollments_count": enrollments.count(),
+                "enrollments_count": enrollments_count,
                 "unread_notifications": unread,
                 "modules": [
                     {"code": "01", "name": "Portail étudiant", "status": "active"},
@@ -38,7 +50,9 @@ class StudentDashboardView(APIView):
                     {"code": "08", "name": "Documents", "status": "planned"},
                 ],
             }
-        )
+
+        payload = cached_value(cache_key("portal", "student", user_id), build, timeout=20)
+        return Response(payload)
 
 
 class TeacherDashboardView(APIView):
@@ -48,12 +62,18 @@ class TeacherDashboardView(APIView):
         if not request.user.has_role("teacher") and not request.user.is_superuser:
             return Response({"code": "forbidden", "message": "Accès réservé aux enseignants."}, status=403)
 
-        assignments = TeachingAssignment.objects.filter(teacher__user=request.user).select_related("subject")
-        unread = Notification.objects.filter(recipient=request.user, is_read=False).count()
-        return Response(
-            {
+        user_id = str(request.user.id)
+
+        def build():
+            assignments = list(
+                TeachingAssignment.objects.filter(teacher__user_id=request.user.id)
+                .select_related("subject")
+                .only("subject_id", "subject__name", "subject__code")
+            )
+            unread = Notification.objects.filter(recipient_id=request.user.id, is_read=False).count()
+            return {
                 "role": "teacher",
-                "assignments_count": assignments.count(),
+                "assignments_count": len(assignments),
                 "subjects": [
                     {"id": str(a.subject_id), "name": a.subject.name, "code": a.subject.code}
                     for a in assignments
@@ -65,7 +85,9 @@ class TeacherDashboardView(APIView):
                     {"code": "07", "name": "Notes", "status": "planned"},
                 ],
             }
-        )
+
+        payload = cached_value(cache_key("portal", "teacher", user_id), build, timeout=20)
+        return Response(payload)
 
 
 class AdminDashboardView(APIView):
@@ -78,8 +100,8 @@ class AdminDashboardView(APIView):
         ):
             return Response({"code": "forbidden", "message": "Accès réservé à l'administration."}, status=403)
 
-        return Response(
-            {
+        def build():
+            return {
                 "role": "admin",
                 "stats": {
                     "users": User.objects.filter(is_active=True).count(),
@@ -89,7 +111,9 @@ class AdminDashboardView(APIView):
                     "enrollments": Enrollment.objects.count(),
                 },
             }
-        )
+
+        payload = cached_value(cache_key("portal", "admin", "stats"), build, timeout=30)
+        return Response(payload)
 
 
 class DirectionDashboardView(APIView):
@@ -102,17 +126,19 @@ class DirectionDashboardView(APIView):
         ):
             return Response({"code": "forbidden", "message": "Accès réservé à la direction."}, status=403)
 
-        by_faculty = (
-            StudentProfile.objects.values("program__faculty__name")
-            .annotate(total=Count("id"))
-            .order_by("-total")
-        )
-        return Response(
-            {
+        def build():
+            by_faculty = list(
+                StudentProfile.objects.values("program__faculty__name")
+                .annotate(total=Count("id"))
+                .order_by("-total")[:50]
+            )
+            return {
                 "role": "direction",
                 "kpis": {
                     "students": StudentProfile.objects.count(),
-                    "teachers": User.objects.filter(user_roles__role__code="teacher").distinct().count(),
+                    "teachers": User.objects.filter(user_roles__role__code="teacher", user_roles__is_active=True)
+                    .distinct()
+                    .count(),
                     "faculties": Faculty.objects.count(),
                     "programs": Program.objects.count(),
                     "enrollments": Enrollment.objects.count(),
@@ -123,4 +149,6 @@ class DirectionDashboardView(APIView):
                 ],
                 "note": "Indicateurs calculés depuis la base réelle (aucun chiffre fictif).",
             }
-        )
+
+        payload = cached_value(cache_key("portal", "direction", "kpis"), build, timeout=30)
+        return Response(payload)

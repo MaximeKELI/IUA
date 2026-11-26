@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
-import { apiGet } from "@/lib/api";
+import { apiGetCached } from "@/lib/api";
 import { getAccessToken } from "@/lib/auth";
 import { adminNav } from "@/lib/navigation";
 
@@ -25,7 +25,7 @@ export default function AdminPortalPage() {
   useEffect(() => {
     const token = getAccessToken();
     if (!token) return;
-    apiGet<AdminDashboard>("/portal/admin/dashboard/", token)
+    apiGetCached<AdminDashboard>("/portal/admin/dashboard/", token, 20_000)
       .then(setData)
       .catch((err) => setError(err instanceof Error ? err.message : "Erreur"));
   }, []);

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
-import { apiGet } from "@/lib/api";
+import { apiGetCached } from "@/lib/api";
 import { getAccessToken } from "@/lib/auth";
 import { teacherNav } from "@/lib/navigation";
 
@@ -19,7 +19,7 @@ export default function TeacherPortalPage() {
   useEffect(() => {
     const token = getAccessToken();
     if (!token) return;
-    apiGet<TeacherDashboard>("/portal/teacher/dashboard/", token)
+    apiGetCached<TeacherDashboard>("/portal/teacher/dashboard/", token, 15_000)
       .then(setData)
       .catch((err) => setError(err instanceof Error ? err.message : "Erreur"));
   }, []);

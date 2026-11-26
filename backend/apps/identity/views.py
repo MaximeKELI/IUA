@@ -2,6 +2,7 @@ from django.utils import timezone
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.throttling import AnonRateThrottle
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -11,9 +12,14 @@ from apps.identity.serializers import LoginSerializer, RoleSerializer, UserSeria
 from apps.identity.services import client_ip
 
 
+class LoginRateThrottle(AnonRateThrottle):
+    scope = "login"
+
+
 class LoginView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
+    throttle_classes = [LoginRateThrottle]
 
     def post(self, request):
         serializer = LoginSerializer(data=request.data, context={"request": request})

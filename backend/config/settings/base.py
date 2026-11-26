@@ -115,6 +115,18 @@ REST_FRAMEWORK = {
     "PAGE_SIZE": 25,
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "EXCEPTION_HANDLER": "apps.core.exceptions.iua_exception_handler",
+    "DEFAULT_RENDERER_CLASSES": (
+        "rest_framework.renderers.JSONRenderer",
+    ),
+    "DEFAULT_THROTTLE_CLASSES": (
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.UserRateThrottle",
+    ),
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": "60/min",
+        "user": "600/min",
+        "login": "10/min",
+    },
 }
 
 SIMPLE_JWT = {
@@ -196,3 +208,42 @@ def configure_database() -> dict:
 
 
 DATABASES = configure_database()
+
+# Cache: Redis when available, else local memory (dev/SQLite)
+_redis_url = os.getenv("REDIS_URL", "")
+if _redis_url and os.getenv("USE_REDIS_CACHE", "true").lower() == "true":
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.redis.RedisCache",
+            "LOCATION": _redis_url,
+            "KEY_PREFIX": "iua",
+            "TIMEOUT": 60,
+        }
+    }
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "iua-local",
+            "TIMEOUT": 60,
+        }
+    }
+
+DISABLE_CACHE = os.getenv("DISABLE_CACHE", "false").lower() == "true"
+
+# Static files compressed & cached aggressively in non-debug
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"
+        if not DEBUG
+        else "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
+
+# Data-intensive defaults
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 5000
+FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
