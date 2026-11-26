@@ -27,18 +27,18 @@ pip install -r requirements.txt
 cp .env.example .env   # USE_SQLITE_FOR_LOCAL=true par défaut
 python manage.py migrate
 python manage.py seed_demo
-python manage.py runserver
+python manage.py runserver 8001
 ```
 
-API : http://localhost:8000/api/v1/  
-Docs OpenAPI : http://localhost:8000/api/docs/
+API : http://localhost:8001/api/v1/ (utiliser un port libre si 8000 est déjà pris)  
+Docs OpenAPI : http://localhost:8001/api/docs/
 
 ### Frontend
 
 ```bash
 cd frontend
 npm install
-NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1 npm run dev
+NEXT_PUBLIC_API_URL=http://localhost:8001/api/v1 npm run dev
 ```
 
 UI : http://localhost:3000
