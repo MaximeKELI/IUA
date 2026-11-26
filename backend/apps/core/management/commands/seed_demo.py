@@ -104,7 +104,43 @@ class Command(BaseCommand):
             admin_user.set_password("IuaDemoAdmin2026!")
             admin_user.save()
         assign_role(admin_user, "super_admin")
-        assign_role(admin_user, "direction")
+        assign_role(admin_user, "admin")
+        if created or not admin_user.has_usable_password():
+            admin_user.set_password("IuaDemoAdmin2026!")
+            admin_user.save(update_fields=["password"])
+
+        direction_user, created = User.objects.get_or_create(
+            email="direction@demo.iua.local",
+            defaults={
+                "first_name": "Mariam",
+                "last_name": "Bamba",
+                "is_staff": True,
+            },
+        )
+        if created:
+            direction_user.set_password("IuaDemoDirection2026!")
+            direction_user.save()
+        else:
+            direction_user.set_password("IuaDemoDirection2026!")
+            direction_user.is_superuser = False
+            direction_user.save(update_fields=["password", "is_superuser"])
+        assign_role(direction_user, "direction")
+
+        secretariat_user, created = User.objects.get_or_create(
+            email="secretariat@demo.iua.local",
+            defaults={
+                "first_name": "Fatou",
+                "last_name": "N'Diaye",
+                "is_staff": True,
+            },
+        )
+        if created:
+            secretariat_user.set_password("IuaDemoSecret2026!")
+            secretariat_user.save()
+        else:
+            secretariat_user.set_password("IuaDemoSecret2026!")
+            secretariat_user.save(update_fields=["password"])
+        assign_role(secretariat_user, "secretariat")
 
         student_user, created = User.objects.get_or_create(
             email="etudiant@demo.iua.local",
@@ -166,7 +202,9 @@ class Command(BaseCommand):
         )
 
         self.stdout.write(self.style.SUCCESS("Données de démonstration chargées."))
-        self.stdout.write("Comptes @demo.iua.local : admin / etudiant / enseignant")
+        self.stdout.write(
+            "Comptes @demo.iua.local : admin / direction / secretariat / etudiant / enseignant"
+        )
         # Relay outbox synchronously for local bootstrap without Celery
         count = relay_pending()
         self.stdout.write(f"Événements relayés: {count}")

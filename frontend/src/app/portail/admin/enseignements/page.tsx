@@ -3,8 +3,9 @@
 import { FormEvent, useEffect, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
 import { apiGet, apiSend, clearApiMemoryCache, Page, unwrapList } from "@/lib/api";
+import { getStoredUser } from "@/lib/auth";
+import { canEditTeaching, resolveOpsNav, resolveOpsTitle } from "@/lib/portalCapabilities";
 import { useAuthToken } from "@/lib/useAuthToken";
-import { adminNav } from "@/lib/navigation";
 
 type Assignment = {
   id: string;
@@ -22,6 +23,8 @@ type TeacherOption = { id: string; label: string; staff_id: string };
 
 export default function AdminEnseignementsPage() {
   const { token, ready } = useAuthToken();
+  const roles = getStoredUser()?.roles || [];
+  const canEdit = canEditTeaching(roles);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [years, setYears] = useState<Year[]>([]);
@@ -97,16 +100,19 @@ export default function AdminEnseignementsPage() {
   }
 
   return (
-    <PortalShell title="Administration" nav={adminNav}>
+    <PortalShell title={resolveOpsTitle(roles)} nav={resolveOpsNav(roles)}>
       <p className="text-xs uppercase tracking-[0.18em] text-iua-cyan">Pédagogie</p>
       <h1 className="mt-2 font-display text-3xl text-iua-navy">Affectations enseignants</h1>
       <p className="mt-2 text-sm text-iua-muted">
-        Liez un enseignant à une matière — indispensable pour la saisie des notes.
+        {canEdit
+          ? "Liez un enseignant à une matière — indispensable pour la saisie des notes."
+          : "Consultation seule — la direction ne modifie pas les affectations de cours."}
       </p>
       {error && <p className="mt-4 text-sm text-red-700">{error}</p>}
       {ok && <p className="mt-4 text-sm text-emerald-700">{ok}</p>}
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-2">
+      <div className={`mt-8 grid gap-6 ${canEdit ? "lg:grid-cols-2" : ""}`}>
+        {canEdit && (
         <form onSubmit={onSubmit} className="space-y-3 rounded-xl bg-white p-5 shadow-soft">
           <h2 className="font-display text-xl text-iua-navy">Nouvelle affectation</h2>
           <select
@@ -153,6 +159,7 @@ export default function AdminEnseignementsPage() {
             Affecter
           </button>
         </form>
+        )}
 
         <section className="rounded-xl bg-white p-5 shadow-soft">
           <h2 className="font-display text-xl text-iua-navy">Affectations actuelles</h2>

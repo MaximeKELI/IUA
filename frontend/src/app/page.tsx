@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AuthHomeCta } from "@/components/AuthHomeCta";
 import { BrandLogo } from "@/components/BrandLogo";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -80,13 +81,7 @@ export default function HomePage() {
             >
               S&apos;inscrire maintenant
             </Link>
-            <Link
-              href="/connexion"
-              prefetch
-              className="rounded-md border border-white/40 bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/20"
-            >
-              Accéder au Digital Campus
-            </Link>
+            <AuthHomeCta className="rounded-md border border-white/40 bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/20" />
           </div>
           <div className="mt-14 flex items-center gap-3 text-xs uppercase tracking-[0.18em] text-white/55 animate-[fadeUp_1s_ease_both]">
             <span className="inline-block h-px w-10 bg-iua-cyan/80" />

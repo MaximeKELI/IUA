@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { AuthHeaderActions } from "@/components/AuthHeaderActions";
 import { BrandLogo } from "@/components/BrandLogo";
+import { getAccessToken, getStoredUser, resolveHomePath } from "@/lib/auth";
 import { publicNav } from "@/lib/navigation";
 
 export function SiteHeader({ variant = "overlay" }: { variant?: "overlay" | "solid" }) {
@@ -87,22 +89,7 @@ export function SiteHeader({ variant = "overlay" }: { variant?: "overlay" | "sol
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-3">
-          <Link
-            href="/connexion"
-            prefetch
-            className={`hidden rounded-md px-4 py-2.5 text-sm font-semibold transition sm:inline-flex ${
-              solid ? "text-iua-navy hover:bg-iua-mist" : "text-white hover:bg-white/10"
-            }`}
-          >
-            Connexion
-          </Link>
-          <Link
-            href="/admissions"
-            prefetch
-            className="btn-shine rounded-md bg-iua-sun px-4 py-2.5 text-sm font-semibold text-iua-navy shadow-soft transition hover:brightness-105"
-          >
-            Inscription
-          </Link>
+          <AuthHeaderActions solid={solid} />
           <button
             type="button"
             className={`inline-flex h-10 w-10 items-center justify-center rounded-md lg:hidden ${
@@ -143,9 +130,19 @@ export function SiteHeader({ variant = "overlay" }: { variant?: "overlay" | "sol
                 )}
               </div>
             ))}
-            <Link href="/connexion" className="pt-2 font-semibold" onClick={() => setOpen(false)}>
-              Connexion au portail
-            </Link>
+            {getAccessToken() ? (
+              <Link
+                href={resolveHomePath(getStoredUser()?.roles || [])}
+                className="pt-2 font-semibold"
+                onClick={() => setOpen(false)}
+              >
+                Mon espace
+              </Link>
+            ) : (
+              <Link href="/connexion" className="pt-2 font-semibold" onClick={() => setOpen(false)}>
+                Connexion au portail
+              </Link>
+            )}
           </div>
         </div>
       )}

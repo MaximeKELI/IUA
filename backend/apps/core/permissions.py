@@ -22,3 +22,16 @@ def require_permission(code: str):
         permission_code = code
 
     return _Perm
+
+
+class CanCreateAdminRequest(BasePermission):
+    """Students/alumni (or anyone with services.request.create) may file requests."""
+
+    def has_permission(self, request, view):
+        user = request.user
+        if not user or not user.is_authenticated:
+            return False
+        if user.is_superuser or user.has_perm_code("services.request.create"):
+            return True
+        return user.has_any_role("student", "alumni", "teacher")
+

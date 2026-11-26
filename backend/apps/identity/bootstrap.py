@@ -30,6 +30,7 @@ BASE_PERMISSIONS = [
     ("academic.faculty.manage", "Gérer les facultés", "academic"),
     ("academic.program.manage", "Gérer les formations", "academic"),
     ("academic.enrollment.manage", "Gérer les inscriptions", "academic"),
+    ("academic.teaching.manage", "Gérer les affectations enseignants", "academic"),
     ("academic.grades.manage", "Saisir et valider les notes", "academic"),
     ("academic.grades.read", "Consulter les notes", "academic"),
     ("services.request.manage", "Traiter les demandes administratives", "services"),
@@ -38,20 +39,6 @@ BASE_PERMISSIONS = [
     ("notifications.read", "Lire les notifications", "notifications"),
     ("portal.direction.read", "Tableau de bord direction", "portal"),
 ]
-
-FULL_ACCESS = {
-    "super_admin",
-    "direction",
-    "admin",
-    "it",
-}
-
-ACADEMIC_STAFF = {
-    "academic_dir",
-    "secretariat",
-    "faculty_head",
-    "dept_head",
-}
 
 
 def seed_roles_and_permissions() -> None:
@@ -64,21 +51,44 @@ def seed_roles_and_permissions() -> None:
         perm_objs.append(obj)
     by_code = {p.code: p for p in perm_objs}
 
+    # Direction: almost everything, but cannot modify grades or teaching assignments.
+    direction_perms = [
+        p
+        for p in perm_objs
+        if p.code
+        not in {
+            "academic.grades.manage",
+            "academic.teaching.manage",
+        }
+    ]
+
     for code, name in SYSTEM_ROLES:
         role, _ = Role.objects.update_or_create(
             code=code,
             defaults={"name": name, "is_system": True},
         )
-        if code in FULL_ACCESS:
+        if code == "super_admin":
             role.permissions.set(perm_objs)
-        elif code in ACADEMIC_STAFF:
+        elif code == "direction":
+            role.permissions.set(direction_perms)
+        elif code in {"admin", "it"}:
+            role.permissions.set(
+                [p for p in perm_objs if p.code != "academic.grades.manage"]
+            )
+        elif code in {"academic_dir", "secretariat", "faculty_head", "dept_head"}:
             role.permissions.set(
                 [
                     p
                     for p in perm_objs
                     if p.code.startswith("academic.")
                     or p.code.startswith("services.")
-                    or p.code in {"identity.user.read", "identity.role.read", "notifications.read"}
+                    or p.code
+                    in {
+                        "identity.user.read",
+                        "identity.user.manage",
+                        "identity.role.read",
+                        "notifications.read",
+                    }
                 ]
             )
         elif code == "finance_dir":
@@ -88,6 +98,7 @@ def seed_roles_and_permissions() -> None:
                     by_code["notifications.read"],
                     by_code["portal.direction.read"],
                     by_code["services.request.manage"],
+                    by_code["academic.grades.read"],
                 ]
             )
         elif code == "teacher":
@@ -96,6 +107,7 @@ def seed_roles_and_permissions() -> None:
                     by_code["notifications.read"],
                     by_code["academic.grades.manage"],
                     by_code["academic.grades.read"],
+                    by_code["services.request.create"],
                 ]
             )
         elif code in {"student", "alumni"}:

@@ -83,6 +83,44 @@ export const adminNav: PortalGroup[] = [
       { href: "/portail/admin/enseignements", label: "Affectations enseignants", status: "active" },
       { href: "/portail/admin/inscriptions", label: "Inscriptions", status: "active" },
       { href: "/portail/admin/demandes", label: "Demandes", status: "active" },
+      { href: "/portail/admin/notes", label: "Notes (consultation)", status: "active" },
+    ],
+  },
+];
+
+/** Direction : gestion globale + consultation notes/cours (sans modification). */
+export const directionNav: PortalGroup[] = [
+  {
+    title: "Pilotage",
+    links: [
+      { href: "/portail/direction", label: "Tableau de bord", status: "active" },
+      { href: "/portail/admin", label: "Vue opérationnelle", status: "active" },
+    ],
+  },
+  {
+    title: "Gestion",
+    links: [
+      { href: "/portail/admin/utilisateurs", label: "Utilisateurs & rôles", status: "active" },
+      { href: "/portail/admin/formations", label: "Formations", status: "active" },
+      { href: "/portail/admin/inscriptions", label: "Inscriptions", status: "active" },
+      { href: "/portail/admin/demandes", label: "Demandes admin.", status: "active" },
+    ],
+  },
+  {
+    title: "Consultation",
+    links: [
+      {
+        href: "/portail/admin/enseignements",
+        label: "Cours & affectations",
+        description: "Lecture seule",
+        status: "active",
+      },
+      {
+        href: "/portail/admin/notes",
+        label: "Notes des enseignants",
+        description: "Lecture seule",
+        status: "active",
+      },
     ],
   },
 ];

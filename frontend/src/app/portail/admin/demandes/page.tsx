@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
 import { apiGet, apiSend, Page, unwrapList } from "@/lib/api";
+import { getStoredUser } from "@/lib/auth";
+import { resolveOpsNav, resolveOpsTitle } from "@/lib/portalCapabilities";
 import { useAuthToken } from "@/lib/useAuthToken";
-import { adminNav } from "@/lib/navigation";
 
 type AdminRequest = {
   id: string;
@@ -26,6 +27,7 @@ const statuses = [
 
 export default function AdminDemandesPage() {
   const { token, ready } = useAuthToken();
+  const roles = getStoredUser()?.roles || [];
   const [items, setItems] = useState<AdminRequest[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [notes, setNotes] = useState<Record<string, string>>({});
@@ -55,7 +57,7 @@ export default function AdminDemandesPage() {
   }
 
   return (
-    <PortalShell title="Administration" nav={adminNav}>
+    <PortalShell title={resolveOpsTitle(roles)} nav={resolveOpsNav(roles)}>
       <p className="text-xs uppercase tracking-[0.18em] text-iua-cyan">Secrétariat</p>
       <h1 className="mt-2 font-display text-3xl text-iua-navy">Demandes administratives</h1>
       <p className="mt-2 text-sm text-iua-muted">Traitez les demandes déposées par les étudiants.</p>

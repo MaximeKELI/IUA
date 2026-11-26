@@ -3,7 +3,15 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.academic.models import Enrollment, Faculty, Program, StudentProfile, TeachingAssignment
+from apps.academic.models import (
+    AdminRequest,
+    Enrollment,
+    Faculty,
+    Grade,
+    Program,
+    StudentProfile,
+    TeachingAssignment,
+)
 from apps.core.cache import cache_key, cached_value
 from apps.identity.models import User
 from apps.notifications.models import Notification
@@ -163,23 +171,58 @@ class DirectionDashboardView(APIView):
                 .annotate(total=Count("id"))
                 .order_by("-total")[:50]
             )
+            pending_requests = AdminRequest.objects.filter(status="pending").count()
+            recent_requests = list(
+                AdminRequest.objects.select_related("requester")
+                .order_by("-created_at")[:8]
+                .values("id", "subject", "status", "kind", "requester__first_name", "requester__last_name")
+            )
             return {
                 "role": "direction",
                 "kpis": {
                     "students": StudentProfile.objects.count(),
-                    "teachers": User.objects.filter(user_roles__role__code="teacher", user_roles__is_active=True)
+                    "teachers": User.objects.filter(
+                        user_roles__role__code="teacher", user_roles__is_active=True
+                    )
                     .distinct()
                     .count(),
                     "faculties": Faculty.objects.count(),
                     "programs": Program.objects.count(),
                     "enrollments": Enrollment.objects.count(),
+                    "pending_requests": pending_requests,
+                    "grades_published": Grade.objects.filter(is_published=True).count(),
+                    "teaching_assignments": TeachingAssignment.objects.count(),
                 },
                 "students_by_faculty": [
-                    {"faculty": row["program__faculty__name"] or "Non affecté", "total": row["total"]}
+                    {
+                        "faculty": row["program__faculty__name"] or "Non affecté",
+                        "total": row["total"],
+                    }
                     for row in by_faculty
                 ],
-                "note": "Indicateurs calculés depuis la base réelle (aucun chiffre fictif).",
+                "recent_requests": [
+                    {
+                        "id": str(r["id"]),
+                        "subject": r["subject"],
+                        "status": r["status"],
+                        "kind": r["kind"],
+                        "requester": f"{r['requester__first_name']} {r['requester__last_name']}".strip(),
+                    }
+                    for r in recent_requests
+                ],
+                "capabilities": {
+                    "can_manage_users": True,
+                    "can_manage_programs": True,
+                    "can_manage_enrollments": True,
+                    "can_manage_requests": True,
+                    "can_view_grades": True,
+                    "can_edit_grades": False,
+                    "can_view_teaching": True,
+                    "can_edit_teaching": False,
+                    "can_see_student_ids": False,
+                },
+                "note": "Direction : gestion globale. Notes & cours enseignants en consultation seule. Matricules étudiants masqués.",
             }
 
-        payload = cached_value(cache_key("portal", "direction", "kpis"), build, timeout=30)
+        payload = cached_value(cache_key("portal", "direction", "kpis"), build, timeout=15)
         return Response(payload)

@@ -1,17 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BrandLogo } from "@/components/BrandLogo";
 import { apiLogin } from "@/lib/api";
-import { resolveHomePath, saveSession } from "@/lib/auth";
+import { getAccessToken, getStoredUser, resolveHomePath, saveSession } from "@/lib/auth";
 
 const presets = [
   { label: "Étudiant", email: "etudiant@demo.iua.local", password: "IuaDemoStudent2026!" },
   { label: "Enseignant", email: "enseignant@demo.iua.local", password: "IuaDemoTeacher2026!" },
   { label: "Secrétariat", email: "secretariat@demo.iua.local", password: "IuaDemoSecret2026!" },
-  { label: "Direction", email: "admin@demo.iua.local", password: "IuaDemoAdmin2026!" },
+  { label: "Direction", email: "direction@demo.iua.local", password: "IuaDemoDirection2026!" },
+  { label: "Admin", email: "admin@demo.iua.local", password: "IuaDemoAdmin2026!" },
 ];
 
 export default function LoginPage() {
@@ -20,6 +21,20 @@ export default function LoginPage() {
   const [password, setPassword] = useState(presets[0].password);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    if (!getAccessToken()) {
+      setChecking(false);
+      return;
+    }
+    const user = getStoredUser();
+    if (user?.roles?.length) {
+      router.replace(resolveHomePath(user.roles));
+      return;
+    }
+    setChecking(false);
+  }, [router]);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -34,6 +49,14 @@ export default function LoginPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  if (checking) {
+    return (
+      <main className="flex min-h-[100svh] items-center justify-center bg-iua-mist text-iua-navy">
+        Vérification de votre session…
+      </main>
+    );
   }
 
   return (

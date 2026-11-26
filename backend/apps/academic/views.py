@@ -36,7 +36,7 @@ from apps.academic.serializers import (
     TeachingAssignmentSerializer,
 )
 from apps.core.pagination import EnrollmentPagination, StudentPagination
-from apps.core.permissions import HasPermission, require_permission
+from apps.core.permissions import CanCreateAdminRequest, HasPermission, require_permission
 from apps.notifications.models import Notification
 
 STAFF_ROLES = (
@@ -235,7 +235,13 @@ class EnrollmentViewSet(AcademicReadWriteMixin, viewsets.ModelViewSet):
 class TeachingAssignmentViewSet(AcademicReadWriteMixin, viewsets.ModelViewSet):
     queryset = TeachingAssignment.objects.select_related("teacher", "subject", "academic_year").all()
     serializer_class = TeachingAssignmentSerializer
-    required_permission = "academic.program.manage"
+    required_permission = "academic.teaching.manage"
+
+    def get_permissions(self):
+        # Direction may consult courses/assignments but not modify them.
+        if self.action in ("list", "retrieve"):
+            return [IsAuthenticated()]
+        return [HasPermission()]
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -304,7 +310,7 @@ class AdminRequestViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action == "create":
-            return [require_permission("services.request.create")()]
+            return [CanCreateAdminRequest()]
         if self.action in ("update", "partial_update", "destroy"):
             return [require_permission("services.request.manage")()]
         return [IsAuthenticated()]

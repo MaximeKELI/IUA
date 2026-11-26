@@ -4,8 +4,9 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
 import { apiGetCached } from "@/lib/api";
+import { getStoredUser } from "@/lib/auth";
+import { resolveOpsNav, resolveOpsTitle } from "@/lib/portalCapabilities";
 import { useAuthToken } from "@/lib/useAuthToken";
-import { adminNav } from "@/lib/navigation";
 
 type AdminDashboard = {
   stats: Record<string, number>;
@@ -22,6 +23,7 @@ const labels: Record<string, string> = {
 export default function AdminPortalPage() {
   const [data, setData] = useState<AdminDashboard | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const roles = getStoredUser()?.roles || [];
 
   const { token, ready } = useAuthToken();
 
@@ -33,7 +35,7 @@ export default function AdminPortalPage() {
   }, [ready, token]);
 
   return (
-    <PortalShell title="Administration" nav={adminNav}>
+    <PortalShell title={resolveOpsTitle(roles)} nav={resolveOpsNav(roles)}>
       <p className="text-xs uppercase tracking-[0.18em] text-iua-cyan">Pilotage</p>
       <h1 className="mt-2 font-display text-3xl text-iua-navy">Vue d&apos;ensemble</h1>
       <p className="mt-2 text-sm text-iua-muted">

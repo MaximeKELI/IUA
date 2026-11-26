@@ -3,8 +3,9 @@
 import { FormEvent, useEffect, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
 import { apiGet, apiSend, clearApiMemoryCache, Page, unwrapList } from "@/lib/api";
+import { getStoredUser } from "@/lib/auth";
+import { resolveOpsNav, resolveOpsTitle } from "@/lib/portalCapabilities";
 import { useAuthToken } from "@/lib/useAuthToken";
-import { adminNav } from "@/lib/navigation";
 
 type Faculty = { id: string; name: string; code: string; institution: string; is_active: boolean };
 type Program = {
@@ -19,6 +20,7 @@ type Institution = { id: string; name: string; code: string };
 
 export default function AdminFormationsPage() {
   const { token, ready } = useAuthToken();
+  const roles = getStoredUser()?.roles || [];
   const [faculties, setFaculties] = useState<Faculty[]>([]);
   const [programs, setPrograms] = useState<Program[]>([]);
   const [institutions, setInstitutions] = useState<Institution[]>([]);
@@ -92,7 +94,7 @@ export default function AdminFormationsPage() {
   }
 
   return (
-    <PortalShell title="Administration" nav={adminNav}>
+    <PortalShell title={resolveOpsTitle(roles)} nav={resolveOpsNav(roles)}>
       <p className="text-xs uppercase tracking-[0.18em] text-iua-cyan">Référentiels</p>
       <h1 className="mt-2 font-display text-3xl text-iua-navy">Formations</h1>
       <p className="mt-2 text-sm text-iua-muted">Gérez facultés et programmes — données réelles API.</p>

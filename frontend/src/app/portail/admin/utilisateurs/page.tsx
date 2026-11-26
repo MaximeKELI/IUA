@@ -11,8 +11,9 @@ import {
   Role,
   unwrapList,
 } from "@/lib/api";
+import { getStoredUser } from "@/lib/auth";
+import { canSeeStudentIds, resolveOpsNav, resolveOpsTitle } from "@/lib/portalCapabilities";
 import { useAuthToken } from "@/lib/useAuthToken";
-import { adminNav } from "@/lib/navigation";
 
 type FormState = {
   email: string;
@@ -52,6 +53,8 @@ export default function AdminUsersPage() {
   const [ok, setOk] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [q, setQ] = useState("");
+  const myRoles = getStoredUser()?.roles || [];
+  const showStudentIds = canSeeStudentIds(myRoles);
 
   const { token, ready } = useAuthToken();
 
@@ -160,12 +163,13 @@ export default function AdminUsersPage() {
   }
 
   return (
-    <PortalShell title="Administration" nav={adminNav}>
+    <PortalShell title={resolveOpsTitle(myRoles)} nav={resolveOpsNav(myRoles)}>
       <p className="text-xs uppercase tracking-[0.18em] text-iua-cyan">Autorisations</p>
       <h1 className="mt-2 font-display text-3xl text-iua-navy">Utilisateurs & rôles</h1>
       <p className="mt-2 max-w-2xl text-sm text-iua-muted">
         Créez un compte, choisissez les rôles (étudiant, enseignant, secrétariat, direction…).
         C&apos;est ici que l&apos;accès au Digital Campus est réellement accordé.
+        {!showStudentIds && " Les matricules étudiants sont masqués pour votre profil."}
       </p>
 
       <div className="mt-8 grid gap-8 xl:grid-cols-[1.1fr_0.9fr]">
@@ -306,13 +310,19 @@ export default function AdminUsersPage() {
                 <p className="text-xs font-semibold uppercase tracking-[0.12em] text-iua-muted">
                   Profil étudiant
                 </p>
-                <Field label="Matricule (auto si vide)">
-                  <input
-                    value={form.student_number}
-                    onChange={(e) => setForm({ ...form, student_number: e.target.value })}
-                    className="w-full rounded-md border border-iua-navy/15 px-3 py-2 text-sm"
-                  />
-                </Field>
+                {showStudentIds ? (
+                  <Field label="Matricule (auto si vide)">
+                    <input
+                      value={form.student_number}
+                      onChange={(e) => setForm({ ...form, student_number: e.target.value })}
+                      className="w-full rounded-md border border-iua-navy/15 px-3 py-2 text-sm"
+                    />
+                  </Field>
+                ) : (
+                  <p className="text-xs text-iua-muted">
+                    Matricule généré automatiquement (non visible pour la direction).
+                  </p>
+                )}
                 <Field label="Formation (obligatoire)">
                   <select
                     required

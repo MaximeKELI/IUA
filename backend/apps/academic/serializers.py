@@ -69,6 +69,7 @@ class SubjectSerializer(serializers.ModelSerializer):
 class StudentProfileSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(source="user.email", read_only=True)
     full_name = serializers.CharField(source="user.full_name", read_only=True)
+    student_number = serializers.SerializerMethodField()
 
     class Meta:
         model = StudentProfile
@@ -83,6 +84,21 @@ class StudentProfileSerializer(serializers.ModelSerializer):
             "full_name",
             "created_at",
         )
+
+    def get_student_number(self, obj):
+        """Direction may see students but not their matricule IDs."""
+        request = self.context.get("request")
+        user = getattr(request, "user", None)
+        if not user or not user.is_authenticated:
+            return None
+        if user.is_superuser or user.has_any_role(
+            "admin", "secretariat", "academic_dir", "teacher", "super_admin"
+        ):
+            return obj.student_number
+        if user.has_role("student") and obj.user_id == user.id:
+            return obj.student_number
+        # direction / finance / others: hide matricule
+        return None
 
 
 class StaffProfileSerializer(serializers.ModelSerializer):
@@ -135,7 +151,7 @@ class GradeSerializer(serializers.ModelSerializer):
     subject_name = serializers.CharField(source="subject.name", read_only=True)
     subject_code = serializers.CharField(source="subject.code", read_only=True)
     student_name = serializers.CharField(source="student.user.full_name", read_only=True)
-    student_number = serializers.CharField(source="student.student_number", read_only=True)
+    student_number = serializers.SerializerMethodField()
 
     class Meta:
         model = Grade
@@ -158,6 +174,19 @@ class GradeSerializer(serializers.ModelSerializer):
             "updated_at",
         )
         read_only_fields = ("recorded_by",)
+
+    def get_student_number(self, obj):
+        request = self.context.get("request")
+        user = getattr(request, "user", None)
+        if not user or not user.is_authenticated:
+            return None
+        if user.is_superuser or user.has_any_role(
+            "admin", "secretariat", "academic_dir", "teacher", "super_admin"
+        ):
+            return obj.student.student_number
+        if user.has_role("student") and obj.student.user_id == user.id:
+            return obj.student.student_number
+        return None
 
 
 class AdminRequestSerializer(serializers.ModelSerializer):

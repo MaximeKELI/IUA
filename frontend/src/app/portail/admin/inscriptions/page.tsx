@@ -3,10 +3,11 @@
 import { FormEvent, useEffect, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
 import { apiGet, apiSend, clearApiMemoryCache, Page, unwrapList } from "@/lib/api";
+import { getStoredUser } from "@/lib/auth";
+import { canSeeStudentIds, resolveOpsNav, resolveOpsTitle } from "@/lib/portalCapabilities";
 import { useAuthToken } from "@/lib/useAuthToken";
-import { adminNav } from "@/lib/navigation";
 
-type Student = { id: string; student_number: string; full_name: string; email: string; program: string | null };
+type Student = { id: string; student_number: string | null; full_name: string; email: string; program: string | null };
 type Program = { id: string; name: string; code: string };
 type Cohort = { id: string; name: string; code: string; program: string; academic_year: string };
 type Year = { id: string; name: string; code: string; is_current: boolean };
@@ -21,6 +22,8 @@ type Enrollment = {
 
 export default function AdminInscriptionsPage() {
   const { token, ready } = useAuthToken();
+  const roles = getStoredUser()?.roles || [];
+  const showIds = canSeeStudentIds(roles);
   const [students, setStudents] = useState<Student[]>([]);
   const [programs, setPrograms] = useState<Program[]>([]);
   const [cohorts, setCohorts] = useState<Cohort[]>([]);
@@ -80,15 +83,19 @@ export default function AdminInscriptionsPage() {
 
   const studentLabel = (id: string) => {
     const s = students.find((x) => x.id === id);
-    return s ? `${s.student_number} — ${s.full_name}` : id.slice(0, 8);
+    if (!s) return id.slice(0, 8);
+    return showIds && s.student_number ? `${s.student_number} — ${s.full_name}` : s.full_name;
   };
   const programLabel = (id: string) => programs.find((x) => x.id === id)?.name || id.slice(0, 8);
 
   return (
-    <PortalShell title="Administration" nav={adminNav}>
+    <PortalShell title={resolveOpsTitle(roles)} nav={resolveOpsNav(roles)}>
       <p className="text-xs uppercase tracking-[0.18em] text-iua-cyan">Scolarité</p>
       <h1 className="mt-2 font-display text-3xl text-iua-navy">Inscriptions</h1>
-      <p className="mt-2 text-sm text-iua-muted">Inscrivez un étudiant à une formation / promotion.</p>
+      <p className="mt-2 text-sm text-iua-muted">
+        Inscrivez un étudiant à une formation / promotion.
+        {!showIds && " Les matricules restent masqués pour la direction."}
+      </p>
       {error && <p className="mt-4 text-sm text-red-700">{error}</p>}
       {ok && <p className="mt-4 text-sm text-emerald-700">{ok}</p>}
 
@@ -104,7 +111,7 @@ export default function AdminInscriptionsPage() {
             <option value="">Étudiant…</option>
             {students.map((s) => (
               <option key={s.id} value={s.id}>
-                {s.student_number} — {s.full_name}
+                {showIds && s.student_number ? `${s.student_number} — ${s.full_name}` : s.full_name}
               </option>
             ))}
           </select>
