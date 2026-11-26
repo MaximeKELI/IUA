@@ -1,13 +1,10 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
-import { Reveal } from "@/components/motion";
 
 export function SiteFooter() {
   return (
     <footer className="bg-iua-navy text-white">
-      <Reveal className="mx-auto grid max-w-6xl gap-10 px-6 py-14 md:grid-cols-[1.2fr_1fr_1fr]">
+      <div className="mx-auto grid max-w-6xl gap-10 px-6 py-14 md:grid-cols-[1.2fr_1fr_1fr]">
         <div>
           <Image
             src="/brand/logo-iua.png"
@@ -15,6 +12,7 @@ export function SiteFooter() {
             width={140}
             height={52}
             className="h-10 w-auto brightness-0 invert"
+            loading="lazy"
           />
           <p className="mt-4 max-w-sm text-sm leading-relaxed text-white/65">
             Institut Universitaire d&apos;Abidjan — excellence académique, insertion
@@ -25,7 +23,7 @@ export function SiteFooter() {
           <p className="text-xs uppercase tracking-[0.18em] text-iua-cyan">Parcours</p>
           <ul className="mt-4 space-y-2 text-sm text-white/75">
             <li>
-              <Link className="transition hover:text-white" href="/formations">
+              <Link className="transition hover:text-white" href="/formations" prefetch={false}>
                 Formations
               </Link>
             </li>
@@ -57,7 +55,7 @@ export function SiteFooter() {
             </li>
           </ul>
         </div>
-      </Reveal>
+      </div>
       <div className="border-t border-white/10 px-6 py-4 text-center text-xs text-white/45">
         © {new Date().getFullYear()} Institut Universitaire d&apos;Abidjan · Digital Campus
       </div>

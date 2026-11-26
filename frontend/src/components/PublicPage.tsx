@@ -1,8 +1,5 @@
-"use client";
-
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
-import { Reveal, motion } from "@/components/motion";
 
 export function PublicPage({
   eyebrow,
@@ -22,37 +19,19 @@ export function PublicPage({
         <div className="pointer-events-none absolute -right-16 top-0 h-40 w-40 rounded-full bg-iua-cyan/15 blur-3xl" />
         <div className="mx-auto max-w-6xl px-6 py-14 pt-28">
           {eyebrow && (
-            <motion.p
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-xs uppercase tracking-[0.2em] text-iua-cyan"
-            >
+            <p className="text-xs uppercase tracking-[0.2em] text-iua-cyan animate-[fadeUp_0.4s_ease_both]">
               {eyebrow}
-            </motion.p>
+            </p>
           )}
-          <motion.h1
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.08, duration: 0.55 }}
-            className="mt-3 font-display text-4xl text-iua-navy"
-          >
+          <h1 className="mt-3 font-display text-4xl text-iua-navy animate-[fadeUp_0.5s_ease_both]">
             {title}
-          </motion.h1>
+          </h1>
           {lead && (
-            <motion.p
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.16, duration: 0.55 }}
-              className="mt-4 max-w-2xl text-iua-muted"
-            >
-              {lead}
-            </motion.p>
+            <p className="mt-4 max-w-2xl text-iua-muted animate-[fadeUp_0.6s_ease_both]">{lead}</p>
           )}
         </div>
       </section>
-      <Reveal className="mx-auto max-w-6xl px-6 py-12" delay={0.1}>
-        {children}
-      </Reveal>
+      <div className="mx-auto max-w-6xl px-6 py-12 content-auto">{children}</div>
       <SiteFooter />
     </main>
   );

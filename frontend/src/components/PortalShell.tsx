@@ -7,7 +7,6 @@ import { useEffect, useState } from "react";
 import { AuthUser } from "@/lib/api";
 import { clearSession, getStoredUser } from "@/lib/auth";
 import { PortalGroup } from "@/lib/navigation";
-import { motion } from "@/components/motion";
 
 export function PortalShell({
   title,
@@ -125,14 +124,9 @@ export function PortalShell({
           </div>
         </aside>
 
-        <motion.main
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="px-4 py-8 sm:px-6 lg:px-8"
-        >
+        <main className="px-4 py-8 sm:px-6 lg:px-8 animate-[fadeUp_0.35s_ease_both]">
           {children}
-        </motion.main>
+        </main>
       </div>
     </div>
   );

@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { publicNav } from "@/lib/navigation";
 
@@ -13,22 +12,27 @@ export function SiteHeader({ variant = "overlay" }: { variant?: "overlay" | "sol
 
   useEffect(() => {
     if (variant === "solid") return;
-    const onScroll = () => setScrolled(window.scrollY > 24);
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        setScrolled(window.scrollY > 24);
+        ticking = false;
+      });
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, [variant]);
 
   return (
-    <motion.header
-      initial={{ y: -24, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-      className={
+    <header
+      className={`will-change-transform animate-[fadeUp_0.45s_ease_both] ${
         solid
           ? "fixed inset-x-0 top-0 z-40 border-b border-iua-navy/10 bg-white/95 shadow-soft backdrop-blur-md"
           : "absolute inset-x-0 top-0 z-40"
-      }
+      }`}
     >
       <div
         className={`hidden border-b px-6 py-2 text-xs sm:block ${
@@ -77,6 +81,7 @@ export function SiteHeader({ variant = "overlay" }: { variant?: "overlay" | "sol
             <Link
               key={item.href}
               href={item.href}
+              prefetch
               className={`relative text-sm font-medium transition after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:bg-iua-cyan after:transition-all hover:after:w-full ${
                 solid ? "text-iua-navy/75 hover:text-iua-navy" : "text-white/85 hover:text-white"
               }`}
@@ -89,6 +94,7 @@ export function SiteHeader({ variant = "overlay" }: { variant?: "overlay" | "sol
         <div className="flex items-center gap-2 sm:gap-3">
           <Link
             href="/connexion"
+            prefetch
             className={`hidden rounded-md px-4 py-2.5 text-sm font-semibold transition sm:inline-flex ${
               solid ? "text-iua-navy hover:bg-iua-mist" : "text-white hover:bg-white/10"
             }`}
@@ -97,6 +103,7 @@ export function SiteHeader({ variant = "overlay" }: { variant?: "overlay" | "sol
           </Link>
           <Link
             href="/admissions"
+            prefetch
             className="btn-shine rounded-md bg-iua-sun px-4 py-2.5 text-sm font-semibold text-iua-navy shadow-soft transition hover:brightness-105"
           >
             Inscription
@@ -114,50 +121,39 @@ export function SiteHeader({ variant = "overlay" }: { variant?: "overlay" | "sol
         </div>
       </div>
 
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.28 }}
-            className={`overflow-hidden border-t lg:hidden ${
-              solid ? "border-iua-navy/10 bg-white" : "border-white/10 bg-iua-navy/95 text-white"
-            }`}
-          >
-            <div className="mx-auto flex max-w-6xl flex-col gap-3 px-6 py-4">
-              {publicNav.map((item, i) => (
-                <motion.div
-                  key={item.href}
-                  initial={{ x: -12, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: 0.05 * i }}
+      {open && (
+        <div
+          className={`border-t px-6 py-4 lg:hidden animate-[fadeUp_0.25s_ease_both] ${
+            solid ? "border-iua-navy/10 bg-white" : "border-white/10 bg-iua-navy/95 text-white"
+          }`}
+        >
+          <div className="mx-auto flex max-w-6xl flex-col gap-3">
+            {publicNav.map((item) => (
+              <div key={item.href}>
+                <Link
+                  href={item.href}
+                  className="block py-2 text-base font-semibold"
+                  onClick={() => setOpen(false)}
                 >
-                  <Link
-                    href={item.href}
-                    className="block py-2 text-base font-semibold"
-                    onClick={() => setOpen(false)}
-                  >
-                    {item.label}
-                  </Link>
-                  {"children" in item && item.children && (
-                    <div className="ml-3 flex flex-col gap-1 border-l border-current/15 pl-3 text-sm opacity-80">
-                      {item.children.map((child) => (
-                        <Link key={child.href} href={child.href} onClick={() => setOpen(false)}>
-                          {child.label}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </motion.div>
-              ))}
-              <Link href="/connexion" className="pt-2 font-semibold" onClick={() => setOpen(false)}>
-                Connexion au portail
-              </Link>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.header>
+                  {item.label}
+                </Link>
+                {"children" in item && item.children && (
+                  <div className="ml-3 flex flex-col gap-1 border-l border-current/15 pl-3 text-sm opacity-80">
+                    {item.children.map((child) => (
+                      <Link key={child.href} href={child.href} onClick={() => setOpen(false)}>
+                        {child.label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+            <Link href="/connexion" className="pt-2 font-semibold" onClick={() => setOpen(false)}>
+              Connexion au portail
+            </Link>
+          </div>
+        </div>
+      )}
+    </header>
   );
 }
