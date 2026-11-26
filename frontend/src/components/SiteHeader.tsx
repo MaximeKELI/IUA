@@ -28,7 +28,7 @@ export function SiteHeader({ variant = "overlay" }: { variant?: "overlay" | "sol
 
   return (
     <header
-      className={`will-change-transform animate-[fadeUp_0.45s_ease_both] ${
+      className={`animate-[fadeUp_0.45s_ease_both] ${
         solid
           ? "fixed inset-x-0 top-0 z-40 border-b border-iua-navy/10 bg-white/95 shadow-soft backdrop-blur-md"
           : "absolute inset-x-0 top-0 z-40"
@@ -56,13 +56,11 @@ export function SiteHeader({ variant = "overlay" }: { variant?: "overlay" | "sol
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-4">
         <Link href="/" className="group flex items-center gap-3">
           <Image
-            src="/brand/logo-iua.png"
+            src={solid ? "/brand/logo-iua.png" : "/brand/logo-iua-white.png"}
             alt="Institut Universitaire d'Abidjan"
-            width={148}
-            height={56}
-            className={`h-11 w-auto transition duration-300 group-hover:scale-[1.03] ${
-              solid ? "" : "brightness-0 invert"
-            }`}
+            width={160}
+            height={140}
+            className="h-11 w-auto transition duration-300 group-hover:scale-[1.03]"
             priority
           />
           <span

@@ -44,7 +44,7 @@ const ticker = [
 export default function HomePage() {
   return (
     <main>
-      <section className="relative min-h-[100svh] overflow-hidden text-white content-visibility-auto">
+      <section className="relative min-h-[100svh] overflow-hidden text-white">
         <Image
           src="/brand/campus-hero.jpg"
           alt="Étudiantes de l'Institut Universitaire d'Abidjan"
@@ -53,32 +53,32 @@ export default function HomePage() {
           fetchPriority="high"
           placeholder="blur"
           blurDataURL={CAMPUS_HERO_BLUR}
-          className="hero-kenburns object-cover object-[center_20%]"
-          sizes="100vw"
-          quality={65}
+          className="object-cover object-[center_18%]"
+          sizes="(max-width: 768px) 100vw, 100vw"
+          quality={90}
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-iua-navy/93 via-iua-navy/78 to-iua-navy/30" />
-        <div className="absolute inset-0 bg-gradient-to-t from-iua-navy/75 via-transparent to-iua-navy/30" />
-        <div className="glow-orb pointer-events-none absolute -left-20 top-28 h-64 w-64 rounded-full bg-iua-cyan/25 blur-3xl" />
+        {/* Lighter overlay so the photo stays sharp and visible */}
+        <div className="absolute inset-0 bg-gradient-to-r from-iua-navy/80 via-iua-navy/55 to-iua-navy/25" />
+        <div className="absolute inset-0 bg-gradient-to-t from-iua-navy/70 via-transparent to-iua-navy/20" />
 
         <SiteHeader />
 
         <div className="relative mx-auto flex min-h-[100svh] max-w-6xl flex-col justify-end px-6 pb-16 pt-44 sm:justify-center sm:pb-24">
           <Image
-            src="/brand/logo-iua.png"
+            src="/brand/logo-iua-white.png"
             alt="IUA"
-            width={220}
-            height={84}
-            className="mb-8 h-14 w-auto brightness-0 invert sm:h-16 animate-[fadeUp_0.5s_ease_both]"
+            width={240}
+            height={210}
+            className="mb-8 h-16 w-auto sm:h-20 animate-[fadeUp_0.5s_ease_both]"
             priority
           />
           <p className="mb-4 text-xs uppercase tracking-[0.28em] text-iua-cyan animate-[fadeUp_0.55s_ease_both]">
             One University · One Digital Ecosystem
           </p>
-          <h1 className="max-w-2xl font-display text-4xl leading-[1.08] text-balance sm:text-6xl animate-[fadeUp_0.65s_ease_both]">
+          <h1 className="max-w-2xl font-display text-4xl leading-[1.08] text-balance drop-shadow-sm sm:text-6xl animate-[fadeUp_0.65s_ease_both]">
             L&apos;excellence commence avec vous
           </h1>
-          <p className="mt-5 max-w-lg text-base leading-relaxed text-white/80 sm:text-lg animate-[fadeUp_0.75s_ease_both]">
+          <p className="mt-5 max-w-lg text-base leading-relaxed text-white/85 sm:text-lg animate-[fadeUp_0.75s_ease_both]">
             Un seul portail pour candidater, étudier, payer et suivre votre parcours à
             l&apos;Institut Universitaire d&apos;Abidjan.
           </p>
@@ -93,7 +93,7 @@ export default function HomePage() {
             <Link
               href="/connexion"
               prefetch
-              className="rounded-md border border-white/35 bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/20"
+              className="rounded-md border border-white/40 bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/20"
             >
               Accéder au Digital Campus
             </Link>
@@ -197,11 +197,11 @@ export default function HomePage() {
               src="/brand/campus-hero.jpg"
               alt="Étudiantes IUA"
               width={900}
-              height={640}
+              height={506}
               loading="lazy"
-              quality={60}
+              quality={85}
               sizes="(max-width: 1024px) 100vw, 45vw"
-              className="h-72 w-full object-cover object-top sm:h-80"
+              className="h-72 w-full object-cover object-[center_15%] sm:h-80"
             />
             <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-iua-navy/80 to-transparent p-5">
               <p className="text-sm font-medium">Excellence · Professionnalisme · Abidjan</p>

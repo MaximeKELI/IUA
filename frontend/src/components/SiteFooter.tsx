@@ -7,11 +7,11 @@ export function SiteFooter() {
       <div className="mx-auto grid max-w-6xl gap-10 px-6 py-14 md:grid-cols-[1.2fr_1fr_1fr]">
         <div>
           <Image
-            src="/brand/logo-iua.png"
+            src="/brand/logo-iua-white.png"
             alt="IUA"
             width={140}
-            height={52}
-            className="h-10 w-auto brightness-0 invert"
+            height={120}
+            className="h-12 w-auto"
             loading="lazy"
           />
           <p className="mt-4 max-w-sm text-sm leading-relaxed text-white/65">

@@ -58,7 +58,7 @@ export function PortalShell({
               {menuOpen ? "×" : "☰"}
             </button>
             <Link href="/" className="flex items-center gap-3">
-              <Image src="/brand/logo-iua.png" alt="IUA" width={112} height={42} className="h-9 w-auto" />
+              <Image src="/brand/logo-iua.png" alt="IUA" width={112} height={98} className="h-10 w-auto" />
               <span className="hidden text-xs uppercase tracking-[0.16em] text-iua-muted sm:block">
                 Digital Campus
               </span>

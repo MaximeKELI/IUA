@@ -46,18 +46,18 @@ export default function LoginPage() {
           priority
           placeholder="blur"
           blurDataURL={CAMPUS_HERO_BLUR}
-          quality={55}
-          className="object-cover opacity-45"
+          quality={85}
+          className="object-cover object-[center_18%] opacity-55"
           sizes="50vw"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-iua-navy via-iua-navy/70 to-iua-navy/40" />
+        <div className="absolute inset-0 bg-gradient-to-t from-iua-navy via-iua-navy/65 to-iua-navy/35" />
         <div className="relative flex h-full flex-col justify-between p-10 text-white">
           <Image
-            src="/brand/logo-iua.png"
+            src="/brand/logo-iua-white.png"
             alt="IUA"
             width={160}
-            height={60}
-            className="h-12 w-auto brightness-0 invert"
+            height={140}
+            className="h-14 w-auto"
             priority
           />
           <div className="animate-[fadeUp_0.5s_ease_both]">
@@ -79,7 +79,7 @@ export default function LoginPage() {
             ← Retour à l&apos;accueil
           </Link>
           <div className="mt-8 lg:hidden">
-            <Image src="/brand/logo-iua.png" alt="IUA" width={140} height={52} className="h-10 w-auto" />
+            <Image src="/brand/logo-iua.png" alt="IUA" width={140} height={120} className="h-12 w-auto" />
           </div>
           <h2 className="mt-6 font-display text-3xl text-iua-navy">Connexion</h2>
           <p className="mt-2 text-sm text-iua-muted">
