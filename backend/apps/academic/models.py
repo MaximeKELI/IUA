@@ -168,6 +168,9 @@ class StudentProfile(UUIDModel, TimeStampedModel, SoftDeleteModel):
     level = models.CharField(max_length=32, blank=True)
     status = models.CharField(max_length=32, default="active")
 
+    class Meta:
+        ordering = ["student_number"]
+
     def __str__(self) -> str:
         return self.student_number
 
