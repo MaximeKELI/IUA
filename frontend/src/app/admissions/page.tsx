@@ -1,24 +1,65 @@
 import Link from "next/link";
+import { PublicPage } from "@/components/PublicPage";
+
+const steps = [
+  {
+    n: "01",
+    title: "Choisir une formation",
+    body: "Parcourez le catalogue et sélectionnez le programme adapté.",
+  },
+  {
+    n: "02",
+    title: "Déposer le dossier",
+    body: "Formulaire unique, pièces justificatives et suivi en ligne.",
+  },
+  {
+    n: "03",
+    title: "Recevoir la décision",
+    body: "Notifications automatiques à chaque étape de validation.",
+  },
+  {
+    n: "04",
+    title: "Finaliser l'inscription",
+    body: "Paiement sécurisé puis activation du compte Digital Campus.",
+  },
+];
 
 export default function AdmissionsPage() {
   return (
-    <main className="min-h-[100svh] bg-iua-sand px-6 py-16">
-      <div className="mx-auto max-w-3xl">
-        <Link href="/" className="text-sm text-iua-navy/60 hover:text-iua-navy">
-          ← Accueil
+    <PublicPage
+      eyebrow="Admissions"
+      title="Un parcours d'inscription lisible"
+      lead="Plus de dispersion entre pages. Quatre étapes claires, du choix de formation à l'activation de votre espace étudiant."
+    >
+      <ol className="grid gap-6 md:grid-cols-2">
+        {steps.map((step) => (
+          <li key={step.n} className="rounded-xl bg-white p-6 shadow-soft">
+            <p className="font-mono text-sm text-iua-cyan">{step.n}</p>
+            <h2 className="mt-2 font-display text-2xl text-iua-navy">{step.title}</h2>
+            <p className="mt-2 text-sm leading-relaxed text-iua-muted">{step.body}</p>
+          </li>
+        ))}
+      </ol>
+
+      <div className="mt-10 flex flex-wrap gap-3">
+        <Link
+          href="/formations"
+          className="rounded-md bg-iua-navy px-5 py-3 text-sm font-semibold text-white"
+        >
+          Voir les formations
         </Link>
-        <h1 className="mt-8 font-display text-4xl text-iua-navy">Admissions</h1>
-        <p className="mt-4 text-iua-ink/70">
-          Le module 03 (Admissions & Inscriptions) est planifié en Vague A après le socle.
-          Cette page accueillera le parcours candidature, dépôt de pièces et suivi de dossier.
-        </p>
         <Link
           href="/connexion"
-          className="mt-10 inline-flex rounded-full bg-iua-navy px-6 py-3 text-sm font-semibold text-white"
+          className="rounded-md border border-iua-navy/15 bg-white px-5 py-3 text-sm font-semibold text-iua-navy"
         >
-          Accéder au portail
+          J&apos;ai déjà un compte
         </Link>
       </div>
-    </main>
+
+      <p className="mt-8 text-sm text-iua-muted">
+        Le dépôt de candidature en ligne (module 03) sera branché sur ce parcours dès la
+        Vague A — la structure UX est déjà en place.
+      </p>
+    </PublicPage>
   );
 }

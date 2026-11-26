@@ -1,35 +1,163 @@
-import Link from "next/link";
+"use client";
 
-export function SiteHeader() {
+import Image from "next/image";
+import Link from "next/link";
+import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import { publicNav } from "@/lib/navigation";
+
+export function SiteHeader({ variant = "overlay" }: { variant?: "overlay" | "solid" }) {
+  const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const solid = variant === "solid" || scrolled;
+
+  useEffect(() => {
+    if (variant === "solid") return;
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [variant]);
+
   return (
-    <header className="absolute inset-x-0 top-0 z-20">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
+    <motion.header
+      initial={{ y: -24, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+      className={
+        solid
+          ? "fixed inset-x-0 top-0 z-40 border-b border-iua-navy/10 bg-white/95 shadow-soft backdrop-blur-md"
+          : "absolute inset-x-0 top-0 z-40"
+      }
+    >
+      <div
+        className={`hidden border-b px-6 py-2 text-xs sm:block ${
+          solid ? "border-iua-navy/10 bg-iua-navy text-white/80" : "border-white/10 text-white/75"
+        }`}
+      >
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
+          <p>
+            <a href="mailto:info@iua-ci.org" className="transition hover:text-white">
+              info@iua-ci.org
+            </a>
+            <span className="mx-3 opacity-40">·</span>
+            <a href="tel:+2252722422265" className="transition hover:text-white">
+              +225 27 224 222 65
+            </a>
+          </p>
+          <p className="tracking-[0.12em] uppercase">Abidjan · Côte d&apos;Ivoire</p>
+        </div>
+      </div>
+
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-4">
         <Link href="/" className="group flex items-center gap-3">
-          <span className="flex h-11 w-11 items-center justify-center rounded-full border border-white/25 bg-white/10 text-sm font-semibold tracking-wide text-white backdrop-blur">
-            IUA
+          <Image
+            src="/brand/logo-iua.png"
+            alt="Institut Universitaire d'Abidjan"
+            width={148}
+            height={56}
+            className={`h-11 w-auto transition duration-300 group-hover:scale-[1.03] ${
+              solid ? "" : "brightness-0 invert"
+            }`}
+            priority
+          />
+          <span
+            className={`hidden border-l pl-3 text-[11px] uppercase leading-tight tracking-[0.16em] sm:block ${
+              solid ? "border-iua-navy/15 text-iua-navy/55" : "border-white/25 text-white/70"
+            }`}
+          >
+            Digital
+            <br />
+            Campus
           </span>
-          <div>
-            <p className="font-display text-lg leading-none text-white">Digital Campus</p>
-            <p className="mt-1 text-xs uppercase tracking-[0.18em] text-white/60">
-              Institut Universitaire d&apos;Abidjan
-            </p>
-          </div>
         </Link>
-        <nav className="flex items-center gap-6 text-sm text-white/80">
-          <Link href="/formations" className="hidden transition hover:text-white sm:inline">
-            Formations
-          </Link>
-          <Link href="/admissions" className="hidden transition hover:text-white sm:inline">
-            Admissions
-          </Link>
+
+        <nav className="hidden items-center gap-7 lg:flex">
+          {publicNav.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`relative text-sm font-medium transition after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:bg-iua-cyan after:transition-all hover:after:w-full ${
+                solid ? "text-iua-navy/75 hover:text-iua-navy" : "text-white/85 hover:text-white"
+              }`}
+            >
+              {item.label}
+            </Link>
+          ))}
+        </nav>
+
+        <div className="flex items-center gap-2 sm:gap-3">
           <Link
             href="/connexion"
-            className="rounded-full bg-iua-teal px-5 py-2.5 font-medium text-white shadow-lg shadow-teal-900/30 transition hover:bg-teal-600"
+            className={`hidden rounded-md px-4 py-2.5 text-sm font-semibold transition sm:inline-flex ${
+              solid ? "text-iua-navy hover:bg-iua-mist" : "text-white hover:bg-white/10"
+            }`}
           >
             Connexion
           </Link>
-        </nav>
+          <Link
+            href="/admissions"
+            className="btn-shine rounded-md bg-iua-sun px-4 py-2.5 text-sm font-semibold text-iua-navy shadow-soft transition hover:brightness-105"
+          >
+            Inscription
+          </Link>
+          <button
+            type="button"
+            className={`inline-flex h-10 w-10 items-center justify-center rounded-md lg:hidden ${
+              solid ? "bg-iua-mist text-iua-navy" : "bg-white/15 text-white"
+            }`}
+            aria-label="Menu"
+            onClick={() => setOpen((v) => !v)}
+          >
+            <span className="text-lg">{open ? "×" : "☰"}</span>
+          </button>
+        </div>
       </div>
-    </header>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.28 }}
+            className={`overflow-hidden border-t lg:hidden ${
+              solid ? "border-iua-navy/10 bg-white" : "border-white/10 bg-iua-navy/95 text-white"
+            }`}
+          >
+            <div className="mx-auto flex max-w-6xl flex-col gap-3 px-6 py-4">
+              {publicNav.map((item, i) => (
+                <motion.div
+                  key={item.href}
+                  initial={{ x: -12, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: 0.05 * i }}
+                >
+                  <Link
+                    href={item.href}
+                    className="block py-2 text-base font-semibold"
+                    onClick={() => setOpen(false)}
+                  >
+                    {item.label}
+                  </Link>
+                  {"children" in item && item.children && (
+                    <div className="ml-3 flex flex-col gap-1 border-l border-current/15 pl-3 text-sm opacity-80">
+                      {item.children.map((child) => (
+                        <Link key={child.href} href={child.href} onClick={() => setOpen(false)}>
+                          {child.label}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </motion.div>
+              ))}
+              <Link href="/connexion" className="pt-2 font-semibold" onClick={() => setOpen(false)}>
+                Connexion au portail
+              </Link>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.header>
   );
 }

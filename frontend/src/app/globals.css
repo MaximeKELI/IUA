@@ -3,18 +3,12 @@
 @tailwind utilities;
 
 :root {
-  --iua-navy: #0b1f3a;
-  --iua-teal: #0d9488;
-  --iua-gold: #c4a35a;
-  --iua-sand: #f7f5f2;
-  --iua-ink: #0a0f1a;
-  --background: #f7f5f2;
-  --foreground: #0a0f1a;
-}
-
-.dark {
-  --background: #0a0f1a;
-  --foreground: #f7f5f2;
+  --iua-navy: #0a2342;
+  --iua-cyan: #3db8e8;
+  --iua-sun: #f0a202;
+  --iua-mist: #f3f7fb;
+  --background: #f3f7fb;
+  --foreground: #122033;
 }
 
 html {
@@ -26,19 +20,115 @@ body {
   color: var(--foreground);
 }
 
+::selection {
+  background: color-mix(in srgb, var(--iua-cyan) 35%, white);
+  color: var(--iua-navy);
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
 }
 
-@keyframes fadeUp {
+@keyframes drift {
   from {
-    opacity: 0;
-    transform: translateY(16px);
+    transform: scale(1.04) translate3d(0, 0, 0);
   }
   to {
-    opacity: 1;
+    transform: scale(1.12) translate3d(0, -2%, 0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes pulseSoft {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes floatY {
+  0%,
+  100% {
     transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.hero-kenburns {
+  animation: drift 22s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+.glow-orb {
+  animation: pulseSoft 6s ease-in-out infinite;
+}
+
+.float-soft {
+  animation: floatY 5.5s ease-in-out infinite;
+}
+
+.marquee-track {
+  animation: marquee 28s linear infinite;
+}
+
+.btn-shine {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-shine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    110deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.35) 45%,
+    transparent 70%
+  );
+  transform: translateX(-120%);
+  transition: transform 0.7s ease;
+}
+
+.btn-shine:hover::after {
+  transform: translateX(120%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-kenburns,
+  .glow-orb,
+  .float-soft,
+  .marquee-track {
+    animation: none !important;
+  }
+
+  .btn-shine::after {
+    display: none;
   }
 }

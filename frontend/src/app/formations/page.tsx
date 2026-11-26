@@ -1,26 +1,51 @@
 import Link from "next/link";
+import { PublicPage } from "@/components/PublicPage";
+
+const programs = [
+  {
+    level: "Licence",
+    name: "Licence en Gestion",
+    faculty: "Faculté des Sciences Économiques et de Gestion",
+  },
+  {
+    level: "Licence",
+    name: "Licence en Informatique",
+    faculty: "Faculté des Sciences et Technologies",
+  },
+  {
+    level: "Master",
+    name: "Master en Management",
+    faculty: "Faculté des Sciences Économiques et de Gestion",
+  },
+];
 
 export default function FormationsPage() {
   return (
-    <main className="min-h-[100svh] bg-iua-sand px-6 py-16">
-      <div className="mx-auto max-w-3xl">
-        <Link href="/" className="text-sm text-iua-navy/60 hover:text-iua-navy">
-          ← Accueil
-        </Link>
-        <h1 className="mt-8 font-display text-4xl text-iua-navy">Catalogue des formations</h1>
-        <p className="mt-4 text-iua-ink/70">
-          Les formations sont servies par l&apos;API académique (`/api/v1/programs/`).
-          Le catalogue public dynamique sera branché dès l&apos;ouverture anonyme contrôlée
-          des référentiels.
-        </p>
-        <article className="mt-10 border-t border-iua-navy/15 pt-6">
-          <p className="text-xs uppercase tracking-[0.16em] text-iua-teal">Licence</p>
-          <h2 className="mt-2 font-display text-2xl text-iua-navy">Licence en Gestion</h2>
-          <p className="mt-3 text-sm text-iua-ink/65">
-            Formation initiale — Faculté des Sciences Économiques et de Gestion (données démo).
-          </p>
-        </article>
+    <PublicPage
+      eyebrow="Catalogue"
+      title="Formations"
+      lead="Licences et masters présentés par niveau — sans mélanger les menus du site institutionnel."
+    >
+      <div className="space-y-4">
+        {programs.map((p) => (
+          <article
+            key={p.name}
+            className="flex flex-col gap-4 rounded-xl bg-white p-6 shadow-soft sm:flex-row sm:items-center sm:justify-between"
+          >
+            <div>
+              <p className="text-xs uppercase tracking-[0.16em] text-iua-cyan">{p.level}</p>
+              <h2 className="mt-1 font-display text-2xl text-iua-navy">{p.name}</h2>
+              <p className="mt-1 text-sm text-iua-muted">{p.faculty}</p>
+            </div>
+            <Link
+              href="/admissions"
+              className="inline-flex rounded-md bg-iua-sun px-4 py-2.5 text-sm font-semibold text-iua-navy"
+            >
+              Candidater
+            </Link>
+          </article>
+        ))}
       </div>
-    </main>
+    </PublicPage>
   );
 }

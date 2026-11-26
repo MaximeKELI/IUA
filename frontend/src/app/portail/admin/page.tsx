@@ -4,15 +4,18 @@ import { useEffect, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
 import { apiGet } from "@/lib/api";
 import { getAccessToken } from "@/lib/auth";
+import { adminNav } from "@/lib/navigation";
 
 type AdminDashboard = {
-  stats: {
-    users: number;
-    students: number;
-    faculties: number;
-    programs: number;
-    enrollments: number;
-  };
+  stats: Record<string, number>;
+};
+
+const labels: Record<string, string> = {
+  users: "Utilisateurs",
+  students: "Étudiants",
+  faculties: "Facultés",
+  programs: "Formations",
+  enrollments: "Inscriptions",
 };
 
 export default function AdminPortalPage() {
@@ -28,15 +31,20 @@ export default function AdminPortalPage() {
   }, []);
 
   return (
-    <PortalShell title="Administration">
-      <h1 className="font-display text-3xl text-iua-navy">Pilotage administratif</h1>
-      <p className="mt-2 text-iua-ink/65">Vue consolidée des référentiels et effectifs.</p>
+    <PortalShell title="Administration" nav={adminNav}>
+      <p className="text-xs uppercase tracking-[0.18em] text-iua-cyan">Pilotage</p>
+      <h1 className="mt-2 font-display text-3xl text-iua-navy">Vue d&apos;ensemble</h1>
+      <p className="mt-2 text-sm text-iua-muted">
+        Effectifs et référentiels — données issues de l&apos;API centrale.
+      </p>
       {error && <p className="mt-6 text-red-700">{error}</p>}
       {data && (
-        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Object.entries(data.stats).map(([key, value]) => (
-            <div key={key} className="border-t border-iua-navy/15 pt-4">
-              <p className="text-xs uppercase tracking-[0.14em] text-iua-navy/45">{key}</p>
+            <div key={key} className="rounded-xl bg-white p-5 shadow-soft">
+              <p className="text-xs uppercase tracking-[0.14em] text-iua-muted">
+                {labels[key] || key}
+              </p>
               <p className="mt-2 font-display text-3xl text-iua-navy">{value}</p>
             </div>
           ))}
