@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
 import { apiGetCached } from "@/lib/api";
-import { getAccessToken } from "@/lib/auth";
+import { useAuthToken } from "@/lib/useAuthToken";
 import { adminNav } from "@/lib/navigation";
 
 type DirectionDashboard = {
@@ -24,13 +24,14 @@ export default function DirectionPortalPage() {
   const [data, setData] = useState<DirectionDashboard | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const { token, ready } = useAuthToken();
+
   useEffect(() => {
-    const token = getAccessToken();
-    if (!token) return;
+    if (!ready || !token) return;
     apiGetCached<DirectionDashboard>("/portal/direction/dashboard/", token, 20_000)
       .then(setData)
       .catch((err) => setError(err instanceof Error ? err.message : "Erreur"));
-  }, []);
+  }, [ready, token]);
 
   return (
     <PortalShell title="Direction" nav={adminNav}>

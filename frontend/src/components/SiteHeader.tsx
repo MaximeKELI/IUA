@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { BrandLogo } from "@/components/BrandLogo";
 import { publicNav } from "@/lib/navigation";
 
 export function SiteHeader({ variant = "overlay" }: { variant?: "overlay" | "solid" }) {
@@ -55,13 +55,10 @@ export function SiteHeader({ variant = "overlay" }: { variant?: "overlay" | "sol
 
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-4">
         <Link href="/" className="group flex items-center gap-3">
-          <Image
-            src={solid ? "/brand/logo-iua.png" : "/brand/logo-iua-white.png"}
-            alt="Institut Universitaire d'Abidjan"
-            width={160}
-            height={140}
-            className="h-11 w-auto transition duration-300 group-hover:scale-[1.03]"
+          <BrandLogo
+            variant={solid ? "color" : "white"}
             priority
+            className="h-10 w-auto transition duration-300 group-hover:scale-[1.02] sm:h-11"
           />
           <span
             className={`hidden border-l pl-3 text-[11px] uppercase leading-tight tracking-[0.16em] sm:block ${

@@ -1,8 +1,7 @@
-import Image from "next/image";
 import Link from "next/link";
+import { BrandLogo } from "@/components/BrandLogo";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
-import { CAMPUS_HERO_BLUR } from "@/lib/blur";
 
 const journeys = [
   {
@@ -45,32 +44,23 @@ export default function HomePage() {
   return (
     <main>
       <section className="relative min-h-[100svh] overflow-hidden text-white">
-        <Image
-          src="/brand/campus-hero.jpg"
-          alt="Étudiantes de l'Institut Universitaire d'Abidjan"
-          fill
-          priority
-          fetchPriority="high"
-          placeholder="blur"
-          blurDataURL={CAMPUS_HERO_BLUR}
-          className="object-cover object-[center_18%]"
-          sizes="(max-width: 768px) 100vw, 100vw"
-          quality={90}
+        {/* Native CSS background = sharp full-bleed photo (no Next optimizer downsample) */}
+        <div
+          className="absolute inset-0 bg-cover bg-[position:center_18%] bg-no-repeat"
+          style={{ backgroundImage: "url('/brand/campus-hero.png')" }}
+          role="img"
+          aria-label="Étudiantes de l'Institut Universitaire d'Abidjan"
         />
-        {/* Lighter overlay so the photo stays sharp and visible */}
-        <div className="absolute inset-0 bg-gradient-to-r from-iua-navy/80 via-iua-navy/55 to-iua-navy/25" />
-        <div className="absolute inset-0 bg-gradient-to-t from-iua-navy/70 via-transparent to-iua-navy/20" />
+        <div className="absolute inset-0 bg-gradient-to-r from-iua-navy/78 via-iua-navy/50 to-iua-navy/20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-iua-navy/65 via-transparent to-iua-navy/15" />
 
         <SiteHeader />
 
         <div className="relative mx-auto flex min-h-[100svh] max-w-6xl flex-col justify-end px-6 pb-16 pt-44 sm:justify-center sm:pb-24">
-          <Image
-            src="/brand/logo-iua-white.png"
-            alt="IUA"
-            width={240}
-            height={210}
-            className="mb-8 h-16 w-auto sm:h-20 animate-[fadeUp_0.5s_ease_both]"
+          <BrandLogo
+            variant="white"
             priority
+            className="mb-7 h-12 w-auto sm:h-14 animate-[fadeUp_0.5s_ease_both]"
           />
           <p className="mb-4 text-xs uppercase tracking-[0.28em] text-iua-cyan animate-[fadeUp_0.55s_ease_both]">
             One University · One Digital Ecosystem
@@ -192,17 +182,12 @@ export default function HomePage() {
               </Link>
             </div>
           </div>
-          <div className="relative overflow-hidden rounded-2xl shadow-soft">
-            <Image
-              src="/brand/campus-hero.jpg"
-              alt="Étudiantes IUA"
-              width={900}
-              height={506}
-              loading="lazy"
-              quality={85}
-              sizes="(max-width: 1024px) 100vw, 45vw"
-              className="h-72 w-full object-cover object-[center_15%] sm:h-80"
-            />
+          <div
+            className="relative h-72 overflow-hidden rounded-2xl bg-cover bg-[position:center_15%] shadow-soft sm:h-80"
+            style={{ backgroundImage: "url('/brand/campus-hero.png')" }}
+            role="img"
+            aria-label="Étudiantes IUA"
+          >
             <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-iua-navy/80 to-transparent p-5">
               <p className="text-sm font-medium">Excellence · Professionnalisme · Abidjan</p>
             </div>

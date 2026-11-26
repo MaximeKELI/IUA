@@ -44,10 +44,10 @@ class StudentDashboardView(APIView):
                 "unread_notifications": unread,
                 "modules": [
                     {"code": "01", "name": "Portail étudiant", "status": "active"},
+                    {"code": "07", "name": "Notes", "status": "active"},
+                    {"code": "08", "name": "Demandes admin.", "status": "active"},
                     {"code": "04", "name": "Finance", "status": "planned"},
                     {"code": "05", "name": "LMS", "status": "planned"},
-                    {"code": "07", "name": "Notes", "status": "planned"},
-                    {"code": "08", "name": "Documents", "status": "planned"},
                 ],
             }
 
@@ -81,8 +81,8 @@ class TeacherDashboardView(APIView):
                 "unread_notifications": unread,
                 "modules": [
                     {"code": "02", "name": "Portail enseignant", "status": "active"},
+                    {"code": "07", "name": "Notes", "status": "active"},
                     {"code": "05", "name": "LMS", "status": "planned"},
-                    {"code": "07", "name": "Notes", "status": "planned"},
                 ],
             }
 
@@ -95,7 +95,9 @@ class AdminDashboardView(APIView):
 
     def get(self, request):
         if not (
-            request.user.has_any_role("admin", "super_admin", "academic_dir", "direction")
+            request.user.has_any_role(
+                "admin", "super_admin", "academic_dir", "direction", "secretariat"
+            )
             or request.user.is_superuser
         ):
             return Response({"code": "forbidden", "message": "Accès réservé à l'administration."}, status=403)
@@ -121,7 +123,13 @@ class DirectionDashboardView(APIView):
 
     def get(self, request):
         if not (
-            request.user.has_any_role("direction", "super_admin", "academic_dir", "finance_dir")
+            request.user.has_any_role(
+                "direction",
+                "super_admin",
+                "academic_dir",
+                "finance_dir",
+                "admin",
+            )
             or request.user.is_superuser
         ):
             return Response({"code": "forbidden", "message": "Accès réservé à la direction."}, status=403)

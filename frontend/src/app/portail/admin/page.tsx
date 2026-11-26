@@ -1,9 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
 import { apiGetCached } from "@/lib/api";
-import { getAccessToken } from "@/lib/auth";
+import { useAuthToken } from "@/lib/useAuthToken";
 import { adminNav } from "@/lib/navigation";
 
 type AdminDashboard = {
@@ -22,13 +23,14 @@ export default function AdminPortalPage() {
   const [data, setData] = useState<AdminDashboard | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const { token, ready } = useAuthToken();
+
   useEffect(() => {
-    const token = getAccessToken();
-    if (!token) return;
+    if (!ready || !token) return;
     apiGetCached<AdminDashboard>("/portal/admin/dashboard/", token, 20_000)
       .then(setData)
       .catch((err) => setError(err instanceof Error ? err.message : "Erreur"));
-  }, []);
+  }, [ready, token]);
 
   return (
     <PortalShell title="Administration" nav={adminNav}>
@@ -50,6 +52,23 @@ export default function AdminPortalPage() {
           ))}
         </div>
       )}
+
+      <section className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {[
+          ["/portail/admin/utilisateurs", "Autoriser un accès"],
+          ["/portail/admin/formations", "Gérer les formations"],
+          ["/portail/admin/inscriptions", "Inscrire un étudiant"],
+          ["/portail/admin/demandes", "Traiter les demandes"],
+        ].map(([href, label]) => (
+          <Link
+            key={href}
+            href={href}
+            className="rounded-xl bg-iua-navy px-4 py-4 text-sm font-semibold text-white transition hover:bg-iua-blue"
+          >
+            {label}
+          </Link>
+        ))}
+      </section>
     </PortalShell>
   );
 }

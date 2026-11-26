@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 140" role="img" aria-label="Institut Universitaire d'Abidjan — IUA">
+  <g fill="#3DB8E8">
+    <!-- star arc -->
+    <path transform="translate(48,10) scale(1)" d="M10 0l2.4 7.4H20l-6.2 4.5 2.4 7.4L10 14.8 3.8 19.3l2.4-7.4L0 7.4h7.6z"/>
+    <path transform="translate(22,36) scale(0.86)" d="M10 0l2.4 7.4H20l-6.2 4.5 2.4 7.4L10 14.8 3.8 19.3l2.4-7.4L0 7.4h7.6z"/>
+    <path transform="translate(10,66) scale(0.72)" d="M10 0l2.4 7.4H20l-6.2 4.5 2.4 7.4L10 14.8 3.8 19.3l2.4-7.4L0 7.4h7.6z"/>
+    <path transform="translate(22,94) scale(0.58)" d="M10 0l2.4 7.4H20l-6.2 4.5 2.4 7.4L10 14.8 3.8 19.3l2.4-7.4L0 7.4h7.6z"/>
+    <path transform="translate(50,114) scale(0.46)" d="M10 0l2.4 7.4H20l-6.2 4.5 2.4 7.4L10 14.8 3.8 19.3l2.4-7.4L0 7.4h7.6z"/>
+    <path transform="translate(84,122) scale(0.36)" d="M10 0l2.4 7.4H20l-6.2 4.5 2.4 7.4L10 14.8 3.8 19.3l2.4-7.4L0 7.4h7.6z"/>
+    <path transform="translate(114,126) scale(0.28)" d="M10 0l2.4 7.4H20l-6.2 4.5 2.4 7.4L10 14.8 3.8 19.3l2.4-7.4L0 7.4h7.6z"/>
+
+    <!-- Literal wordmark IUA — cannot be misread -->
+    <text x="145" y="102" font-family="Georgia, 'Times New Roman', Times, serif" font-size="92" font-weight="700" letter-spacing="4">IUA</text>
+
+    <text x="372" y="72" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600">Institut</text>
+    <text x="372" y="92" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600">Universitaire</text>
+    <text x="372" y="112" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600">d'Abidjan</text>
+  </g>
+</svg>

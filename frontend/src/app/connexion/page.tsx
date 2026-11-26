@@ -1,16 +1,16 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import { BrandLogo } from "@/components/BrandLogo";
 import { apiLogin } from "@/lib/api";
 import { resolveHomePath, saveSession } from "@/lib/auth";
-import { CAMPUS_HERO_BLUR } from "@/lib/blur";
 
 const presets = [
   { label: "Étudiant", email: "etudiant@demo.iua.local", password: "IuaDemoStudent2026!" },
   { label: "Enseignant", email: "enseignant@demo.iua.local", password: "IuaDemoTeacher2026!" },
+  { label: "Secrétariat", email: "secretariat@demo.iua.local", password: "IuaDemoSecret2026!" },
   { label: "Direction", email: "admin@demo.iua.local", password: "IuaDemoAdmin2026!" },
 ];
 
@@ -39,27 +39,13 @@ export default function LoginPage() {
   return (
     <main className="grid min-h-[100svh] lg:grid-cols-2">
       <section className="relative hidden overflow-hidden bg-iua-navy lg:block">
-        <Image
-          src="/brand/campus-hero.jpg"
-          alt=""
-          fill
-          priority
-          placeholder="blur"
-          blurDataURL={CAMPUS_HERO_BLUR}
-          quality={85}
-          className="object-cover object-[center_18%] opacity-55"
-          sizes="50vw"
+        <div
+          className="absolute inset-0 bg-cover bg-[position:center_18%] opacity-55"
+          style={{ backgroundImage: "url('/brand/campus-hero.png')" }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-iua-navy via-iua-navy/65 to-iua-navy/35" />
         <div className="relative flex h-full flex-col justify-between p-10 text-white">
-          <Image
-            src="/brand/logo-iua-white.png"
-            alt="IUA"
-            width={160}
-            height={140}
-            className="h-14 w-auto"
-            priority
-          />
+          <BrandLogo variant="white" priority className="h-12 w-auto" />
           <div className="animate-[fadeUp_0.5s_ease_both]">
             <p className="text-xs uppercase tracking-[0.22em] text-iua-cyan">Identité unique</p>
             <h1 className="mt-3 max-w-md font-display text-4xl leading-tight">
@@ -79,7 +65,7 @@ export default function LoginPage() {
             ← Retour à l&apos;accueil
           </Link>
           <div className="mt-8 lg:hidden">
-            <Image src="/brand/logo-iua.png" alt="IUA" width={140} height={120} className="h-12 w-auto" />
+            <BrandLogo className="h-11 w-auto" />
           </div>
           <h2 className="mt-6 font-display text-3xl text-iua-navy">Connexion</h2>
           <p className="mt-2 text-sm text-iua-muted">

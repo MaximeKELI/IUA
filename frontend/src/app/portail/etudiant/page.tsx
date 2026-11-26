@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { PortalShell } from "@/components/PortalShell";
 import { apiGetCached } from "@/lib/api";
-import { getAccessToken } from "@/lib/auth";
+import { useAuthToken } from "@/lib/useAuthToken";
 import { studentNav } from "@/lib/navigation";
 
 type StudentDashboard = {
@@ -24,13 +24,14 @@ export default function StudentPortalPage() {
   const [data, setData] = useState<StudentDashboard | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const { token, ready } = useAuthToken();
+
   useEffect(() => {
-    const token = getAccessToken();
-    if (!token) return;
+    if (!ready || !token) return;
     apiGetCached<StudentDashboard>("/portal/student/dashboard/", token, 15_000)
       .then(setData)
       .catch((err) => setError(err instanceof Error ? err.message : "Erreur"));
-  }, []);
+  }, [ready, token]);
 
   return (
     <PortalShell title="Espace étudiant" nav={studentNav}>
@@ -59,21 +60,20 @@ export default function StudentPortalPage() {
             <h2 className="font-display text-xl text-iua-navy">Accès rapides</h2>
             <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {[
-                ["Notes & résultats", "Consulter vos moyennes", "#"],
-                ["Paiements", "Solde et reçus", "#"],
-                ["Documents", "Attestations et relevés", "#"],
-                ["Cours", "Supports pédagogiques", "#"],
-                ["Demandes", "Démarches administratives", "#"],
-                ["Stages", "Offres et conventions", "#"],
-              ].map(([title, body]) => (
-                <div
+                ["Notes & résultats", "Consulter vos moyennes", "/portail/etudiant/notes"],
+                ["Cours", "Matières et inscriptions", "/portail/etudiant/cours"],
+                ["Demandes", "Démarches administratives", "/portail/etudiant/demandes"],
+                ["Notifications", "Alertes du campus", "/portail/etudiant/notifications"],
+              ].map(([title, body, href]) => (
+                <Link
                   key={title}
-                  className="rounded-xl border border-iua-navy/10 bg-white p-5 shadow-soft"
+                  href={href}
+                  className="rounded-xl border border-iua-navy/10 bg-white p-5 shadow-soft transition hover:border-iua-cyan"
                 >
                   <h3 className="font-semibold text-iua-navy">{title}</h3>
                   <p className="mt-1 text-sm text-iua-muted">{body}</p>
-                  <p className="mt-4 text-xs uppercase tracking-[0.14em] text-iua-sun">Bientôt</p>
-                </div>
+                  <p className="mt-4 text-xs uppercase tracking-[0.14em] text-iua-cyan">Ouvrir</p>
+                </Link>
               ))}
             </div>
           </section>

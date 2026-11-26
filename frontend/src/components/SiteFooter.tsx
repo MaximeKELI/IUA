@@ -1,19 +1,12 @@
-import Image from "next/image";
 import Link from "next/link";
+import { BrandLogo } from "@/components/BrandLogo";
 
 export function SiteFooter() {
   return (
     <footer className="bg-iua-navy text-white">
       <div className="mx-auto grid max-w-6xl gap-10 px-6 py-14 md:grid-cols-[1.2fr_1fr_1fr]">
         <div>
-          <Image
-            src="/brand/logo-iua-white.png"
-            alt="IUA"
-            width={140}
-            height={120}
-            className="h-12 w-auto"
-            loading="lazy"
-          />
+          <BrandLogo variant="white" className="h-12 w-auto" />
           <p className="mt-4 max-w-sm text-sm leading-relaxed text-white/65">
             Institut Universitaire d&apos;Abidjan — excellence académique, insertion
             professionnelle et campus numérique intégré.

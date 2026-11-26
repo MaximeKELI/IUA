@@ -48,8 +48,11 @@ UI : http://localhost:3000
 | Email | Mot de passe | Rôle |
 |-------|--------------|------|
 | `admin@demo.iua.local` | `IuaDemoAdmin2026!` | Super admin / Direction |
+| `secretariat@demo.iua.local` | `IuaDemoSecret2026!` | Secrétariat / Admin |
 | `etudiant@demo.iua.local` | `IuaDemoStudent2026!` | Étudiant |
 | `enseignant@demo.iua.local` | `IuaDemoTeacher2026!` | Enseignant |
+
+**Qui autorise les accès ?** Connectez-vous en Direction/Admin → `/portail/admin/utilisateurs` → créer un compte + cocher les rôles.
 
 ## Docker Compose
 

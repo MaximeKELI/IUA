@@ -229,3 +229,78 @@ class TeachingAssignment(UUIDModel, TimeStampedModel):
             models.Index(fields=["academic_year", "teacher"]),
             models.Index(fields=["subject", "academic_year"]),
         ]
+
+
+class Grade(UUIDModel, TimeStampedModel):
+    """Note saisie par un enseignant — consultable par l'étudiant."""
+
+    class Kind(models.TextChoices):
+        CC = "cc", "Contrôle continu"
+        EXAM = "exam", "Examen"
+        TP = "tp", "Travaux pratiques"
+        OTHER = "other", "Autre"
+
+    student = models.ForeignKey(StudentProfile, on_delete=models.CASCADE, related_name="grades")
+    subject = models.ForeignKey(Subject, on_delete=models.PROTECT, related_name="grades")
+    academic_year = models.ForeignKey(AcademicYear, on_delete=models.PROTECT, related_name="grades")
+    kind = models.CharField(max_length=16, choices=Kind.choices, default=Kind.CC)
+    label = models.CharField(max_length=128, blank=True)
+    score = models.DecimalField(max_digits=5, decimal_places=2)
+    max_score = models.DecimalField(max_digits=5, decimal_places=2, default=20)
+    recorded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="grades_recorded",
+    )
+    is_published = models.BooleanField(default=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["student", "academic_year"]),
+            models.Index(fields=["subject", "academic_year"]),
+            models.Index(fields=["-created_at"]),
+        ]
+
+
+class AdminRequest(UUIDModel, TimeStampedModel):
+    """Demande administrative (attestation, relevé, etc.)."""
+
+    class Status(models.TextChoices):
+        PENDING = "pending", "En attente"
+        IN_PROGRESS = "in_progress", "En cours"
+        DONE = "done", "Traitée"
+        REJECTED = "rejected", "Rejetée"
+
+    class Kind(models.TextChoices):
+        ATTESTATION = "attestation", "Attestation de scolarité"
+        TRANSCRIPT = "transcript", "Relevé de notes"
+        CERTIFICATE = "certificate", "Certificat"
+        OTHER = "other", "Autre"
+
+    requester = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="admin_requests",
+    )
+    kind = models.CharField(max_length=32, choices=Kind.choices, default=Kind.ATTESTATION)
+    subject = models.CharField(max_length=255)
+    body = models.TextField(blank=True)
+    status = models.CharField(max_length=32, choices=Status.choices, default=Status.PENDING, db_index=True)
+    admin_note = models.TextField(blank=True)
+    handled_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="admin_requests_handled",
+    )
+    handled_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["status", "-created_at"]),
+            models.Index(fields=["requester", "-created_at"]),
+        ]

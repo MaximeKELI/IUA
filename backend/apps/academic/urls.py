@@ -2,11 +2,13 @@ from rest_framework.routers import DefaultRouter
 
 from apps.academic.views import (
     AcademicYearViewSet,
+    AdminRequestViewSet,
     CohortViewSet,
     CourseUnitViewSet,
     DepartmentViewSet,
     EnrollmentViewSet,
     FacultyViewSet,
+    GradeViewSet,
     InstitutionViewSet,
     ProgramViewSet,
     StudentProfileViewSet,
@@ -26,5 +28,7 @@ router.register(r"subjects", SubjectViewSet, basename="subjects")
 router.register(r"students", StudentProfileViewSet, basename="students")
 router.register(r"enrollments", EnrollmentViewSet, basename="enrollments")
 router.register(r"teaching-assignments", TeachingAssignmentViewSet, basename="teaching-assignments")
+router.register(r"grades", GradeViewSet, basename="grades")
+router.register(r"admin-requests", AdminRequestViewSet, basename="admin-requests")
 
 urlpatterns = router.urls

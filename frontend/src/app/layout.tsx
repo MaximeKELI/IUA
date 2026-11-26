@@ -25,7 +25,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="fr">
       <head>
-        <link rel="preload" href="/brand/campus-hero.jpg" as="image" type="image/jpeg" />
+        <link rel="preload" href="/brand/campus-hero.png" as="image" type="image/png" />
+        <link rel="preload" href="/brand/logo-iua-white-v2.svg" as="image" type="image/svg+xml" />
       </head>
       <body className="font-sans antialiased">{children}</body>
     </html>

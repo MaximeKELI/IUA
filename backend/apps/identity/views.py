@@ -1,5 +1,6 @@
 from django.utils import timezone
-from rest_framework import generics, status
+from rest_framework import generics, status, viewsets
+from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
@@ -8,7 +9,13 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from apps.core.permissions import require_permission
 from apps.identity.models import Role, User
-from apps.identity.serializers import LoginSerializer, RoleSerializer, UserSerializer
+from apps.identity.serializers import (
+    LoginSerializer,
+    RoleSerializer,
+    UserProvisionSerializer,
+    UserSerializer,
+    UserUpdateSerializer,
+)
 from apps.identity.services import client_ip
 
 
@@ -67,12 +74,68 @@ class MeView(APIView):
         return Response(UserSerializer(request.user).data)
 
 
-class UserListView(generics.ListAPIView):
-    permission_classes = [require_permission("identity.user.read")]
-    required_permission = "identity.user.read"
-    serializer_class = UserSerializer
-    queryset = User.objects.all().order_by("last_name", "first_name")
-    search_fields = ("email", "first_name", "last_name")
+class UserViewSet(viewsets.ModelViewSet):
+    """Admin user directory: list, create, update, deactivate (no hard delete)."""
+
+    queryset = User.objects.prefetch_related("user_roles__role").all()
+    search_fields = ("email", "first_name", "last_name", "phone")
+    filterset_fields = ("is_active",)
+    ordering_fields = ("last_name", "first_name", "email", "date_joined")
+    http_method_names = ["get", "post", "put", "patch", "head", "options"]
+
+    def get_permissions(self):
+        if self.action in ("list", "retrieve"):
+            return [require_permission("identity.user.read")()]
+        return [require_permission("identity.user.manage")()]
+
+    def get_serializer_class(self):
+        if self.action == "create":
+            return UserProvisionSerializer
+        if self.action in ("update", "partial_update"):
+            return UserUpdateSerializer
+        return UserSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop("partial", False)
+        instance = self.get_object()
+        serializer = self.get_serializer(
+            instance,
+            data=request.data,
+            partial=partial,
+            context={**self.get_serializer_context(), "updating_user": instance},
+        )
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        return Response(UserSerializer(user).data)
+
+    @action(detail=True, methods=["post"], url_path="deactivate")
+    def deactivate(self, request, pk=None):
+        user = self.get_object()
+        if user.pk == request.user.pk:
+            return Response(
+                {"code": "invalid", "message": "Vous ne pouvez pas désactiver votre propre compte."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        # Keep roles intact so reactivation restores access immediately.
+        user.is_active = False
+        user.save(update_fields=["is_active"])
+        return Response(UserSerializer(user).data)
+
+    @action(detail=True, methods=["post"], url_path="activate")
+    def activate(self, request, pk=None):
+        user = self.get_object()
+        user.is_active = True
+        user.save(update_fields=["is_active"])
+        # Heal legacy deactivations that wiped role flags.
+        if not user.user_roles.filter(is_active=True).exists():
+            user.user_roles.update(is_active=True)
+        return Response(UserSerializer(user).data)
 
 
 class RoleListView(generics.ListAPIView):
@@ -80,3 +143,5 @@ class RoleListView(generics.ListAPIView):
     required_permission = "identity.role.read"
     serializer_class = RoleSerializer
     queryset = Role.objects.prefetch_related("permissions").all()
+    pagination_class = None
+    search_fields = ("code", "name")

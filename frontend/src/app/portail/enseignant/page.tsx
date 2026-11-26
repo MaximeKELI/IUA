@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
 import { apiGetCached } from "@/lib/api";
-import { getAccessToken } from "@/lib/auth";
+import { useAuthToken } from "@/lib/useAuthToken";
 import { teacherNav } from "@/lib/navigation";
 
 type TeacherDashboard = {
@@ -16,13 +16,14 @@ export default function TeacherPortalPage() {
   const [data, setData] = useState<TeacherDashboard | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const { token, ready } = useAuthToken();
+
   useEffect(() => {
-    const token = getAccessToken();
-    if (!token) return;
+    if (!ready || !token) return;
     apiGetCached<TeacherDashboard>("/portal/teacher/dashboard/", token, 15_000)
       .then(setData)
       .catch((err) => setError(err instanceof Error ? err.message : "Erreur"));
-  }, []);
+  }, [ready, token]);
 
   return (
     <PortalShell title="Espace enseignant" nav={teacherNav}>

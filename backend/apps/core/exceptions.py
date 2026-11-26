@@ -1,11 +1,16 @@
+import logging
+
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import exception_handler
+
+logger = logging.getLogger("iua.api")
 
 
 def iua_exception_handler(exc, context):
     response = exception_handler(exc, context)
     if response is None:
+        logger.exception("Unhandled API error in %s", context.get("view"))
         return Response(
             {
                 "code": "server_error",
@@ -20,6 +25,20 @@ def iua_exception_handler(exc, context):
         payload = {
             "code": getattr(exc, "default_code", "error"),
             "message": str(detail),
+            "details": message,
+        }
+    elif isinstance(message, dict):
+        # Surface first field error for admin UX
+        first = next(iter(message.values()), None)
+        if isinstance(first, list) and first:
+            human = str(first[0])
+        elif isinstance(first, str):
+            human = first
+        else:
+            human = "La requête est invalide."
+        payload = {
+            "code": getattr(exc, "default_code", "invalid"),
+            "message": human,
             "details": message,
         }
     else:
