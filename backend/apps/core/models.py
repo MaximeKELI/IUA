@@ -2,6 +2,7 @@ import uuid
 
 from django.conf import settings
 from django.db import models
+from django.utils import timezone
 
 
 class TimeStampedModel(models.Model):
@@ -26,11 +27,6 @@ class SoftDeleteQuerySet(models.QuerySet):
     def deleted(self):
         return self.exclude(deleted_at__isnull=True)
 
-    def delete(self, hard: bool = False):
-        if hard:
-            return super().delete()
-        return self.update(deleted_at=models.functions.Now())
-
 
 class SoftDeleteManager(models.Manager):
     def get_queryset(self):
@@ -47,14 +43,18 @@ class SoftDeleteModel(models.Model):
         abstract = True
 
     def soft_delete(self):
-        from django.utils import timezone
-
         self.deleted_at = timezone.now()
-        self.save(update_fields=["deleted_at", "updated_at"] if hasattr(self, "updated_at") else ["deleted_at"])
+        update_fields = ["deleted_at"]
+        if hasattr(self, "updated_at"):
+            update_fields.append("updated_at")
+        self.save(update_fields=update_fields)
 
     def restore(self):
         self.deleted_at = None
-        self.save(update_fields=["deleted_at", "updated_at"] if hasattr(self, "updated_at") else ["deleted_at"])
+        update_fields = ["deleted_at"]
+        if hasattr(self, "updated_at"):
+            update_fields.append("updated_at")
+        self.save(update_fields=update_fields)
 
 
 class AuditLog(UUIDModel, TimeStampedModel):
