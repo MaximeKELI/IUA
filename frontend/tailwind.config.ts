@@ -18,8 +18,8 @@ const config: Config = {
         },
       },
       fontFamily: {
-        display: ["var(--font-display)", "Georgia", "serif"],
-        sans: ["var(--font-sans)", "system-ui", "sans-serif"],
+        display: ["Libre Baskerville", "Georgia", "serif"],
+        sans: ["Manrope", "system-ui", "sans-serif"],
       },
       boxShadow: {
         soft: "0 18px 50px -28px rgba(10, 35, 66, 0.45)",
