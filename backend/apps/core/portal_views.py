@@ -1,4 +1,4 @@
-from django.db.models import Count
+from django.db.models import Count, Q
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -96,28 +96,101 @@ class TeacherDashboardView(APIView):
         user_id = str(request.user.id)
 
         def build():
-            assignments = list(
+            assignments_qs = (
                 TeachingAssignment.objects.filter(teacher__user_id=request.user.id)
-                .select_related("subject")
-                .only("subject_id", "subject__name", "subject__code")
+                .select_related(
+                    "subject__course_unit__program",
+                    "academic_year",
+                    "cohort",
+                    "teacher",
+                )
             )
-            unread = Notification.objects.filter(recipient_id=request.user.id, is_read=False).count()
+            assignments = list(assignments_qs)
+            subject_ids = [a.subject_id for a in assignments]
+            program_ids = [
+                a.subject.course_unit.program_id
+                for a in assignments
+                if a.subject.course_unit_id
+            ]
+            grades_qs = Grade.objects.filter(
+                recorded_by_id=request.user.id
+            ) | Grade.objects.filter(subject_id__in=subject_ids)
+            grades_qs = grades_qs.distinct()
+            students_count = (
+                StudentProfile.objects.filter(
+                    Q(program_id__in=program_ids)
+                    | Q(
+                        id__in=Enrollment.objects.filter(
+                            program_id__in=program_ids, status="active"
+                        ).values_list("student_id", flat=True)
+                    )
+                )
+                .distinct()
+                .count()
+                if program_ids
+                else 0
+            )
+            recent = list(
+                grades_qs.select_related("student__user", "subject")
+                .order_by("-created_at")[:8]
+                .values(
+                    "id",
+                    "score",
+                    "max_score",
+                    "label",
+                    "kind",
+                    "is_published",
+                    "subject__name",
+                    "student__user__first_name",
+                    "student__user__last_name",
+                    "created_at",
+                )
+            )
+            staff = (
+                TeachingAssignment.objects.filter(teacher__user_id=request.user.id)
+                .select_related("teacher")
+                .first()
+            )
+            unread = Notification.objects.filter(
+                recipient_id=request.user.id, is_read=False
+            ).count()
             return {
                 "role": "teacher",
+                "title": getattr(getattr(staff, "teacher", None), "title", "") or "",
                 "assignments_count": len(assignments),
+                "students_count": students_count,
+                "grades_count": grades_qs.count(),
+                "drafts_count": grades_qs.filter(is_published=False).count(),
+                "unread_notifications": unread,
                 "subjects": [
-                    {"id": str(a.subject_id), "name": a.subject.name, "code": a.subject.code}
+                    {
+                        "id": str(a.subject_id),
+                        "name": a.subject.name,
+                        "code": a.subject.code,
+                        "program": a.subject.course_unit.program.name
+                        if a.subject.course_unit_id
+                        else None,
+                        "year": a.academic_year.name,
+                        "hours": a.subject.hours,
+                    }
                     for a in assignments
                 ],
-                "unread_notifications": unread,
-                "modules": [
-                    {"code": "02", "name": "Portail enseignant", "status": "active"},
-                    {"code": "07", "name": "Notes", "status": "active"},
-                    {"code": "05", "name": "LMS", "status": "planned"},
+                "recent_grades": [
+                    {
+                        "id": str(r["id"]),
+                        "score": str(r["score"]),
+                        "max_score": str(r["max_score"]),
+                        "label": r["label"] or r["kind"],
+                        "is_published": r["is_published"],
+                        "subject": r["subject__name"],
+                        "student": f"{r['student__user__first_name']} {r['student__user__last_name']}".strip(),
+                        "created_at": r["created_at"].isoformat(),
+                    }
+                    for r in recent
                 ],
             }
 
-        payload = cached_value(cache_key("portal", "teacher", user_id), build, timeout=20)
+        payload = cached_value(cache_key("portal", "teacher", user_id), build, timeout=15)
         return Response(payload)
 
 

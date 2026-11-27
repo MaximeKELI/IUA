@@ -54,16 +54,20 @@ export const studentNav: PortalGroup[] = [
 
 export const teacherNav: PortalGroup[] = [
   {
-    title: "Pédagogie",
+    title: "Enseignement",
     links: [
       { href: "/portail/enseignant", label: "Tableau de bord", status: "active" },
       { href: "/portail/enseignant/cours", label: "Mes cours", status: "active" },
-      { href: "/portail/enseignant/notes", label: "Saisie des notes", status: "active" },
+      { href: "/portail/enseignant/etudiants", label: "Mes étudiants", status: "active" },
+      { href: "/portail/enseignant/notes", label: "Notes", status: "active" },
     ],
   },
   {
-    title: "Communication",
-    links: [{ href: "/portail/enseignant/notifications", label: "Notifications", status: "active" }],
+    title: "Compte",
+    links: [
+      { href: "/portail/enseignant/demandes", label: "Demandes", status: "active" },
+      { href: "/portail/enseignant/notifications", label: "Notifications", status: "active" },
+    ],
   },
 ];
 
