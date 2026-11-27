@@ -28,28 +28,27 @@ class StudentDashboardView(APIView):
         user_id = str(request.user.id)
 
         def build():
+            from apps.academic.models import Subject
+
             profile = (
                 StudentProfile.objects.filter(user_id=request.user.id)
                 .select_related("program", "cohort")
-                .only(
-                    "student_number",
-                    "level",
-                    "program__name",
-                    "cohort__name",
-                )
                 .first()
             )
-            enrollments = (
-                Enrollment.objects.filter(student__user_id=request.user.id, status="active")
-                .select_related("program", "cohort")
+            enrollments_qs = (
+                Enrollment.objects.filter(student__user_id=request.user.id)
+                .select_related("program", "cohort", "academic_year")
                 .order_by("-created_at")
             )
-            enrollments_count = enrollments.count()
-            latest = enrollments.first()
+            enrollments = list(enrollments_qs)
+            active_enrollments = [e for e in enrollments if e.status == "active"]
+            latest = active_enrollments[0] if active_enrollments else (enrollments[0] if enrollments else None)
             program_name = getattr(getattr(profile, "program", None), "name", None)
+            program_code = getattr(getattr(profile, "program", None), "code", None)
             cohort_name = getattr(getattr(profile, "cohort", None), "name", None)
             if not program_name and latest:
                 program_name = latest.program.name
+                program_code = latest.program.code
             if not cohort_name and latest:
                 cohort_name = latest.cohort.name
             # Heal profile drift from enrollment
@@ -63,17 +62,131 @@ class StudentDashboardView(APIView):
                     dirty.append("cohort_id")
                 if dirty:
                     profile.save(update_fields=[*dirty, "updated_at"])
-            unread = Notification.objects.filter(recipient_id=request.user.id, is_read=False).count()
+
+            program_id = getattr(profile, "program_id", None) or (
+                latest.program_id if latest else None
+            )
+            grades_qs = Grade.objects.filter(
+                student__user_id=request.user.id, is_published=True
+            ).select_related("subject", "academic_year")
+            grades_list = list(grades_qs.order_by("-created_at"))
+            grades_count = len(grades_list)
+
+            # Average on /20 scale
+            avg_score = None
+            if grades_list:
+                ratios = [
+                    float(g.score) / float(g.max_score) * 20
+                    for g in grades_list
+                    if g.max_score and float(g.max_score) > 0
+                ]
+                if ratios:
+                    avg_score = round(sum(ratios) / len(ratios), 2)
+
+            grade_stats_by_subject: dict[str, dict] = {}
+            for g in grades_list:
+                sid = str(g.subject_id)
+                bucket = grade_stats_by_subject.setdefault(
+                    sid, {"count": 0, "ratios": [], "latest_label": None, "latest_score": None}
+                )
+                bucket["count"] += 1
+                if g.max_score and float(g.max_score) > 0:
+                    bucket["ratios"].append(float(g.score) / float(g.max_score) * 20)
+                if bucket["latest_label"] is None:
+                    bucket["latest_label"] = g.label or g.kind
+                    bucket["latest_score"] = f"{g.score}/{g.max_score}"
+
+            subjects_payload = []
+            if program_id:
+                subjects = list(
+                    Subject.objects.filter(course_unit__program_id=program_id)
+                    .select_related("course_unit")
+                    .order_by("course_unit__semester", "code")
+                )
+                teacher_by_subject: dict[str, str] = {}
+                for ta in (
+                    TeachingAssignment.objects.filter(subject_id__in=[s.id for s in subjects])
+                    .select_related("teacher__user")
+                ):
+                    name = f"{ta.teacher.user.first_name} {ta.teacher.user.last_name}".strip()
+                    if name:
+                        teacher_by_subject[str(ta.subject_id)] = name
+                for s in subjects:
+                    stats = grade_stats_by_subject.get(str(s.id), {})
+                    ratios = stats.get("ratios") or []
+                    subjects_payload.append(
+                        {
+                            "id": str(s.id),
+                            "name": s.name,
+                            "code": s.code,
+                            "hours": s.hours,
+                            "coefficient": str(s.coefficient),
+                            "semester": s.course_unit.semester,
+                            "ue_code": s.course_unit.code,
+                            "ue_name": s.course_unit.name,
+                            "credits": str(s.course_unit.credits),
+                            "teacher": teacher_by_subject.get(str(s.id), "").strip() or None,
+                            "grades_count": stats.get("count", 0),
+                            "avg_score": round(sum(ratios) / len(ratios), 2) if ratios else None,
+                            "latest_grade": stats.get("latest_score"),
+                            "latest_label": stats.get("latest_label"),
+                        }
+                    )
+
+            pending_requests = AdminRequest.objects.filter(
+                requester_id=request.user.id, status__in=["pending", "in_progress"]
+            ).count()
+            unread = Notification.objects.filter(
+                recipient_id=request.user.id, is_read=False
+            ).count()
+
+            recent_grades = [
+                {
+                    "id": str(g.id),
+                    "score": str(g.score),
+                    "max_score": str(g.max_score),
+                    "label": g.label or g.kind,
+                    "kind": g.kind,
+                    "subject": g.subject.name,
+                    "subject_code": g.subject.code,
+                    "created_at": g.created_at.isoformat(),
+                }
+                for g in grades_list[:8]
+            ]
+
             return {
                 "role": "student",
+                "full_name": request.user.full_name,
                 "profile": {
                     "student_number": getattr(profile, "student_number", None),
                     "program": program_name,
+                    "program_code": program_code,
+                    "program_id": str(program_id) if program_id else None,
                     "cohort": cohort_name,
                     "level": getattr(profile, "level", None),
+                    "status": getattr(profile, "status", None),
+                    "email": request.user.email,
                 },
-                "enrollments_count": enrollments_count,
+                "enrollments_count": len(active_enrollments),
+                "enrollments": [
+                    {
+                        "id": str(e.id),
+                        "status": e.status,
+                        "program": e.program.name,
+                        "program_code": e.program.code,
+                        "cohort": e.cohort.name,
+                        "academic_year": e.academic_year.name,
+                        "enrolled_at": e.enrolled_at.isoformat() if e.enrolled_at else None,
+                    }
+                    for e in enrollments[:10]
+                ],
+                "grades_count": grades_count,
+                "avg_score": avg_score,
+                "subjects_count": len(subjects_payload),
+                "pending_requests": pending_requests,
                 "unread_notifications": unread,
+                "subjects": subjects_payload,
+                "recent_grades": recent_grades,
                 "modules": [
                     {"code": "01", "name": "Portail étudiant", "status": "active"},
                     {"code": "07", "name": "Notes", "status": "active"},
@@ -83,7 +196,7 @@ class StudentDashboardView(APIView):
                 ],
             }
 
-        payload = cached_value(cache_key("portal", "student", user_id), build, timeout=20)
+        payload = cached_value(cache_key("portal", "student", user_id), build, timeout=15)
         return Response(payload)
 
 
