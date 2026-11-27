@@ -5,7 +5,7 @@ export default function ContactPage() {
     <PublicPage
       eyebrow="Contact"
       title="Nous écrire"
-      lead="Une seule page contact — les démarches administratives passent ensuite par le portail."
+      lead="Coordonnées de l'institut. Les démarches étudiantes se font ensuite dans le portail."
     >
       <div className="grid gap-6 md:grid-cols-2">
         <div className="rounded-xl bg-white p-6 shadow-soft">
@@ -32,8 +32,7 @@ export default function ContactPage() {
         <div className="rounded-xl bg-iua-navy p-6 text-white">
           <h2 className="font-display text-xl">Besoin d&apos;un service étudiant ?</h2>
           <p className="mt-3 text-sm text-white/70">
-            Attestations, notes, paiements et demandes se gèrent dans le Digital Campus après
-            connexion — plus rapide qu&apos;un formulaire générique.
+            Attestations, notes, paiements et demandes se gèrent dans le portail après connexion.
           </p>
         </div>
       </div>

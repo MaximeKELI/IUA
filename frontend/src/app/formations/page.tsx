@@ -24,7 +24,7 @@ export default function FormationsPage() {
     <PublicPage
       eyebrow="Catalogue"
       title="Formations"
-      lead="Licences et masters présentés par niveau — sans mélanger les menus du site institutionnel."
+      lead="Licences et masters classés par niveau."
     >
       <div className="space-y-4">
         {programs.map((p) => (

@@ -167,9 +167,8 @@ export default function AdminUsersPage() {
       <p className="text-xs uppercase tracking-[0.18em] text-iua-cyan">Autorisations</p>
       <h1 className="mt-2 font-display text-3xl text-iua-navy">Utilisateurs & rôles</h1>
       <p className="mt-2 max-w-2xl text-sm text-iua-muted">
-        Créez un compte, choisissez les rôles (étudiant, enseignant, secrétariat, direction…).
-        C&apos;est ici que l&apos;accès au Digital Campus est réellement accordé.
-        {!showStudentIds && " Les matricules étudiants sont masqués pour votre profil."}
+        Créez un compte et attribuez les rôles. C&apos;est ici que l&apos;accès est accordé.
+        {!showStudentIds && " Les matricules restent masqués pour votre profil."}
       </p>
 
       <div className="mt-8 grid gap-8 xl:grid-cols-[1.1fr_0.9fr]">

@@ -105,8 +105,8 @@ export default function AdminEnseignementsPage() {
       <h1 className="mt-2 font-display text-3xl text-iua-navy">Affectations enseignants</h1>
       <p className="mt-2 text-sm text-iua-muted">
         {canEdit
-          ? "Liez un enseignant à une matière — indispensable pour la saisie des notes."
-          : "Consultation seule — la direction ne modifie pas les affectations de cours."}
+          ? "Associez un enseignant à une matière pour ouvrir la saisie des notes."
+          : "Consultation uniquement. Les affectations se gèrent au secrétariat."}
       </p>
       {error && <p className="mt-4 text-sm text-red-700">{error}</p>}
       {ok && <p className="mt-4 text-sm text-emerald-700">{ok}</p>}

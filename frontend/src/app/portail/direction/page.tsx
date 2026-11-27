@@ -60,12 +60,12 @@ const consultLinks = [
   {
     href: "/portail/admin/enseignements",
     title: "Cours & affectations",
-    body: "Consultation seule — modification réservée au secrétariat / scolarité.",
+    body: "Lecture seule. Les modifications passent par le secrétariat.",
   },
   {
     href: "/portail/admin/notes",
     title: "Notes des enseignants",
-    body: "Consultation seule — saisie réservée aux enseignants.",
+    body: "Lecture seule. La saisie reste du côté des enseignants.",
   },
 ];
 
@@ -84,12 +84,10 @@ export default function DirectionPortalPage() {
 
   return (
     <PortalShell title={resolveOpsTitle(roles)} nav={resolveOpsNav(roles)}>
-      <p className="text-xs uppercase tracking-[0.18em] text-iua-cyan">Gouvernance</p>
-      <h1 className="mt-2 font-display text-3xl text-iua-navy">Tableau de bord direction</h1>
+      <h1 className="font-display text-3xl text-iua-navy">Tableau de bord</h1>
       <p className="mt-2 max-w-2xl text-sm text-iua-muted">
-        Pilotage de l&apos;établissement : vous gérez utilisateurs, formations, inscriptions et
-        demandes. Les matricules étudiants sont masqués ; cours et notes enseignants restent en
-        consultation.
+        Utilisateurs, formations, inscriptions et demandes. Matricules masqués. Cours et notes
+        en lecture seule.
       </p>
       {error && <p className="mt-6 text-red-700">{error}</p>}
       {data && (
@@ -124,7 +122,7 @@ export default function DirectionPortalPage() {
             </section>
 
             <section className="rounded-xl bg-white p-5 shadow-soft">
-              <h2 className="font-display text-xl text-iua-navy">Consultation (lecture seule)</h2>
+              <h2 className="font-display text-xl text-iua-navy">Consultation</h2>
               <ul className="mt-4 space-y-3">
                 {consultLinks.map((link) => (
                   <li key={link.href}>

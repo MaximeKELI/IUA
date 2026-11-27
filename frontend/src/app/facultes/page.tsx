@@ -6,7 +6,7 @@ export default function FacultesPage() {
     <PublicPage
       eyebrow="Institution"
       title="Facultés"
-      lead="Les facultés regroupent les formations — elles ne concurrencent plus les menus Licences / Masters."
+      lead="Chaque faculté regroupe ses formations et ses départements."
     >
       <ul className="space-y-4">
         {[

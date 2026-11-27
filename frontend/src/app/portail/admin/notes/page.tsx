@@ -47,8 +47,8 @@ export default function AdminNotesConsultPage() {
       <h1 className="mt-2 font-display text-3xl text-iua-navy">Notes des enseignants</h1>
       <p className="mt-2 max-w-2xl text-sm text-iua-muted">
         {editable
-          ? "Consultation des notes saisies. La saisie se fait dans l'espace enseignant."
-          : "Consultation seule — la direction ne modifie pas les notes des enseignants."}
+          ? "Notes déjà saisies. La saisie se fait dans l'espace enseignant."
+          : "Consultation uniquement. La saisie reste réservée aux enseignants."}
       </p>
       {error && <p className="mt-4 text-sm text-red-700">{error}</p>}
 

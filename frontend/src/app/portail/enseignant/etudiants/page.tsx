@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { PortalShell } from "@/components/PortalShell";
 import { apiGet, Page, unwrapList } from "@/lib/api";
@@ -20,7 +20,7 @@ type Student = {
 
 type Program = { id: string; name: string; code: string };
 
-export default function TeacherStudentsPage() {
+function TeacherStudentsInner() {
   const { token, ready } = useAuthToken();
   const search = useSearchParams();
   const programFilter = search.get("program") || "";
@@ -64,7 +64,7 @@ export default function TeacherStudentsPage() {
     programs.find((p) => p.id === id)?.name || "Non affecté";
 
   return (
-    <PortalShell title="Espace enseignant" nav={teacherNav}>
+    <>
       <h1 className="font-display text-3xl text-iua-navy">Mes étudiants</h1>
       <p className="mt-2 text-sm text-iua-muted">
         Étudiants des formations liées à vos matières.
@@ -133,6 +133,16 @@ export default function TeacherStudentsPage() {
           </tbody>
         </table>
       </section>
+    </>
+  );
+}
+
+export default function TeacherStudentsPage() {
+  return (
+    <PortalShell title="Espace enseignant" nav={teacherNav}>
+      <Suspense fallback={<p className="text-sm text-iua-muted">Chargement…</p>}>
+        <TeacherStudentsInner />
+      </Suspense>
     </PortalShell>
   );
 }

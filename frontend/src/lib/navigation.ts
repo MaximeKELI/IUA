@@ -87,7 +87,7 @@ export const adminNav: PortalGroup[] = [
       { href: "/portail/admin/enseignements", label: "Affectations enseignants", status: "active" },
       { href: "/portail/admin/inscriptions", label: "Inscriptions", status: "active" },
       { href: "/portail/admin/demandes", label: "Demandes", status: "active" },
-      { href: "/portail/admin/notes", label: "Notes (consultation)", status: "active" },
+      { href: "/portail/admin/notes", label: "Notes", status: "active" },
     ],
   },
 ];

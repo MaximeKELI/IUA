@@ -38,10 +38,8 @@ export default function StudentPortalPage() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-xs uppercase tracking-[0.18em] text-iua-cyan">Bonjour</p>
-          <h1 className="mt-2 font-display text-3xl text-iua-navy">Votre tableau de bord</h1>
-          <p className="mt-2 text-sm text-iua-muted">
-            Les actions essentielles d&apos;abord — le reste reste accessible dans le menu.
-          </p>
+          <h1 className="mt-2 font-display text-3xl text-iua-navy">Tableau de bord</h1>
+          <p className="mt-2 text-sm text-iua-muted">Vos notes, cours et démarches.</p>
         </div>
       </div>
 
@@ -60,10 +58,10 @@ export default function StudentPortalPage() {
             <h2 className="font-display text-xl text-iua-navy">Accès rapides</h2>
             <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {[
-                ["Notes & résultats", "Consulter vos moyennes", "/portail/etudiant/notes"],
+                ["Notes", "Moyennes et résultats", "/portail/etudiant/notes"],
                 ["Cours", "Matières et inscriptions", "/portail/etudiant/cours"],
-                ["Demandes", "Démarches administratives", "/portail/etudiant/demandes"],
-                ["Notifications", "Alertes du campus", "/portail/etudiant/notifications"],
+                ["Demandes", "Attestations et relevés", "/portail/etudiant/demandes"],
+                ["Notifications", "Messages du campus", "/portail/etudiant/notifications"],
               ].map(([title, body, href]) => (
                 <Link
                   key={title}
@@ -72,33 +70,11 @@ export default function StudentPortalPage() {
                 >
                   <h3 className="font-semibold text-iua-navy">{title}</h3>
                   <p className="mt-1 text-sm text-iua-muted">{body}</p>
-                  <p className="mt-4 text-xs uppercase tracking-[0.14em] text-iua-cyan">Ouvrir</p>
                 </Link>
               ))}
             </div>
           </section>
 
-          <section className="mt-10 rounded-xl border border-iua-navy/10 bg-white p-5">
-            <div className="flex items-center justify-between gap-3">
-              <h2 className="font-display text-xl text-iua-navy">Services connectés</h2>
-              <Link href="/portail/etudiant" className="text-sm text-iua-blue">
-                Actualisé
-              </Link>
-            </div>
-            <ul className="mt-4 divide-y divide-iua-navy/10">
-              {data.modules.map((m) => (
-                <li key={m.code} className="flex items-center justify-between py-3 text-sm">
-                  <span>
-                    <span className="mr-3 font-mono text-iua-muted">{m.code}</span>
-                    {m.name}
-                  </span>
-                  <span className={m.status === "active" ? "text-iua-cyan" : "text-iua-muted"}>
-                    {m.status === "active" ? "Actif" : "Planifié"}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </section>
         </>
       )}
     </PortalShell>

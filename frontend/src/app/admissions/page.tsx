@@ -15,12 +15,12 @@ const steps = [
   {
     n: "03",
     title: "Recevoir la décision",
-    body: "Notifications automatiques à chaque étape de validation.",
+    body: "Vous êtes informé à chaque étape de validation.",
   },
   {
     n: "04",
     title: "Finaliser l'inscription",
-    body: "Paiement sécurisé puis activation du compte Digital Campus.",
+    body: "Paiement puis activation de votre compte étudiant.",
   },
 ];
 
@@ -28,8 +28,8 @@ export default function AdmissionsPage() {
   return (
     <PublicPage
       eyebrow="Admissions"
-      title="Un parcours d'inscription lisible"
-      lead="Plus de dispersion entre pages. Quatre étapes claires, du choix de formation à l'activation de votre espace étudiant."
+      title="Comment s'inscrire"
+      lead="Quatre étapes, du choix de formation à l'activation de votre espace étudiant."
     >
       <ol className="grid gap-6 md:grid-cols-2">
         {steps.map((step) => (
@@ -57,8 +57,7 @@ export default function AdmissionsPage() {
       </div>
 
       <p className="mt-8 text-sm text-iua-muted">
-        Le dépôt de candidature en ligne (module 03) sera branché sur ce parcours dès la
-        Vague A — la structure UX est déjà en place.
+        Le dépôt de candidature en ligne sera bientôt disponible sur ce parcours.
       </p>
     </PublicPage>
   );

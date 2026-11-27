@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     template: "%s · IUA Digital Campus",
   },
   description:
-    "Portail numérique de l'Institut Universitaire d'Abidjan — études, services et administration en un seul écosystème.",
+    "Portail de l'Institut Universitaire d'Abidjan : études, services et administration.",
 };
 
 export const viewport: Viewport = {

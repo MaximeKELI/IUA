@@ -7,8 +7,8 @@ import { getAccessToken, getStoredUser, resolveHomePath } from "@/lib/auth";
 export function AuthHomeCta({
   className,
   guestHref = "/connexion",
-  guestLabel = "Accéder au Digital Campus",
-  memberLabel = "Retourner à mon espace",
+  guestLabel = "Me connecter",
+  memberLabel = "Mon espace",
 }: {
   className?: string;
   guestHref?: string;

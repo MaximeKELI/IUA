@@ -6,7 +6,7 @@ export default function EtudierPage() {
     <PublicPage
       eyebrow="Étudier à l'IUA"
       title="Choisissez votre porte d'entrée"
-      lead="Trois intentions, trois chemins — pour éviter la navigation plate de l'ancien site."
+      lead="Formations, admissions ou accueil international : choisissez votre entrée."
     >
       <div className="grid gap-4 md:grid-cols-3">
         {[

@@ -294,7 +294,7 @@ class DirectionDashboardView(APIView):
                     "can_edit_teaching": False,
                     "can_see_student_ids": False,
                 },
-                "note": "Direction : gestion globale. Notes & cours enseignants en consultation seule. Matricules étudiants masqués.",
+                "note": "Vous gérez l’établissement. Notes et cours : consultation. Matricules étudiants masqués.",
             }
 
         payload = cached_value(cache_key("portal", "direction", "kpis"), build, timeout=15)

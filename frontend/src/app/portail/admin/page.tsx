@@ -36,11 +36,8 @@ export default function AdminPortalPage() {
 
   return (
     <PortalShell title={resolveOpsTitle(roles)} nav={resolveOpsNav(roles)}>
-      <p className="text-xs uppercase tracking-[0.18em] text-iua-cyan">Pilotage</p>
-      <h1 className="mt-2 font-display text-3xl text-iua-navy">Vue d&apos;ensemble</h1>
-      <p className="mt-2 text-sm text-iua-muted">
-        Effectifs et référentiels — données issues de l&apos;API centrale.
-      </p>
+      <h1 className="font-display text-3xl text-iua-navy">Vue d&apos;ensemble</h1>
+      <p className="mt-2 text-sm text-iua-muted">Effectifs et référentiels de l&apos;établissement.</p>
       {error && <p className="mt-6 text-red-700">{error}</p>}
       {data && (
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

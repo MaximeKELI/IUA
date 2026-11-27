@@ -50,7 +50,7 @@ export default function StudentDemandesPage() {
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     if (!ready || !token) {
-      setError("Session non prête — rechargez la page.");
+      setError("Session non prête. Rechargez la page.");
       return;
     }
     if (!form.subject.trim()) {

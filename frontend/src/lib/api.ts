@@ -57,7 +57,7 @@ async function parseError(res: Response): Promise<string> {
   } catch {
     /* ignore */
   }
-  if (res.status === 401) return "Session expirée — reconnectez-vous.";
+  if (res.status === 401) return "Session expirée. Reconnectez-vous.";
   if (res.status === 403) return "Accès refusé pour votre rôle.";
   return `Erreur HTTP ${res.status}`;
 }
@@ -130,7 +130,7 @@ async function authorizedFetch(
   let access = token ?? getAccessToken();
   if (!access) {
     redirectToLogin();
-    throw new Error("Session absente — reconnectez-vous.");
+    throw new Error("Session absente. Reconnectez-vous.");
   }
 
   const doFetch = (tok: string) =>
@@ -145,13 +145,13 @@ async function authorizedFetch(
     const next = await refreshAccessToken();
     if (!next) {
       redirectToLogin();
-      throw new Error("Session expirée — reconnectez-vous.");
+      throw new Error("Session expirée. Reconnectez-vous.");
     }
     res = await doFetch(next);
     if (res.status === 401) {
       clearSession();
       redirectToLogin();
-      throw new Error("Session expirée — reconnectez-vous.");
+      throw new Error("Session expirée. Reconnectez-vous.");
     }
   }
   return res;

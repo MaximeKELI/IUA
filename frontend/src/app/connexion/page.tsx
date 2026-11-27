@@ -70,13 +70,13 @@ export default function LoginPage() {
         <div className="relative flex h-full flex-col justify-between p-10 text-white">
           <BrandLogo variant="white" priority className="h-12 w-auto" />
           <div className="animate-[fadeUp_0.5s_ease_both]">
-            <p className="text-xs uppercase tracking-[0.22em] text-iua-cyan">Identité unique</p>
+            <p className="text-xs uppercase tracking-[0.22em] text-iua-cyan">Portail IUA</p>
             <h1 className="mt-3 max-w-md font-display text-4xl leading-tight">
-              Un compte. Tous vos services IUA.
+              Un compte pour vos services
             </h1>
             <p className="mt-4 max-w-sm text-sm text-white/70">
-              Étudiants, enseignants et administration accèdent au même Digital Campus,
-              avec des menus adaptés à leur rôle.
+              Étudiants, enseignants et administration se connectent ici, avec un menu adapté
+              à chaque rôle.
             </p>
           </div>
         </div>
@@ -92,7 +92,7 @@ export default function LoginPage() {
           </div>
           <h2 className="mt-6 font-display text-3xl text-iua-navy">Connexion</h2>
           <p className="mt-2 text-sm text-iua-muted">
-            Choisissez votre profil de démonstration, ou saisissez vos identifiants.
+            Profils de démonstration ou vos identifiants.
           </p>
 
           <div className="mt-6 flex flex-wrap gap-2">

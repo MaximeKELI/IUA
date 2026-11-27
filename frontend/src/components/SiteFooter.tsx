@@ -8,8 +8,8 @@ export function SiteFooter() {
         <div>
           <BrandLogo variant="white" className="h-12 w-auto" />
           <p className="mt-4 max-w-sm text-sm leading-relaxed text-white/65">
-            Institut Universitaire d&apos;Abidjan — excellence académique, insertion
-            professionnelle et campus numérique intégré.
+            Formation, recherche et vie de campus à Abidjan. Le Digital Campus regroupe vos
+            services en ligne.
           </p>
         </div>
         <div>

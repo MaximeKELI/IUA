@@ -7,19 +7,19 @@ import { SiteHeader } from "@/components/SiteHeader";
 const journeys = [
   {
     title: "Je candidate",
-    body: "Dossier, pièces et suivi d'admission dans un parcours clair.",
+    body: "Déposez votre dossier et suivez votre admission.",
     href: "/admissions",
     tone: "bg-iua-navy text-white",
   },
   {
     title: "Je me connecte",
-    body: "Notes, cours, paiements et documents — un seul compte.",
+    body: "Notes, cours, paiements et documents au même endroit.",
     href: "/connexion",
     tone: "bg-iua-cyan text-iua-navy",
   },
   {
     title: "Je découvre",
-    body: "Licences, masters et facultés adaptés à votre projet.",
+    body: "Licences et masters pour construire votre projet.",
     href: "/formations",
     tone: "bg-iua-sun text-iua-navy",
   },
@@ -27,16 +27,15 @@ const journeys = [
 
 const roles = [
   ["Étudiant", "Emploi du temps, notes, paiements, documents"],
-  ["Enseignant", "Cours, évaluations, absences, communication"],
-  ["Administration", "Inscriptions, dossiers, validations"],
-  ["Direction", "Indicateurs réels et pilotage central"],
+  ["Enseignant", "Cours, évaluations et suivi des étudiants"],
+  ["Administration", "Inscriptions, dossiers et validations"],
+  ["Direction", "Indicateurs et décisions de pilotage"],
 ];
 
 const ticker = [
   "Licences & Masters",
   "Digital Campus",
   "Admissions en ligne",
-  "Identité unique",
   "Campus Abidjan",
   "Accompagnement pro",
 ];
@@ -45,7 +44,6 @@ export default function HomePage() {
   return (
     <main>
       <section className="relative min-h-[100svh] overflow-hidden text-white">
-        {/* Native CSS background = sharp full-bleed photo (no Next optimizer downsample) */}
         <div
           className="absolute inset-0 bg-cover bg-[position:center_18%] bg-no-repeat"
           style={{ backgroundImage: "url('/brand/campus-hero.png')" }}
@@ -64,14 +62,13 @@ export default function HomePage() {
             className="mb-7 h-12 w-auto sm:h-14 animate-[fadeUp_0.5s_ease_both]"
           />
           <p className="mb-4 text-xs uppercase tracking-[0.28em] text-iua-cyan animate-[fadeUp_0.55s_ease_both]">
-            One University · One Digital Ecosystem
+            Institut Universitaire d&apos;Abidjan
           </p>
           <h1 className="max-w-2xl font-display text-4xl leading-[1.08] text-balance drop-shadow-sm sm:text-6xl animate-[fadeUp_0.65s_ease_both]">
             L&apos;excellence commence avec vous
           </h1>
           <p className="mt-5 max-w-lg text-base leading-relaxed text-white/85 sm:text-lg animate-[fadeUp_0.75s_ease_both]">
-            Un seul portail pour candidater, étudier, payer et suivre votre parcours à
-            l&apos;Institut Universitaire d&apos;Abidjan.
+            Candidatez, étudiez et suivez votre parcours sur le portail de l&apos;IUA.
           </p>
           <div className="mt-9 flex flex-wrap gap-3 animate-[fadeUp_0.85s_ease_both]">
             <Link
@@ -82,10 +79,6 @@ export default function HomePage() {
               S&apos;inscrire maintenant
             </Link>
             <AuthHomeCta className="rounded-md border border-white/40 bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/20" />
-          </div>
-          <div className="mt-14 flex items-center gap-3 text-xs uppercase tracking-[0.18em] text-white/55 animate-[fadeUp_1s_ease_both]">
-            <span className="inline-block h-px w-10 bg-iua-cyan/80" />
-            Défilez pour explorer
           </div>
         </div>
       </section>
@@ -126,13 +119,13 @@ export default function HomePage() {
 
       <section className="mx-auto max-w-6xl px-6 py-20 content-auto">
         <div className="max-w-2xl">
-          <p className="text-xs uppercase tracking-[0.2em] text-iua-cyan">Digital Campus</p>
+          <p className="text-xs uppercase tracking-[0.2em] text-iua-cyan">Portail</p>
           <h2 className="mt-3 font-display text-3xl text-iua-navy sm:text-4xl">
-            Des services clairement rangés, pas une liste confuse
+            Un accès adapté à chaque rôle
           </h2>
           <p className="mt-4 text-iua-muted">
-            Chaque intention a son chemin : découvrir, candidater, ou travailler dans le
-            portail — avec une navigation adaptée à votre rôle.
+            Étudiants, enseignants, administration et direction trouvent leurs outils sans se
+            perdre dans des menus inutiles.
           </p>
         </div>
 
@@ -154,13 +147,13 @@ export default function HomePage() {
       <section className="relative overflow-hidden bg-iua-navy py-20 text-white content-auto">
         <div className="relative mx-auto grid max-w-6xl gap-10 px-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-iua-sun">Campus vivant</p>
+            <p className="text-xs uppercase tracking-[0.2em] text-iua-sun">Campus</p>
             <h2 className="mt-3 font-display text-3xl sm:text-4xl">
-              Une université moderne, une expérience numérique à la hauteur
+              Abidjan, formation et vie étudiante
             </h2>
             <p className="mt-4 max-w-xl text-white/70">
-              Formation, vie de campus et services administratifs se rejoignent dans IUA
-              Digital Campus — sans multiplier les comptes ni les déplacements.
+              L&apos;IUA réunit enseignement, services et vie de campus. Le Digital Campus prolonge
+              cette organisation en ligne.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
@@ -184,7 +177,7 @@ export default function HomePage() {
             aria-label="Étudiantes IUA"
           >
             <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-iua-navy/80 to-transparent p-5">
-              <p className="text-sm font-medium">Excellence · Professionnalisme · Abidjan</p>
+              <p className="text-sm font-medium">II Plateaux, Abidjan</p>
             </div>
           </div>
         </div>
@@ -198,8 +191,7 @@ export default function HomePage() {
               Les inscriptions sont ouvertes
             </h2>
             <p className="mt-3 text-iua-muted">
-              Déposez votre candidature en ligne et suivez l&apos;avancement de votre dossier
-              sans multiplier les guichets.
+              Déposez votre candidature en ligne et suivez l&apos;avancement de votre dossier.
             </p>
           </div>
           <Link
