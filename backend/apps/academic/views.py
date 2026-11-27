@@ -233,7 +233,12 @@ class EnrollmentViewSet(AcademicReadWriteMixin, viewsets.ModelViewSet):
 
 
 class TeachingAssignmentViewSet(AcademicReadWriteMixin, viewsets.ModelViewSet):
-    queryset = TeachingAssignment.objects.select_related("teacher", "subject", "academic_year").all()
+    queryset = TeachingAssignment.objects.select_related(
+        "teacher__user",
+        "subject__course_unit__program",
+        "academic_year",
+        "cohort",
+    ).all()
     serializer_class = TeachingAssignmentSerializer
     required_permission = "academic.teaching.manage"
 

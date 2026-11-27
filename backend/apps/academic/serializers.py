@@ -141,6 +141,16 @@ class TeachingAssignmentSerializer(serializers.ModelSerializer):
     subject_code = serializers.CharField(source="subject.code", read_only=True)
     teacher_name = serializers.CharField(source="teacher.user.full_name", read_only=True)
     teacher_email = serializers.EmailField(source="teacher.user.email", read_only=True)
+    academic_year_name = serializers.CharField(source="academic_year.name", read_only=True)
+    cohort_name = serializers.CharField(source="cohort.name", read_only=True, allow_null=True)
+    program_id = serializers.UUIDField(source="subject.course_unit.program_id", read_only=True)
+    program_name = serializers.CharField(
+        source="subject.course_unit.program.name", read_only=True
+    )
+    hours = serializers.IntegerField(source="subject.hours", read_only=True)
+    coefficient = serializers.DecimalField(
+        source="subject.coefficient", max_digits=5, decimal_places=2, read_only=True
+    )
 
     class Meta:
         model = TeachingAssignment
