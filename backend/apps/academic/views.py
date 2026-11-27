@@ -278,24 +278,28 @@ class GradeViewSet(viewsets.ModelViewSet):
             return qs.filter(subject__assignments__teacher__user=user).distinct()
         return qs
 
-    def perform_create(self, serializer):
-        user = self.request.user
-        subject = serializer.validated_data["subject"]
-        student = serializer.validated_data["student"]
-        if is_teacher_only(user):
-            assigned = TeachingAssignment.objects.filter(
-                teacher__user=user, subject=subject
-            ).exists()
-            if not assigned:
-                raise serializers.ValidationError(
-                    {"subject": "Vous n'êtes pas affecté à cette matière."}
-                )
-            # Student should belong to a program of that subject
+    def _assert_teacher_can_grade(self, user, subject, student=None):
+        if not is_teacher_only(user):
+            return
+        assigned = TeachingAssignment.objects.filter(
+            teacher__user=user, subject=subject
+        ).exists()
+        if not assigned:
+            raise serializers.ValidationError(
+                {"subject": "Vous n'êtes pas affecté à cette matière."}
+            )
+        if student is not None:
             program_id = subject.course_unit.program_id
             if student.program_id and student.program_id != program_id:
                 raise serializers.ValidationError(
                     {"student": "Cet étudiant n'est pas dans le programme de la matière."}
                 )
+
+    def perform_create(self, serializer):
+        user = self.request.user
+        subject = serializer.validated_data["subject"]
+        student = serializer.validated_data["student"]
+        self._assert_teacher_can_grade(user, subject, student)
         grade = serializer.save(recorded_by=user)
         if grade.is_published:
             Notification.objects.create(
@@ -304,6 +308,23 @@ class GradeViewSet(viewsets.ModelViewSet):
                 body=f"Note publiée : {grade.score}/{grade.max_score}",
                 category="grades",
                 data={"grade_id": str(grade.id)},
+            )
+
+    def perform_update(self, serializer):
+        user = self.request.user
+        grade = serializer.instance
+        was_published = grade.is_published
+        subject = serializer.validated_data.get("subject", grade.subject)
+        student = serializer.validated_data.get("student", grade.student)
+        self._assert_teacher_can_grade(user, subject, student)
+        updated = serializer.save()
+        if updated.is_published and not was_published:
+            Notification.objects.create(
+                recipient=updated.student.user,
+                title=f"Note publiée — {updated.subject.name}",
+                body=f"Note : {updated.score}/{updated.max_score}",
+                category="grades",
+                data={"grade_id": str(updated.id)},
             )
 
 

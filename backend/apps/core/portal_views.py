@@ -1,4 +1,4 @@
-from django.db.models import Count, Q
+from django.db.models import Avg, Count, Q
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -9,6 +9,7 @@ from apps.academic.models import (
     Faculty,
     Grade,
     Program,
+    StaffProfile,
     StudentProfile,
     TeachingAssignment,
 )
@@ -102,7 +103,8 @@ class TeacherDashboardView(APIView):
                     "subject__course_unit__program",
                     "academic_year",
                     "cohort",
-                    "teacher",
+                    "teacher__faculty",
+                    "teacher__department",
                 )
             )
             assignments = list(assignments_qs)
@@ -116,6 +118,30 @@ class TeacherDashboardView(APIView):
                 recorded_by_id=request.user.id
             ) | Grade.objects.filter(subject_id__in=subject_ids)
             grades_qs = grades_qs.distinct()
+
+            students_by_program: dict[str, int] = {}
+            if program_ids:
+                for row in (
+                    StudentProfile.objects.filter(program_id__in=program_ids)
+                    .values("program_id")
+                    .annotate(c=Count("id"))
+                ):
+                    students_by_program[str(row["program_id"])] = row["c"]
+
+            grade_stats_by_subject: dict[str, dict] = {}
+            if subject_ids:
+                for row in (
+                    grades_qs.filter(subject_id__in=subject_ids)
+                    .values("subject_id")
+                    .annotate(
+                        total=Count("id"),
+                        drafts=Count("id", filter=Q(is_published=False)),
+                        graded_students=Count("student_id", distinct=True),
+                        avg_score=Avg("score"),
+                    )
+                ):
+                    grade_stats_by_subject[str(row["subject_id"])] = row
+
             students_count = (
                 StudentProfile.objects.filter(
                     Q(program_id__in=program_ids)
@@ -147,22 +173,25 @@ class TeacherDashboardView(APIView):
                 )
             )
             staff = (
-                TeachingAssignment.objects.filter(teacher__user_id=request.user.id)
-                .select_related("teacher")
+                StaffProfile.objects.filter(user_id=request.user.id)
+                .select_related("faculty", "department")
                 .first()
             )
             unread = Notification.objects.filter(
                 recipient_id=request.user.id, is_read=False
             ).count()
-            return {
-                "role": "teacher",
-                "title": getattr(getattr(staff, "teacher", None), "title", "") or "",
-                "assignments_count": len(assignments),
-                "students_count": students_count,
-                "grades_count": grades_qs.count(),
-                "drafts_count": grades_qs.filter(is_published=False).count(),
-                "unread_notifications": unread,
-                "subjects": [
+
+            subjects = []
+            for a in assignments:
+                program_id = (
+                    str(a.subject.course_unit.program_id)
+                    if a.subject.course_unit_id
+                    else None
+                )
+                stats = grade_stats_by_subject.get(str(a.subject_id), {})
+                cohort_students = students_by_program.get(program_id or "", 0)
+                graded = stats.get("graded_students", 0) or 0
+                subjects.append(
                     {
                         "id": str(a.subject_id),
                         "name": a.subject.name,
@@ -170,11 +199,44 @@ class TeacherDashboardView(APIView):
                         "program": a.subject.course_unit.program.name
                         if a.subject.course_unit_id
                         else None,
+                        "program_id": program_id,
                         "year": a.academic_year.name,
+                        "cohort": a.cohort.name if a.cohort_id else None,
                         "hours": a.subject.hours,
+                        "students_count": cohort_students,
+                        "grades_count": stats.get("total", 0) or 0,
+                        "drafts_count": stats.get("drafts", 0) or 0,
+                        "graded_students": graded,
+                        "coverage_pct": round((graded / cohort_students) * 100)
+                        if cohort_students
+                        else 0,
+                        "avg_score": (
+                            round(float(stats["avg_score"]), 2)
+                            if stats.get("avg_score") is not None
+                            else None
+                        ),
                     }
-                    for a in assignments
-                ],
+                )
+
+            return {
+                "role": "teacher",
+                "full_name": request.user.full_name,
+                "title": getattr(staff, "title", "") or "",
+                "profile": {
+                    "staff_number": getattr(staff, "staff_number", None),
+                    "staff_type": getattr(staff, "staff_type", None),
+                    "title": getattr(staff, "title", "") or "",
+                    "faculty": getattr(getattr(staff, "faculty", None), "name", None),
+                    "department": getattr(
+                        getattr(staff, "department", None), "name", None
+                    ),
+                },
+                "assignments_count": len(assignments),
+                "students_count": students_count,
+                "grades_count": grades_qs.count(),
+                "drafts_count": grades_qs.filter(is_published=False).count(),
+                "unread_notifications": unread,
+                "subjects": subjects,
                 "recent_grades": [
                     {
                         "id": str(r["id"]),

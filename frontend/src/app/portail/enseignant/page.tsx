@@ -9,6 +9,14 @@ import { teacherNav } from "@/lib/navigation";
 
 type TeacherDashboard = {
   title?: string;
+  full_name?: string;
+  profile?: {
+    staff_number?: string | null;
+    staff_type?: string | null;
+    title?: string;
+    faculty?: string | null;
+    department?: string | null;
+  };
   assignments_count: number;
   students_count: number;
   grades_count: number;
@@ -19,8 +27,16 @@ type TeacherDashboard = {
     name: string;
     code: string;
     program?: string | null;
+    program_id?: string | null;
     year?: string;
+    cohort?: string | null;
     hours?: number;
+    students_count?: number;
+    grades_count?: number;
+    drafts_count?: number;
+    graded_students?: number;
+    coverage_pct?: number;
+    avg_score?: number | null;
   }[];
   recent_grades: {
     id: string;
@@ -32,6 +48,12 @@ type TeacherDashboard = {
     student: string;
     created_at: string;
   }[];
+};
+
+const staffTypeLabel: Record<string, string> = {
+  permanent: "Permanent",
+  vacataire: "Vacataire",
+  admin: "Administratif",
 };
 
 export default function TeacherPortalPage() {
@@ -46,18 +68,51 @@ export default function TeacherPortalPage() {
       .catch((err) => setError(err instanceof Error ? err.message : "Erreur"));
   }, [ready, token]);
 
+  const greetingName = data?.full_name?.split(" ")[0] || "";
+  const profileBits = [
+    data?.profile?.title || data?.title,
+    data?.profile?.department,
+    data?.profile?.faculty,
+  ].filter(Boolean);
+
   return (
     <PortalShell title="Espace enseignant" nav={teacherNav}>
-      <h1 className="font-display text-3xl text-iua-navy">Bonjour</h1>
+      <p className="text-xs uppercase tracking-[0.18em] text-iua-cyan">
+        {data?.profile?.staff_type
+          ? staffTypeLabel[data.profile.staff_type] || data.profile.staff_type
+          : "Enseignement"}
+      </p>
+      <h1 className="mt-2 font-display text-3xl text-iua-navy">
+        {greetingName ? `Bonjour, ${greetingName}` : "Bonjour"}
+      </h1>
       <p className="mt-2 text-sm text-iua-muted">
-        {data?.title
-          ? `${data.title}. Voici l’état de vos cours et notes.`
+        {profileBits.length
+          ? `${profileBits.join(" · ")}. Vos cours, étudiants et notes.`
           : "Vos cours, étudiants et notes."}
       </p>
       {error && <p className="mt-6 text-red-700">{error}</p>}
 
       {data && (
         <div className="mt-8 space-y-8">
+          {data.drafts_count > 0 && (
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-iua-navy px-5 py-4 text-white">
+              <div>
+                <p className="font-semibold">
+                  {data.drafts_count} note{data.drafts_count > 1 ? "s" : ""} en brouillon
+                </p>
+                <p className="mt-0.5 text-sm text-white/70">
+                  Publiez-les pour les rendre visibles aux étudiants.
+                </p>
+              </div>
+              <Link
+                href="/portail/enseignant/notes"
+                className="rounded-md bg-white px-3 py-2 text-xs font-semibold text-iua-navy"
+              >
+                Traiter les brouillons
+              </Link>
+            </div>
+          )}
+
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <Stat label="Cours" value={String(data.assignments_count)} />
             <Stat label="Étudiants" value={String(data.students_count)} />
@@ -71,17 +126,37 @@ export default function TeacherPortalPage() {
 
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {[
-              { href: "/portail/enseignant/notes", label: "Saisir une note" },
-              { href: "/portail/enseignant/cours", label: "Voir mes cours" },
-              { href: "/portail/enseignant/etudiants", label: "Liste des étudiants" },
-              { href: "/portail/enseignant/notifications", label: `Alertes (${data.unread_notifications})` },
+              {
+                href: "/portail/enseignant/notes",
+                label: "Saisir des notes",
+                body: "Individuel ou collectif",
+              },
+              {
+                href: "/portail/enseignant/cours",
+                label: "Voir mes cours",
+                body: `${data.assignments_count} matière${data.assignments_count > 1 ? "s" : ""}`,
+              },
+              {
+                href: "/portail/enseignant/etudiants",
+                label: "Liste des étudiants",
+                body: `${data.students_count} profil${data.students_count > 1 ? "s" : ""}`,
+              },
+              {
+                href: "/portail/enseignant/notifications",
+                label: "Alertes",
+                body:
+                  data.unread_notifications > 0
+                    ? `${data.unread_notifications} non lue${data.unread_notifications > 1 ? "s" : ""}`
+                    : "Aucune non lue",
+              },
             ].map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="rounded-xl bg-white px-4 py-4 text-sm font-semibold text-iua-navy shadow-soft transition hover:bg-iua-mist"
+                className="rounded-xl bg-white px-4 py-4 shadow-soft transition hover:bg-iua-mist"
               >
-                {item.label}
+                <p className="text-sm font-semibold text-iua-navy">{item.label}</p>
+                <p className="mt-1 text-xs text-iua-muted">{item.body}</p>
               </Link>
             ))}
           </div>
@@ -101,21 +176,50 @@ export default function TeacherPortalPage() {
                   </li>
                 )}
                 {data.subjects.map((s) => (
-                  <li key={s.id} className="flex items-start justify-between gap-3 py-3 text-sm">
-                    <div>
-                      <p className="font-medium text-iua-navy">{s.name}</p>
-                      <p className="text-xs text-iua-muted">
-                        {s.code}
-                        {s.program ? ` · ${s.program}` : ""}
-                        {s.hours != null ? ` · ${s.hours} h` : ""}
-                      </p>
+                  <li key={s.id} className="py-3">
+                    <div className="flex items-start justify-between gap-3 text-sm">
+                      <div>
+                        <p className="font-medium text-iua-navy">{s.name}</p>
+                        <p className="text-xs text-iua-muted">
+                          {s.code}
+                          {s.program ? ` · ${s.program}` : ""}
+                          {s.cohort ? ` · ${s.cohort}` : ""}
+                          {s.hours != null ? ` · ${s.hours} h` : ""}
+                        </p>
+                      </div>
+                      <div className="flex shrink-0 flex-col items-end gap-1">
+                        <Link
+                          href={`/portail/enseignant/notes?subject=${s.id}`}
+                          className="text-xs font-semibold text-iua-cyan"
+                        >
+                          Notes
+                        </Link>
+                        <Link
+                          href={`/portail/enseignant/notes?subject=${s.id}&mode=bulk`}
+                          className="text-xs text-iua-muted hover:text-iua-navy"
+                        >
+                          Saisie collective
+                        </Link>
+                      </div>
                     </div>
-                    <Link
-                      href={`/portail/enseignant/notes?subject=${s.id}`}
-                      className="shrink-0 text-xs font-semibold text-iua-cyan"
-                    >
-                      Notes
-                    </Link>
+                    <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-iua-muted">
+                      <span>
+                        Couverture {s.graded_students ?? 0}/{s.students_count ?? 0}
+                        {s.coverage_pct != null ? ` (${s.coverage_pct} %)` : ""}
+                      </span>
+                      {s.avg_score != null && <span>Moy. {s.avg_score}/20</span>}
+                      {(s.drafts_count ?? 0) > 0 && (
+                        <span className="font-semibold text-iua-navy">
+                          {s.drafts_count} brouillon{(s.drafts_count ?? 0) > 1 ? "s" : ""}
+                        </span>
+                      )}
+                    </div>
+                    <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-iua-mist">
+                      <div
+                        className="h-full rounded-full bg-iua-cyan/80 transition-all"
+                        style={{ width: `${Math.min(100, s.coverage_pct ?? 0)}%` }}
+                      />
+                    </div>
                   </li>
                 ))}
               </ul>

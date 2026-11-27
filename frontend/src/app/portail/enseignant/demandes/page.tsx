@@ -86,20 +86,20 @@ export default function TeacherDemandesPage() {
             onChange={(e) => setForm({ ...form, kind: e.target.value })}
             className="w-full rounded-md border border-iua-navy/15 px-3 py-2 text-sm"
           >
-            <option value="other">Demande interne</option>
+            <option value="other">Demande interne (matériel, salle…)</option>
             <option value="attestation">Attestation</option>
             <option value="certificate">Certificat</option>
-            <option value="transcript">Relevé</option>
+            <option value="transcript">Relevé / document</option>
           </select>
           <input
             required
-            placeholder="Objet"
+            placeholder="Objet (ex. Vidéoprojecteur salle B2)"
             value={form.subject}
             onChange={(e) => setForm({ ...form, subject: e.target.value })}
             className="w-full rounded-md border border-iua-navy/15 px-3 py-2 text-sm"
           />
           <textarea
-            placeholder="Précisions"
+            placeholder="Précisions (date, salle, urgence…)"
             value={form.body}
             onChange={(e) => setForm({ ...form, body: e.target.value })}
             className="w-full rounded-md border border-iua-navy/15 px-3 py-2 text-sm"
