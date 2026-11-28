@@ -45,6 +45,7 @@ export const studentNav: PortalGroup[] = [
       { href: "/portail/etudiant/cours", labelKey: "portal.student.courses", status: "active" },
       { href: "/portail/etudiant/notes", labelKey: "portal.student.grades", status: "active" },
       { href: "/portail/etudiant/edt", labelKey: "portal.student.edt", status: "active" },
+      { href: "/portail/etudiant/calendrier", labelKey: "portal.student.calendar", status: "active" },
       { href: "/portail/etudiant/ects", labelKey: "portal.student.ects", status: "active" },
       { href: "/portail/etudiant/bulletin", labelKey: "portal.student.bulletin", status: "active" },
       { href: "/portail/etudiant/documents", labelKey: "portal.student.docsBilingual", status: "active" },
@@ -66,6 +67,7 @@ export const studentNav: PortalGroup[] = [
     links: [
       { href: "/portail/etudiant/annonces", labelKey: "portal.student.announcements", status: "active" },
       { href: "/portail/etudiant/absences", labelKey: "portal.student.attendance", status: "active" },
+      { href: "/portail/etudiant/arrivee", labelKey: "portal.student.arrival", status: "active" },
       { href: "/portail/etudiant/clubs", labelKey: "portal.student.clubs", status: "active" },
       { href: "/portail/etudiant/bibliotheque", labelKey: "portal.student.library", status: "active" },
       { href: "/portail/etudiant/stages", labelKey: "portal.student.internships", status: "active" },
@@ -103,6 +105,7 @@ export const teacherNav: PortalGroup[] = [
     links: [
       { href: "/portail/enseignant/presence", labelKey: "portal.teacher.presence", status: "active" },
       { href: "/portail/enseignant/edt", labelKey: "portal.teacher.schedule", status: "active" },
+      { href: "/portail/enseignant/calendrier", labelKey: "portal.teacher.calendar", status: "active" },
       { href: "/portail/enseignant/supports", labelKey: "portal.teacher.materials", status: "active" },
       { href: "/portail/enseignant/devoirs", labelKey: "portal.teacher.homework", status: "active" },
       { href: "/portail/enseignant/qcm", labelKey: "portal.teacher.quizzes", status: "active" },

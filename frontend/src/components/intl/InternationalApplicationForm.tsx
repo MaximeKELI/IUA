@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 
 const API_URL = (process.env.NEXT_PUBLIC_API_URL || "/api/v1").replace(/\/$/, "");
 
@@ -62,12 +63,12 @@ export function InternationalApplicationForm() {
             Token de suivi :{" "}
             <code className="rounded bg-iua-mist px-2 py-1 font-mono text-xs">{trackingToken}</code>
             <br />
-            <a
+            <Link
               className="mt-2 inline-block font-semibold text-iua-cyan"
               href={`/international/suivi?token=${encodeURIComponent(trackingToken)}`}
             >
               Suivre ma candidature →
-            </a>
+            </Link>
           </p>
         )}
       </div>

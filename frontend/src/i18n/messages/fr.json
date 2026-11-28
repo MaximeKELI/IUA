@@ -576,6 +576,7 @@
       "calendar": "Calendrier unifié"
     },
     "teacher": {
+      "calendar": "Calendrier unifié",
       "dashboard": "Tableau de bord",
       "courses": "Mes cours",
       "students": "Mes étudiants",
@@ -747,7 +748,8 @@
         "supports": "Supports de cours",
         "alertes": "Alertes & retards de saisie",
         "annonces": "Annonces de classe",
-        "cours": "Mes cours"
+        "cours": "Mes cours",
+        "calendrier": "Calendrier unifié"
       },
       "student": {
         "home": "Home",
@@ -773,6 +775,8 @@
         "bourses": "Bourses & aides",
         "annonces": "Annonces",
         "examens": "Calendrier des examens",
+        "calendrier": "Calendrier unifié",
+        "arrivee": "Checklist d'arrivée",
         "bulletin": "Bulletin de notes — IUA",
         "cours": "Cours & matières",
         "absences": "Mes absences",
