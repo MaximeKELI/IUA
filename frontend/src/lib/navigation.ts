@@ -135,44 +135,83 @@ export const adminNav: PortalGroup[] = [
     titleKey: "portal.admin.groupPilot",
     links: [
       { href: "/portail/admin", labelKey: "portal.admin.overview", status: "active" },
-      { href: "/portail/direction", labelKey: "portal.admin.direction", status: "active" },
+      { href: "/portail/admin/utilisateurs", labelKey: "portal.admin.users", status: "active" },
+      { href: "/portail/admin/formations", labelKey: "portal.admin.programs", status: "active" },
+      { href: "/portail/admin/cohortes", labelKey: "portal.admin.cohorts", status: "active" },
+      { href: "/portail/admin/inscriptions", labelKey: "portal.admin.enroll", status: "active" },
     ],
   },
   {
-    titleKey: "portal.admin.groupManage",
+    titleKey: "portal.admin.groupScolarite",
     links: [
-      { href: "/portail/admin/utilisateurs", labelKey: "portal.admin.users", status: "active" },
-      { href: "/portail/admin/formations", labelKey: "portal.admin.programs", status: "active" },
       { href: "/portail/admin/enseignements", labelKey: "portal.admin.teach", status: "active" },
-      { href: "/portail/admin/inscriptions", labelKey: "portal.admin.enroll", status: "active" },
-      { href: "/portail/admin/demandes", labelKey: "portal.admin.requests", status: "active" },
+      { href: "/portail/admin/edt", labelKey: "portal.admin.schedule", status: "active" },
+      { href: "/portail/admin/presences", labelKey: "portal.admin.attendance", status: "active" },
       { href: "/portail/admin/notes", labelKey: "portal.admin.grades", status: "active" },
+      { href: "/portail/admin/examens", labelKey: "portal.admin.exams", status: "active" },
+    ],
+  },
+  {
+    titleKey: "portal.admin.groupServices",
+    links: [
+      { href: "/portail/admin/demandes", labelKey: "portal.admin.requests", status: "active" },
+      { href: "/portail/admin/documents", labelKey: "portal.admin.documents", status: "active" },
+      { href: "/portail/admin/paiements", labelKey: "portal.admin.payments", status: "active" },
+      { href: "/portail/admin/annonces", labelKey: "portal.admin.announcements", status: "active" },
+      { href: "/portail/admin/import", labelKey: "portal.admin.import", status: "active" },
+    ],
+  },
+  {
+    titleKey: "portal.admin.groupCampus",
+    links: [
+      { href: "/portail/admin/cartes", labelKey: "portal.admin.cards", status: "active" },
+      { href: "/portail/admin/stages", labelKey: "portal.admin.internships", status: "active" },
+      { href: "/portail/admin/bourses", labelKey: "portal.admin.scholarships", status: "active" },
+      { href: "/portail/admin/notifications", labelKey: "portal.admin.notifications", status: "active" },
+      { href: "/portail/admin/file", labelKey: "portal.admin.queue", status: "active" },
     ],
   },
 ];
 
 export const directionNav: PortalGroup[] = [
   {
-    titleKey: "portal.admin.groupPilot",
+    titleKey: "portal.direction.groupPilot",
     links: [
       { href: "/portail/direction", labelKey: "portal.direction.dashboard", status: "active" },
-      { href: "/portail/admin", labelKey: "portal.direction.ops", status: "active" },
+      { href: "/portail/direction/effectifs", labelKey: "portal.direction.headcount", status: "active" },
+      { href: "/portail/direction/performance", labelKey: "portal.direction.performance", status: "active" },
+      { href: "/portail/direction/international", labelKey: "portal.direction.international", status: "active" },
+      { href: "/portail/direction/finance", labelKey: "portal.direction.finance", status: "active" },
     ],
   },
   {
-    titleKey: "portal.admin.groupManage",
+    titleKey: "portal.direction.groupQuality",
     links: [
-      { href: "/portail/admin/utilisateurs", labelKey: "portal.admin.users", status: "active" },
-      { href: "/portail/admin/formations", labelKey: "portal.admin.programs", status: "active" },
-      { href: "/portail/admin/inscriptions", labelKey: "portal.admin.enroll", status: "active" },
-      { href: "/portail/admin/demandes", labelKey: "portal.admin.requests", status: "active" },
+      { href: "/portail/direction/demandes", labelKey: "portal.direction.requests", status: "active" },
+      { href: "/portail/direction/qualite", labelKey: "portal.direction.quality", status: "active" },
+      { href: "/portail/direction/alertes", labelKey: "portal.direction.alerts", status: "active" },
+      { href: "/portail/direction/pv", labelKey: "portal.direction.pv", status: "active" },
+      { href: "/portail/direction/calendrier", labelKey: "portal.direction.calendar", status: "active" },
     ],
   },
   {
-    titleKey: "portal.admin.groupManage",
+    titleKey: "portal.direction.groupOpen",
     links: [
-      { href: "/portail/admin/enseignements", labelKey: "portal.admin.teach", status: "active" },
-      { href: "/portail/admin/notes", labelKey: "portal.admin.grades", status: "active" },
+      { href: "/portail/direction/partenariats", labelKey: "portal.direction.partners", status: "active" },
+      { href: "/portail/direction/alumni", labelKey: "portal.direction.alumni", status: "active" },
+      { href: "/portail/direction/rapports", labelKey: "portal.direction.reports", status: "active" },
+      { href: "/portail/direction/affectations", labelKey: "portal.direction.assignments", status: "active" },
+      { href: "/portail/direction/notes", labelKey: "portal.direction.grades", status: "active" },
+    ],
+  },
+  {
+    titleKey: "portal.direction.groupGov",
+    links: [
+      { href: "/portail/direction/annonces", labelKey: "portal.direction.announcements", status: "active" },
+      { href: "/portail/direction/comptes", labelKey: "portal.direction.accounts", status: "active" },
+      { href: "/portail/direction/journal", labelKey: "portal.direction.audit", status: "active" },
+      { href: "/portail/direction/notifications", labelKey: "portal.direction.notifications", status: "active" },
+      { href: "/portail/direction/etablissement", labelKey: "portal.direction.institution", status: "active" },
     ],
   },
 ];

@@ -44,5 +44,6 @@ export function resolveOpsTitle(roles: string[]): string {
     return "Direction";
   }
   if (roles.includes("super_admin")) return "Direction";
+  if (roles.includes("secretariat")) return "Secrétariat";
   return "Administration";
 }
