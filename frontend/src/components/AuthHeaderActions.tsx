@@ -3,8 +3,9 @@
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "@/i18n/navigation";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { UserAvatar } from "@/components/UserAvatar";
-import { apiLogout, apiUpload } from "@/lib/api";
+import { apiLogout, apiUpload, clearApiMemoryCache } from "@/lib/api";
 import {
   getAccessToken,
   getStoredUser,
@@ -16,6 +17,8 @@ import {
 export function AuthHeaderActions({ solid = false }: { solid?: boolean }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [open, setOpen] = useState(false);
+  const [logoutOpen, setLogoutOpen] = useState(false);
+  const [logoutBusy, setLogoutBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const t = useTranslations("common");
@@ -113,9 +116,9 @@ export function AuthHeaderActions({ solid = false }: { solid?: boolean }) {
               <button
                 type="button"
                 className="rounded-md px-3 py-2 text-start font-medium text-red-700 hover:bg-red-50"
-                onClick={async () => {
-                  await apiLogout();
-                  window.location.href = "/";
+                onClick={() => {
+                  setOpen(false);
+                  setLogoutOpen(true);
                 }}
               >
                 {t("logout")}
@@ -124,6 +127,31 @@ export function AuthHeaderActions({ solid = false }: { solid?: boolean }) {
             {msg && <p className="mt-2 px-1 text-xs text-emerald-700">{msg}</p>}
           </div>
         )}
+
+        <ConfirmDialog
+          open={logoutOpen}
+          title={t("logoutConfirmTitle")}
+          description={t("logoutConfirmBody")}
+          confirmLabel={t("logoutConfirmAction")}
+          cancelLabel={t("cancel")}
+          tone="danger"
+          busy={logoutBusy}
+          onCancel={() => {
+            if (!logoutBusy) setLogoutOpen(false);
+          }}
+          onConfirm={() => {
+            void (async () => {
+              setLogoutBusy(true);
+              try {
+                clearApiMemoryCache();
+                await apiLogout();
+                window.location.href = "/";
+              } finally {
+                setLogoutBusy(false);
+              }
+            })();
+          }}
+        />
       </div>
     );
   }

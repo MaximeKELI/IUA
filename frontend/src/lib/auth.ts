@@ -7,6 +7,8 @@ export type AuthUser = {
   last_name: string;
   full_name: string;
   roles: string[];
+  /** Permission codes from RBAC (e.g. services.request.manage). */
+  permissions?: string[];
   mfa_enabled: boolean;
   avatar_url?: string | null;
   phone?: string;

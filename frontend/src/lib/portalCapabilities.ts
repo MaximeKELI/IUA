@@ -32,6 +32,32 @@ export function canEditGrades(roles: string[]): boolean {
   );
 }
 
+/** Traiter / accorder / refuser les demandes admin (proportionnel au grade). */
+export function canManageAdminRequests(roles: string[]): boolean {
+  return roles.some((r) =>
+    [
+      "super_admin",
+      "admin",
+      "it",
+      "direction",
+      "secretariat",
+      "academic_dir",
+      "finance_dir",
+      "faculty_head",
+      "dept_head",
+    ].includes(r),
+  );
+}
+
+/** Supervision rattrapages / notes côté staff ops (hors enseignant seul). */
+export function canOverseeCatchUps(roles: string[]): boolean {
+  return roles.some((r) =>
+    ["super_admin", "admin", "direction", "secretariat", "academic_dir", "faculty_head", "dept_head"].includes(
+      r,
+    ),
+  );
+}
+
 export function resolveOpsNav(roles: string[]): PortalGroup[] {
   if (roles.includes("direction") || roles.includes("finance_dir") || roles.includes("super_admin")) {
     return directionNav;

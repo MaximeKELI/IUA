@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { BrandLogo } from "@/components/BrandLogo";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { LanguageSwitcher } from "@/components/intl/LanguageSwitcher";
 import { UserAvatar } from "@/components/UserAvatar";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
@@ -49,6 +50,8 @@ export function PortalShell({
   const pathname = usePathname();
   const [user, setUser] = useState<AuthUser | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [logoutOpen, setLogoutOpen] = useState(false);
+  const [logoutBusy, setLogoutBusy] = useState(false);
   const t = useTranslations();
   const tc = useTranslations("common");
   const tp = useTranslations("portal");
@@ -81,10 +84,16 @@ export function PortalShell({
       });
   }, [router]);
 
-  async function logout() {
-    clearApiMemoryCache();
-    await apiLogout();
-    router.push("/connexion");
+  async function confirmLogout() {
+    setLogoutBusy(true);
+    try {
+      clearApiMemoryCache();
+      await apiLogout();
+      router.push("/connexion");
+    } finally {
+      setLogoutBusy(false);
+      setLogoutOpen(false);
+    }
   }
 
   const roles = user?.roles || [];
@@ -138,14 +147,39 @@ export function PortalShell({
             </div>
             <UserAvatar user={user} size="sm" className="ring-iua-navy/10" />
             <button
-              onClick={() => void logout()}
+              type="button"
+              onClick={() => setLogoutOpen(true)}
               className="rounded-md border border-iua-navy/15 px-3 py-2 text-sm text-iua-navy transition hover:bg-iua-navy hover:text-white"
             >
-              {safeT((k) => tp(k as Parameters<typeof tp>[0]), "logout") || "Déconnexion"}
+              {safeT((k) => tp(k as Parameters<typeof tp>[0]), "logout") ||
+                safeT((k) => tc(k as Parameters<typeof tc>[0]), "logout") ||
+                "Déconnexion"}
             </button>
           </div>
         </div>
       </header>
+
+      <ConfirmDialog
+        open={logoutOpen}
+        title={
+          safeT((k) => tc(k as Parameters<typeof tc>[0]), "logoutConfirmTitle") || "Se déconnecter ?"
+        }
+        description={
+          safeT((k) => tc(k as Parameters<typeof tc>[0]), "logoutConfirmBody") ||
+          "Vous allez quitter votre espace sécurisé. Toute session ouverte sur cet appareil sera fermée."
+        }
+        confirmLabel={
+          safeT((k) => tc(k as Parameters<typeof tc>[0]), "logoutConfirmAction") ||
+          "Oui, me déconnecter"
+        }
+        cancelLabel={safeT((k) => tc(k as Parameters<typeof tc>[0]), "cancel") || "Annuler"}
+        tone="danger"
+        busy={logoutBusy}
+        onCancel={() => {
+          if (!logoutBusy) setLogoutOpen(false);
+        }}
+        onConfirm={() => void confirmLogout()}
+      />
 
       <div className="mx-auto grid max-w-7xl lg:grid-cols-[260px_1fr]">
         <aside

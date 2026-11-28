@@ -23,6 +23,7 @@ class RoleSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     roles = serializers.SerializerMethodField()
+    permissions = serializers.SerializerMethodField()
     full_name = serializers.CharField(read_only=True)
     avatar_url = serializers.SerializerMethodField()
 
@@ -39,11 +40,15 @@ class UserSerializer(serializers.ModelSerializer):
             "is_active",
             "mfa_enabled",
             "roles",
+            "permissions",
             "date_joined",
         )
 
     def get_roles(self, obj: User) -> list[str]:
         return obj.role_codes()
+
+    def get_permissions(self, obj: User) -> list[str]:
+        return obj.permission_codes()
 
     def get_avatar_url(self, obj: User) -> str | None:
         if not obj.avatar:

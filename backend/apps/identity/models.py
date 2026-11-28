@@ -72,7 +72,23 @@ class User(AbstractBaseUser, PermissionsMixin, UUIDModel):
     def has_perm_code(self, code: str) -> bool:
         if self.is_superuser:
             return True
-        return Permission.objects.filter(roles__user_roles__user=self, code=code).exists()
+        return Permission.objects.filter(
+            roles__user_roles__user=self,
+            roles__user_roles__is_active=True,
+            code=code,
+        ).exists()
+
+    def permission_codes(self) -> list[str]:
+        if self.is_superuser:
+            return list(Permission.objects.values_list("code", flat=True))
+        return list(
+            Permission.objects.filter(
+                roles__user_roles__user=self,
+                roles__user_roles__is_active=True,
+            )
+            .distinct()
+            .values_list("code", flat=True)
+        )
 
     def has_role(self, code: str) -> bool:
         if self.is_superuser and code == "super_admin":
