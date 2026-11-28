@@ -7,6 +7,7 @@ import { PortalShell } from "@/components/PortalShell";
 import { apiGetCached } from "@/lib/api";
 import { useAuthToken } from "@/lib/useAuthToken";
 import { studentNav } from "@/lib/navigation";
+import { useStudentHub } from "@/lib/student";
 
 type StudentDashboard = {
   role: string;
@@ -48,6 +49,29 @@ type StudentDashboard = {
   modules: { code: string; name: string; status: string }[];
 };
 
+const QUICK_LINKS = [
+  { title: "Emploi du temps", body: "Créneaux et salles", href: "/portail/etudiant/edt" },
+  { title: "Notes", body: "Résultats publiés", href: "/portail/etudiant/notes" },
+  { title: "Bulletin", body: "Export PDF", href: "/portail/etudiant/bulletin" },
+  { title: "ECTS", body: "Progression crédits", href: "/portail/etudiant/ects" },
+  { title: "Supports", body: "Cours & fichiers", href: "/portail/etudiant/supports" },
+  { title: "Devoirs", body: "Remises en ligne", href: "/portail/etudiant/devoirs" },
+  { title: "QCM", body: "Quiz & auto-évaluation", href: "/portail/etudiant/qcm" },
+  { title: "Visio", body: "Liens Jitsi", href: "/portail/etudiant/visio" },
+  { title: "Examens", body: "Calendrier", href: "/portail/etudiant/examens" },
+  { title: "Évaluer", body: "Avis sur les cours", href: "/portail/etudiant/evaluer" },
+  { title: "Annonces", body: "Messages classe", href: "/portail/etudiant/annonces" },
+  { title: "Absences", body: "Présence", href: "/portail/etudiant/absences" },
+  { title: "Finance", body: "Paiements", href: "/portail/etudiant/finance" },
+  { title: "Bourses", body: "Aides & offres", href: "/portail/etudiant/bourses" },
+  { title: "Bibliothèque", body: "Ressources", href: "/portail/etudiant/bibliotheque" },
+  { title: "Stages", body: "Offres stage", href: "/portail/etudiant/stages" },
+  { title: "Carrière", body: "Orientation", href: "/portail/etudiant/carriere" },
+  { title: "Clubs", body: "Vie étudiante", href: "/portail/etudiant/clubs" },
+  { title: "Messages", body: "Contacter enseignant", href: "/portail/etudiant/messages" },
+  { title: "Hors-ligne", body: "Cache notes", href: "/portail/etudiant/hors-ligne" },
+];
+
 const statusLabel: Record<string, string> = {
   active: "Inscription active",
   suspended: "Suspendu",
@@ -60,6 +84,7 @@ export default function StudentPortalPage() {
   const [data, setData] = useState<StudentDashboard | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { token, ready } = useAuthToken();
+  const { hub } = useStudentHub();
 
   useEffect(() => {
     if (!ready || !token) return;
@@ -131,54 +156,45 @@ export default function StudentPortalPage() {
             <Stat label="Matricule" value={data.profile.student_number || "—"} />
             <Stat
               label="Moyenne"
-              value={data.avg_score != null ? `${data.avg_score}/20` : "—"}
+              value={(hub?.avg_score ?? data.avg_score) != null ? `${hub?.avg_score ?? data.avg_score}/20` : "—"}
             />
-            <Stat label="Notes publiées" value={String(data.grades_count ?? 0)} />
             <Stat
-              label="Notifications"
-              value={String(data.unread_notifications)}
-              accent={data.unread_notifications > 0}
+              label="ECTS"
+              value={hub ? `${hub.ects.earned}/${hub.ects.total}` : "—"}
+            />
+            <Stat
+              label="À payer"
+              value={hub ? String(hub.finance.due_count) : "—"}
+              accent={(hub?.finance.due_count ?? 0) > 0}
             />
           </div>
 
+          {(hub?.open_homeworks || hub?.upcoming_exams || hub?.absences) ? (
+            <div className="grid gap-3 sm:grid-cols-3">
+              <Link href="/portail/etudiant/devoirs" className="rounded-xl bg-white px-4 py-3 text-sm shadow-soft">
+                <span className="text-iua-muted">Devoirs ouverts</span>
+                <p className="font-display text-2xl text-iua-navy">{hub?.open_homeworks ?? 0}</p>
+              </Link>
+              <Link href="/portail/etudiant/examens" className="rounded-xl bg-white px-4 py-3 text-sm shadow-soft">
+                <span className="text-iua-muted">Examens à venir</span>
+                <p className="font-display text-2xl text-iua-navy">{hub?.upcoming_exams ?? 0}</p>
+              </Link>
+              <Link href="/portail/etudiant/absences" className="rounded-xl bg-white px-4 py-3 text-sm shadow-soft">
+                <span className="text-iua-muted">Absences / retards</span>
+                <p className="font-display text-2xl text-iua-navy">{hub?.absences ?? 0}</p>
+              </Link>
+            </div>
+          ) : null}
+
           <section>
-            <h2 className="font-display text-xl text-iua-navy">Accès rapides</h2>
+            <h2 className="font-display text-xl text-iua-navy">20 accès étudiants</h2>
+            <p className="mt-1 text-sm text-iua-muted">Parcours, études, campus et services — tout depuis un même espace.</p>
             <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              {[
-                {
-                  title: "Notes",
-                  body:
-                    data.grades_count && data.grades_count > 0
-                      ? `${data.grades_count} résultat${data.grades_count > 1 ? "s" : ""}`
-                      : "Moyennes et résultats",
-                  href: "/portail/etudiant/notes",
-                },
-                {
-                  title: "Cours",
-                  body: `${data.subjects_count ?? 0} matière${(data.subjects_count ?? 0) > 1 ? "s" : ""}`,
-                  href: "/portail/etudiant/cours",
-                },
-                {
-                  title: "Demandes",
-                  body:
-                    (data.pending_requests ?? 0) > 0
-                      ? `${data.pending_requests} en cours`
-                      : "Attestations et relevés",
-                  href: "/portail/etudiant/demandes",
-                },
-                {
-                  title: "Notifications",
-                  body:
-                    data.unread_notifications > 0
-                      ? `${data.unread_notifications} non lue${data.unread_notifications > 1 ? "s" : ""}`
-                      : "Messages du campus",
-                  href: "/portail/etudiant/notifications",
-                },
-              ].map((item) => (
+              {QUICK_LINKS.map((item) => (
                 <Link
-                  key={item.title}
+                  key={item.href}
                   href={item.href}
-                  className="rounded-xl bg-white p-5 shadow-soft transition hover:bg-iua-mist"
+                  className="rounded-xl bg-white p-4 shadow-soft transition hover:bg-iua-mist"
                 >
                   <h3 className="font-semibold text-iua-navy">{item.title}</h3>
                   <p className="mt-1 text-sm text-iua-muted">{item.body}</p>

@@ -96,7 +96,9 @@ function TeacherNotesInner() {
     if (!ready || !token || !subjectId) return;
     const [g, schemes] = await Promise.all([
       apiGet<Page<Grade>>(`/grades/?subject=${subjectId}&page_size=500`, token),
-      apiGet<Page<Scheme>>(`/grade-schemes/?subject=${subjectId}`, token).catch(() => ({ results: [] })),
+      apiGet<Page<Scheme>>(`/grade-schemes/?subject=${subjectId}`, token).catch(
+        () => ({ count: 0, next: null, previous: null, results: [] as Scheme[] }),
+      ),
     ]);
     setGrades(unwrapList(g));
     const sch = unwrapList(schemes)[0] || null;

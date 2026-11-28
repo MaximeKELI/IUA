@@ -256,3 +256,16 @@ class GradeSheetSignature(UUIDModel, TimeStampedModel):
     signed_at = models.DateTimeField(auto_now_add=True)
     snapshot = models.JSONField(default=dict)  # summary stats at sign time
     notes = models.TextField(blank=True)
+
+
+# Re-export student extras so Django discovers them under app `teaching`
+from apps.teaching.student_models import (  # noqa: E402,F401
+    CareerOpportunity,
+    Club,
+    ClubMembership,
+    ExamEvent,
+    Internship,
+    LibraryItem,
+    ScholarshipOffer,
+    StudentPayment,
+)

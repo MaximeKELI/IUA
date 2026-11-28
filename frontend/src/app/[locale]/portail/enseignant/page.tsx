@@ -128,26 +128,43 @@ export default function TeacherPortalPage() {
             {[
               {
                 href: "/portail/enseignant/notes",
-                label: "Saisir des notes",
-                body: "Individuel ou collectif",
+                label: "Carnet de notes",
+                body: "Tableau + import/export",
               },
               {
-                href: "/portail/enseignant/cours",
-                label: "Voir mes cours",
-                body: `${data.assignments_count} matière${data.assignments_count > 1 ? "s" : ""}`,
+                href: "/portail/enseignant/presence",
+                label: "Émargement",
+                body: "Présences de séance",
               },
               {
-                href: "/portail/enseignant/etudiants",
-                label: "Liste des étudiants",
-                body: `${data.students_count} profil${data.students_count > 1 ? "s" : ""}`,
+                href: "/portail/enseignant/alertes",
+                label: "Alertes pédagogiques",
+                body: "Retards & couvertures",
               },
               {
-                href: "/portail/enseignant/notifications",
-                label: "Alertes",
-                body:
-                  data.unread_notifications > 0
-                    ? `${data.unread_notifications} non lue${data.unread_notifications > 1 ? "s" : ""}`
-                    : "Aucune non lue",
+                href: "/portail/enseignant/visio",
+                label: "Visio Jitsi",
+                body: "Salles de cours en ligne",
+              },
+              {
+                href: "/portail/enseignant/devoirs",
+                label: "Devoirs",
+                body: "Deadlines & remises",
+              },
+              {
+                href: "/portail/enseignant/qcm",
+                label: "QCM",
+                body: "Quiz auto-corrigés",
+              },
+              {
+                href: "/portail/enseignant/stats",
+                label: "Statistiques",
+                body: "Moyennes & comparaisons",
+              },
+              {
+                href: "/portail/enseignant/hors-ligne",
+                label: "Hors-ligne",
+                body: "File mobile / terrain",
               },
             ].map((item) => (
               <Link

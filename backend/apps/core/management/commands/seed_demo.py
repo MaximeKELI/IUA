@@ -1,7 +1,9 @@
-from datetime import date
+from datetime import date, timedelta
+from decimal import Decimal
 
 from django.core.management.base import BaseCommand
 from django.db import transaction
+from django.utils import timezone
 
 from apps.academic.models import (
     AcademicYear,
@@ -21,6 +23,15 @@ from apps.events.services import emit_event, relay_pending
 from apps.identity.bootstrap import seed_roles_and_permissions
 from apps.identity.models import User
 from apps.identity.services import assign_role
+from apps.teaching.student_models import (
+    CareerOpportunity,
+    Club,
+    ExamEvent,
+    Internship,
+    LibraryItem,
+    ScholarshipOffer,
+    StudentPayment,
+)
 
 
 class Command(BaseCommand):
@@ -192,6 +203,87 @@ class Command(BaseCommand):
             academic_year=year,
             defaults={"cohort": cohort},
         )
+
+        # Student workspace demo content
+        CourseUnit.objects.filter(pk=ue.pk).update(credits=Decimal("6.0"))
+        StudentPayment.objects.get_or_create(
+            student=student,
+            label="Frais de scolarité — semestre 1",
+            defaults={"amount_xof": 450_000, "due_date": date.today() + timedelta(days=20), "status": "due"},
+        )
+        StudentPayment.objects.get_or_create(
+            student=student,
+            label="Caution bibliothèque",
+            defaults={"amount_xof": 25_000, "due_date": date.today() - timedelta(days=5), "status": "paid", "method": "Mobile Money"},
+        )
+        Internship.objects.get_or_create(
+            student=student,
+            company="Orange Côte d'Ivoire",
+            defaults={
+                "role": "Assistant analyste",
+                "city": "Abidjan",
+                "status": "searching",
+                "notes": "Candidature envoyée — suivi RH",
+            },
+        )
+        club, _ = Club.objects.get_or_create(
+            name="Club Entrepreneuriat IUA",
+            defaults={
+                "category": "business",
+                "description": "Ateliers pitch, mentoring et networking alumni.",
+                "meeting_info": "Jeudi 17h — Amphi B",
+            },
+        )
+        Club.objects.get_or_create(
+            name="Club Debate & Debate EN",
+            defaults={"category": "culture", "description": "Débats bilingues FR/EN.", "meeting_info": "Mardi 16h"},
+        )
+        LibraryItem.objects.get_or_create(
+            title="Principes d'économie",
+            defaults={"author": "Mankiw", "kind": "book", "subject_tags": "économie,L1", "available": True},
+        )
+        LibraryItem.objects.get_or_create(
+            title="Introduction à Python pour data",
+            defaults={
+                "author": "IUA Digital",
+                "kind": "ebook",
+                "subject_tags": "informatique",
+                "available": True,
+                "url": "https://www.iuaci.org/",
+            },
+        )
+        CareerOpportunity.objects.get_or_create(
+            title="Stage analyste junior — banque",
+            defaults={
+                "company": "SGBCI",
+                "kind": "internship",
+                "location": "Abidjan",
+                "description": "Analyse crédit et reporting.",
+                "deadline": date.today() + timedelta(days=45),
+            },
+        )
+        ScholarshipOffer.objects.get_or_create(
+            title="Bourse excellence FSEG",
+            defaults={
+                "provider": "Fondation IUA",
+                "amount_label": "50% frais",
+                "deadline": date.today() + timedelta(days=60),
+                "description": "Pour moyennes ≥ 14/20.",
+            },
+        )
+        ExamEvent.objects.get_or_create(
+            student=student,
+            title=f"Examen — {subject.name}",
+            defaults={
+                "program_code": program.code,
+                "subject_name": subject.name,
+                "starts_at": timezone.now() + timedelta(days=14, hours=9),
+                "room": "Amphi A",
+                "notes": "Pièce d'identité obligatoire",
+            },
+        )
+        # Ensure club joinable (membership optional — student can join via UI)
+        _ = club
 
         emit_event(
             event_type="STUDENT_REGISTERED",
