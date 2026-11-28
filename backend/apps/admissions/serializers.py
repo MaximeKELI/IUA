@@ -17,6 +17,7 @@ class AdmissionApplicationSerializer(serializers.ModelSerializer):
             "diploma",
             "payment_preference",
             "status",
+            "tracking_token",
             "staff_note",
             "reviewed_by",
             "reviewed_at",
@@ -25,6 +26,7 @@ class AdmissionApplicationSerializer(serializers.ModelSerializer):
         )
         read_only_fields = (
             "status",
+            "tracking_token",
             "staff_note",
             "reviewed_by",
             "reviewed_at",

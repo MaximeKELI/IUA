@@ -4,6 +4,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { PortalShell } from "@/components/PortalShell";
+import { ErrorState, Skeleton } from "@/components/ux";
 import { apiGetCached } from "@/lib/api";
 import { useAuthToken } from "@/lib/useAuthToken";
 import { studentNav } from "@/lib/navigation";
@@ -85,15 +86,18 @@ export default function StudentPortalPage() {
   const locale = useLocale();
   const t = useTranslations("portal.student");
   const [data, setData] = useState<StudentDashboard | null>(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { token, ready } = useAuthToken();
   const { hub } = useStudentHub();
 
   useEffect(() => {
     if (!ready || !token) return;
+    setLoading(true);
     apiGetCached<StudentDashboard>("/portal/student/dashboard/", token, 12_000)
       .then(setData)
-      .catch((err) => setError(err instanceof Error ? err.message : "Erreur"));
+      .catch((err) => setError(err instanceof Error ? err.message : "Erreur"))
+      .finally(() => setLoading(false));
   }, [ready, token]);
 
   const firstName = data?.full_name?.split(" ")[0] || "";
@@ -115,7 +119,19 @@ export default function StudentPortalPage() {
           .join(" · ") || "Vos notes, cours et démarches."}
       </p>
 
-      {error && <p className="mt-6 text-red-700">{error}</p>}
+      {error && (
+        <div className="mt-6">
+          <ErrorState message={error} />
+        </div>
+      )}
+
+      {loading && !data && (
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {[0, 1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-24" />
+          ))}
+        </div>
+      )}
 
       {data && (
         <div className="mt-8 space-y-8">
@@ -200,7 +216,7 @@ export default function StudentPortalPage() {
                   className="rounded-xl bg-white p-4 shadow-soft transition hover:bg-iua-mist"
                 >
                   <h3 className="font-semibold text-iua-navy">{t(item.key)}</h3>
-                  <p className="mt-1 text-sm text-iua-muted">{t("groupServices")}</p>
+                  <p className="mt-1 text-sm text-iua-muted">{t(`hint.${item.key}` as Parameters<typeof t>[0])}</p>
                 </Link>
               ))}
             </div>

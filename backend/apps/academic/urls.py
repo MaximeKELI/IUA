@@ -1,6 +1,7 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
 
+from apps.academic.document_verify import document_verify
 from apps.academic.document_views import (
     student_admission_letter_pdf,
     student_attestation_pdf,
@@ -45,5 +46,6 @@ urlpatterns = [
     path("documents/transcript/", student_transcript_pdf, name="documents-transcript"),
     path("documents/admission-letter/", student_admission_letter_pdf, name="documents-admission"),
     path("documents/equivalence/", student_equivalence_pdf, name="documents-equivalence"),
+    path("documents/verify/<path:token>/", document_verify, name="documents-verify"),
     *router.urls,
 ]

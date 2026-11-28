@@ -318,13 +318,15 @@ class GradeViewSet(viewsets.ModelViewSet):
         self._assert_teacher_can_grade(user, subject, student)
         grade = serializer.save(recorded_by=user)
         if grade.is_published:
+            from apps.notifications.services import notify_user
+
             body = (
                 f"Note publiée : {grade.score}/{grade.max_score}"
                 if grade.score is not None
                 else f"Statut : {grade.get_entry_status_display()}"
             )
-            Notification.objects.create(
-                recipient=grade.student.user,
+            notify_user(
+                user=grade.student.user,
                 title=f"Nouvelle note — {grade.subject.name}",
                 body=body,
                 category="grades",
@@ -340,8 +342,10 @@ class GradeViewSet(viewsets.ModelViewSet):
         self._assert_teacher_can_grade(user, subject, student)
         updated = serializer.save()
         if updated.is_published and not was_published:
-            Notification.objects.create(
-                recipient=updated.student.user,
+            from apps.notifications.services import notify_user
+
+            notify_user(
+                user=updated.student.user,
                 title=f"Note publiée — {updated.subject.name}",
                 body=f"Note : {updated.score}/{updated.max_score}",
                 category="grades",
@@ -442,13 +446,15 @@ class AdminRequestViewSet(viewsets.ModelViewSet):
             req.handled_at = timezone.now()
         req.save()
         if new_status != prev:
+            from apps.notifications.services import notify_user
+
             self._safe_audit(
                 f"admin_request.{new_status}",
                 "AdminRequest",
                 f"{req.subject} ({req.id})",
             )
-            Notification.objects.create(
-                recipient=req.requester,
+            notify_user(
+                user=req.requester,
                 title=f"Demande {req.get_status_display().lower()}",
                 body=req.admin_note or req.subject,
                 category="admin_requests",
@@ -491,13 +497,15 @@ class AdminRequestViewSet(viewsets.ModelViewSet):
             req.handled_by = self.request.user
             req.handled_at = timezone.now()
             req.save(update_fields=["handled_by", "handled_at", "updated_at"])
+            from apps.notifications.services import notify_user
+
             self._safe_audit(
                 f"admin_request.{req.status}",
                 "AdminRequest",
                 f"{req.subject} ({req.id})",
             )
-            Notification.objects.create(
-                recipient=req.requester,
+            notify_user(
+                user=req.requester,
                 title=f"Demande {req.get_status_display().lower()}",
                 body=req.admin_note or req.subject,
                 category="admin_requests",

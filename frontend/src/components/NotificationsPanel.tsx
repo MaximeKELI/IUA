@@ -1,6 +1,8 @@
 "use client";
 
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import { EmptyState, ErrorState, PageLoading } from "@/components/ux";
 import { apiGet, apiSend, Page, unwrapList } from "@/lib/api";
 import { useAuthToken } from "@/lib/useAuthToken";
 
@@ -14,8 +16,11 @@ type Notification = {
 };
 
 export function NotificationsPanel() {
+  const tc = useTranslations("common");
+  const locale = useLocale();
   const { token, ready } = useAuthToken();
   const [items, setItems] = useState<Notification[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   async function load() {
@@ -25,7 +30,11 @@ export function NotificationsPanel() {
 
   useEffect(() => {
     if (!ready || !token) return;
-    load().catch((err) => setError(err instanceof Error ? err.message : "Erreur"));
+    setLoading(true);
+    setError(null);
+    load()
+      .catch((err) => setError(err instanceof Error ? err.message : "Erreur"))
+      .finally(() => setLoading(false));
   }, [ready, token]);
 
   async function markAll() {
@@ -47,45 +56,63 @@ export function NotificationsPanel() {
         </div>
         <button
           type="button"
+          disabled={loading || items.length === 0}
           onClick={() => markAll().catch((err) => setError(err.message))}
-          className="rounded-md border border-iua-navy/15 px-3 py-2 text-sm"
+          className="rounded-md border border-iua-navy/15 px-3 py-2 text-sm disabled:opacity-50"
         >
           Tout marquer lu
         </button>
       </div>
-      {error && <p className="mt-4 text-sm text-red-700">{error}</p>}
-      <ul className="mt-8 space-y-3">
-        {items.length === 0 && (
-          <li className="rounded-xl bg-white p-5 text-sm text-iua-muted shadow-soft">
-            Aucune notification.
-          </li>
-        )}
-        {items.map((n) => (
-          <li
-            key={n.id}
-            className={`rounded-xl p-5 shadow-soft ${n.is_read ? "bg-white" : "bg-iua-navy text-white"}`}
-          >
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className={`text-xs uppercase tracking-wide ${n.is_read ? "text-iua-muted" : "text-white/60"}`}>
-                  {n.category}
-                </p>
-                <h2 className="mt-1 font-semibold">{n.title}</h2>
-                <p className={`mt-1 text-sm ${n.is_read ? "text-iua-muted" : "text-white/80"}`}>{n.body}</p>
+      {error && (
+        <div className="mt-4">
+          <ErrorState message={error} onRetry={() => {
+            setLoading(true);
+            setError(null);
+            load()
+              .catch((err) => setError(err instanceof Error ? err.message : "Erreur"))
+              .finally(() => setLoading(false));
+          }} />
+        </div>
+      )}
+      {loading ? (
+        <PageLoading />
+      ) : (
+        <ul className="mt-8 space-y-3">
+          {items.length === 0 && (
+            <li>
+              <EmptyState title={tc("empty")} description="Aucune notification." />
+            </li>
+          )}
+          {items.map((n) => (
+            <li
+              key={n.id}
+              className={`rounded-xl p-5 shadow-soft ${n.is_read ? "bg-white" : "bg-iua-navy text-white"}`}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className={`text-xs uppercase tracking-wide ${n.is_read ? "text-iua-muted" : "text-white/60"}`}>
+                    {n.category}
+                    {n.created_at
+                      ? ` · ${new Date(n.created_at).toLocaleString(locale)}`
+                      : ""}
+                  </p>
+                  <h2 className="mt-1 font-semibold">{n.title}</h2>
+                  <p className={`mt-1 text-sm ${n.is_read ? "text-iua-muted" : "text-white/80"}`}>{n.body}</p>
+                </div>
+                {!n.is_read && (
+                  <button
+                    type="button"
+                    onClick={() => markOne(n.id).catch((err) => setError(err.message))}
+                    className="rounded border border-white/30 px-2 py-1 text-xs"
+                  >
+                    Lu
+                  </button>
+                )}
               </div>
-              {!n.is_read && (
-                <button
-                  type="button"
-                  onClick={() => markOne(n.id).catch((err) => setError(err.message))}
-                  className="rounded border border-white/30 px-2 py-1 text-xs"
-                >
-                  Lu
-                </button>
-              )}
-            </div>
-          </li>
-        ))}
-      </ul>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

@@ -549,7 +549,31 @@
       "privacyLead": "Exportez vos données ou demandez un effacement (revue DPO sous 30 jours).",
       "privacyEraseBody": "Cette action enregistre une demande d'effacement pour le DPO. Les données ne sont pas supprimées immédiatement.",
       "privacyExportOk": "Export téléchargé.",
-      "privacyEraseOk": "Demande d'effacement enregistrée."
+      "privacyEraseOk": "Demande d'effacement enregistrée.",
+      "hint": {
+        "edt": "Cours de la semaine",
+        "grades": "Résultats publiés",
+        "bulletin": "Export PDF",
+        "ects": "Crédits validés",
+        "materials": "Fichiers de cours",
+        "homework": "Remises à venir",
+        "quizzes": "Quiz auto-corrigés",
+        "visio": "Salles en ligne",
+        "exams": "Dates et salles",
+        "evaluate": "Feedback enseignants",
+        "announcements": "Infos campus",
+        "attendance": "Présences & retards",
+        "finance": "Échéances & reçus",
+        "scholarships": "Aides financières",
+        "library": "Catalogue & prêts",
+        "internships": "Conventions",
+        "career": "Offres & orientation",
+        "clubs": "Associations",
+        "messages": "Écrire à un enseignant",
+        "offline": "Cache mobile"
+      },
+      "arrival": "Checklist d'arrivée",
+      "calendar": "Calendrier unifié"
     },
     "teacher": {
       "dashboard": "Tableau de bord",

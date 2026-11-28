@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useEffect, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
+import { ErrorState, Skeleton } from "@/components/ux";
 import { apiGetCached } from "@/lib/api";
 import { useAuthToken } from "@/lib/useAuthToken";
 import { teacherNav } from "@/lib/navigation";
@@ -62,14 +63,17 @@ export default function TeacherPortalPage() {
 
   const t = useTranslations("portal.teacher");
   const [data, setData] = useState<TeacherDashboard | null>(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { token, ready } = useAuthToken();
 
   useEffect(() => {
     if (!ready || !token) return;
+    setLoading(true);
     apiGetCached<TeacherDashboard>("/portal/teacher/dashboard/", token, 12_000)
       .then(setData)
-      .catch((err) => setError(err instanceof Error ? err.message : "Erreur"));
+      .catch((err) => setError(err instanceof Error ? err.message : "Erreur"))
+      .finally(() => setLoading(false));
   }, [ready, token]);
 
   const greetingName = data?.full_name?.split(" ")[0] || "";
@@ -94,7 +98,19 @@ export default function TeacherPortalPage() {
           ? `${profileBits.join(" · ")}. Vos cours, étudiants et notes.`
           : "Vos cours, étudiants et notes."}
       </p>
-      {error && <p className="mt-6 text-red-700">{error}</p>}
+      {error && (
+        <div className="mt-6">
+          <ErrorState message={error} />
+        </div>
+      )}
+
+      {loading && !data && (
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[0, 1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-24" />
+          ))}
+        </div>
+      )}
 
       {data && (
         <div className="mt-8 space-y-8">

@@ -24,7 +24,7 @@ class AdmissionApplicationViewSet(viewsets.ModelViewSet):
     ordering_fields = ("created_at", "status")
 
     def get_permissions(self):
-        if self.action == "create":
+        if self.action in ("create", "track"):
             return [AllowAny()]
         if self.action in ("list", "retrieve", "review"):
             return [require_permission("services.request.manage")()]
@@ -49,6 +49,24 @@ class AdmissionApplicationViewSet(viewsets.ModelViewSet):
             logging.getLogger("iua.audit").exception("admission audit failed")
         return Response(AdmissionApplicationSerializer(app).data, status=status.HTTP_201_CREATED)
 
+    @action(detail=False, methods=["get"], url_path="track/(?P<token>[^/.]+)")
+    def track(self, request, token=None):
+        """Public status lookup by tracking token (no account required)."""
+        app = AdmissionApplication.objects.filter(tracking_token=token).first()
+        if not app:
+            return Response({"detail": "Dossier introuvable."}, status=status.HTTP_404_NOT_FOUND)
+        return Response(
+            {
+                "tracking_token": app.tracking_token,
+                "status": app.status,
+                "status_label": app.get_status_display(),
+                "program": app.program,
+                "email": app.email,
+                "created_at": app.created_at,
+                "reviewed_at": app.reviewed_at,
+            }
+        )
+
     @action(detail=True, methods=["post"])
     def review(self, request, pk=None):
         app = self.get_object()
@@ -67,6 +85,7 @@ class AdmissionApplicationViewSet(viewsets.ModelViewSet):
                 import logging
 
                 logging.getLogger("iua.admissions").exception("provision on accept failed")
+        _email_admission_decision(app)
         try:
             from apps.teaching.ops_views import log_audit
 
@@ -81,6 +100,38 @@ class AdmissionApplicationViewSet(viewsets.ModelViewSet):
 
             logging.getLogger("iua.audit").exception("admission review audit failed")
         return Response(AdmissionApplicationSerializer(app).data)
+
+
+def _email_admission_decision(app: AdmissionApplication) -> None:
+    from apps.notifications.services import send_transactional_mail
+
+    if app.status == AdmissionApplication.Status.ACCEPTED:
+        send_transactional_mail(
+            to=app.email,
+            subject="IUA — Admission acceptée",
+            body=(
+                f"Bonjour,\n\n"
+                f"Votre candidature à l'Institut Universitaire d'Abidjan a été acceptée.\n"
+                f"Programme : {app.program or '—'}\n"
+                f"Token de suivi : {getattr(app, 'tracking_token', '') or app.id}\n\n"
+                f"Définissez votre mot de passe via « Mot de passe oublié » sur le portail "
+                f"avec l'adresse {app.email}.\n\n"
+                f"— IUA Digital Campus / Relations internationales"
+            ),
+        )
+    elif app.status == AdmissionApplication.Status.REJECTED:
+        note = (app.staff_note or "").strip()
+        send_transactional_mail(
+            to=app.email,
+            subject="IUA — Décision sur votre candidature",
+            body=(
+                f"Bonjour,\n\n"
+                f"Après examen, nous ne pouvons pas donner une suite favorable "
+                f"à votre candidature pour le moment.\n"
+                f"{('Motif : ' + note) if note else ''}\n\n"
+                f"— IUA Digital Campus / Relations internationales"
+            ),
+        )
 
 
 def _provision_accepted_applicant(app: AdmissionApplication) -> None:
@@ -113,13 +164,14 @@ def _provision_accepted_applicant(app: AdmissionApplication) -> None:
                 level="",
             )
         try:
-            from apps.notifications.models import Notification
+            from apps.notifications.services import notify_user
 
-            Notification.objects.create(
-                recipient=user,
+            notify_user(
+                user=user,
                 title="Admission acceptée",
                 body="Votre candidature IUA a été acceptée. Définissez votre mot de passe via « Mot de passe oublié ».",
                 category="admissions",
+                email=False,  # dedicated decision mail already sent
             )
         except Exception:
             pass

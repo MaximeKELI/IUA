@@ -549,7 +549,31 @@
       "privacyLead": "Exporte os seus dados ou peça apagamento (revisão DPO em 30 dias).",
       "privacyEraseBody": "Isto regista um pedido de apagamento para o DPO. Os dados não são apagados de imediato.",
       "privacyExportOk": "Exportação descarregada.",
-      "privacyEraseOk": "Pedido de apagamento registado."
+      "privacyEraseOk": "Pedido de apagamento registado.",
+      "hint": {
+        "edt": "Aulas da semana",
+        "grades": "Resultados publicados",
+        "bulletin": "Exportação PDF",
+        "ects": "Créditos validados",
+        "materials": "Ficheiros do curso",
+        "homework": "Entregas próximas",
+        "quizzes": "Questionários",
+        "visio": "Salas online",
+        "exams": "Datas e salas",
+        "evaluate": "Feedback docente",
+        "announcements": "Avisos do campus",
+        "attendance": "Faltas e atrasos",
+        "finance": "Prazos e recibos",
+        "scholarships": "Apoios",
+        "library": "Catálogo e empréstimos",
+        "internships": "Estágios",
+        "career": "Orientação",
+        "clubs": "Associações",
+        "messages": "Contactar docente",
+        "offline": "Cache móvel"
+      },
+      "arrival": "Checklist de chegada",
+      "calendar": "Calendário unificado"
     },
     "teacher": {
       "dashboard": "Dashboard",

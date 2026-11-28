@@ -123,10 +123,11 @@ export function ConfirmDialog({
           <button
             type="button"
             disabled={busy}
+            aria-busy={busy}
             onClick={onConfirm}
             className={`rounded-md px-4 py-2.5 text-sm font-semibold transition ${confirmClass}`}
           >
-            {busy ? "…" : confirmLabel}
+            {busy ? t("working") : confirmLabel}
           </button>
         </div>
       </div>

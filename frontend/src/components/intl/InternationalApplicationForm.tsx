@@ -9,6 +9,7 @@ export function InternationalApplicationForm() {
   const t = useTranslations("admissions");
   const tc = useTranslations("common");
   const [sent, setSent] = useState(false);
+  const [trackingToken, setTrackingToken] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -33,13 +34,16 @@ export function InternationalApplicationForm() {
         headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify(payload),
       });
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
         throw new Error(
           typeof data?.message === "string"
             ? data.message
             : `Échec d'envoi (${res.status})`,
         );
+      }
+      if (typeof data?.tracking_token === "string") {
+        setTrackingToken(data.tracking_token);
       }
       setSent(true);
     } catch (err) {
@@ -51,8 +55,21 @@ export function InternationalApplicationForm() {
 
   if (sent) {
     return (
-      <div className="rounded-xl border border-iua-cyan/30 bg-white p-6 text-sm text-iua-navy shadow-soft">
-        {t("note")}
+      <div className="space-y-3 rounded-xl border border-iua-cyan/30 bg-white p-6 text-sm text-iua-navy shadow-soft">
+        <p>{t("note")}</p>
+        {trackingToken && (
+          <p>
+            Token de suivi :{" "}
+            <code className="rounded bg-iua-mist px-2 py-1 font-mono text-xs">{trackingToken}</code>
+            <br />
+            <a
+              className="mt-2 inline-block font-semibold text-iua-cyan"
+              href={`/international/suivi?token=${encodeURIComponent(trackingToken)}`}
+            >
+              Suivre ma candidature →
+            </a>
+          </p>
+        )}
       </div>
     );
   }

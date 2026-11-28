@@ -1,7 +1,13 @@
+import secrets
+
 from django.conf import settings
 from django.db import models
 
 from apps.core.models import TimeStampedModel, UUIDModel
+
+
+def _tracking_token() -> str:
+    return secrets.token_urlsafe(16)
 
 
 class AdmissionApplication(UUIDModel, TimeStampedModel):
@@ -21,6 +27,9 @@ class AdmissionApplication(UUIDModel, TimeStampedModel):
     payment_preference = models.CharField(max_length=32, blank=True, default="momo")
     status = models.CharField(
         max_length=32, choices=Status.choices, default=Status.SUBMITTED, db_index=True
+    )
+    tracking_token = models.CharField(
+        max_length=64, unique=True, db_index=True, default=_tracking_token, editable=False
     )
     staff_note = models.TextField(blank=True)
     reviewed_by = models.ForeignKey(

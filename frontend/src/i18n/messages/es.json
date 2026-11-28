@@ -549,7 +549,31 @@
       "privacyLead": "Exporte sus datos o solicite borrado (revisión DPO en 30 días).",
       "privacyEraseBody": "Esto registra una solicitud de borrado para el DPO. Los datos no se eliminan de inmediato.",
       "privacyExportOk": "Exportación descargada.",
-      "privacyEraseOk": "Solicitud de borrado registrada."
+      "privacyEraseOk": "Solicitud de borrado registrada.",
+      "hint": {
+        "edt": "Clases de la semana",
+        "grades": "Resultados publicados",
+        "bulletin": "Exportación PDF",
+        "ects": "Créditos validados",
+        "materials": "Archivos del curso",
+        "homework": "Entregas próximas",
+        "quizzes": "Cuestionarios",
+        "visio": "Salas en línea",
+        "exams": "Fechas y aulas",
+        "evaluate": "Valoración docente",
+        "announcements": "Avisos del campus",
+        "attendance": "Ausencias y retrasos",
+        "finance": "Vencimientos y recibos",
+        "scholarships": "Ayudas",
+        "library": "Catálogo y préstamos",
+        "internships": "Convenios",
+        "career": "Orientación",
+        "clubs": "Asociaciones",
+        "messages": "Escribir a un docente",
+        "offline": "Caché móvil"
+      },
+      "arrival": "Checklist de llegada",
+      "calendar": "Calendario unificado"
     },
     "teacher": {
       "dashboard": "Dashboard",

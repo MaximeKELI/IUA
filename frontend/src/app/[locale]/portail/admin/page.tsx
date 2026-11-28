@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useEffect, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
+import { ErrorState, Skeleton } from "@/components/ux";
 import { apiGetCached } from "@/lib/api";
 import { getStoredUser } from "@/lib/auth";
 import { resolveOpsNav, resolveOpsTitle } from "@/lib/portalCapabilities";
@@ -50,6 +51,7 @@ export default function AdminPortalPage() {
   const tPortal = useTranslations("portal");
 
   const [data, setData] = useState<AdminDashboard | null>(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const roles = getStoredUser()?.roles || [];
   const { token, ready } = useAuthToken();
@@ -57,9 +59,11 @@ export default function AdminPortalPage() {
 
   useEffect(() => {
     if (!ready || !token) return;
+    setLoading(true);
     apiGetCached<AdminDashboard>("/portal/admin/dashboard/", token, 20_000)
       .then(setData)
-      .catch((err) => setError(err instanceof Error ? err.message : "Erreur"));
+      .catch((err) => setError(err instanceof Error ? err.message : "Erreur"))
+      .finally(() => setLoading(false));
   }, [ready, token]);
 
   return (
@@ -68,7 +72,19 @@ export default function AdminPortalPage() {
       <p className="mt-2 text-sm text-iua-muted">
         Secrétariat / administration — 20 accès opérationnels.
       </p>
-      {error && <p className="mt-6 text-red-700">{error}</p>}
+      {error && (
+        <div className="mt-6">
+          <ErrorState message={error} />
+        </div>
+      )}
+
+      {loading && !data && (
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {[0, 1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-24" />
+          ))}
+        </div>
+      )}
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Link href="/portail/admin/demandes" className="block">

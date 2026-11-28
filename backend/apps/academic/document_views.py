@@ -5,11 +5,13 @@ from io import BytesIO
 from django.http import HttpResponse
 from django.utils import timezone
 from reportlab.lib.pagesizes import A4
+from reportlab.lib.utils import ImageReader
 from reportlab.pdfgen import canvas
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from apps.academic.document_verify import issue_document_token, verify_page_url
 from apps.academic.models import Grade, StudentProfile
 
 
@@ -21,6 +23,34 @@ def _pdf_response(data: bytes, filename: str) -> HttpResponse:
     response = HttpResponse(data, content_type="application/pdf")
     response["Content-Disposition"] = f'attachment; filename="{filename}"'
     return response
+
+
+def _qr_image(url: str) -> ImageReader | None:
+    try:
+        import qrcode
+    except ImportError:
+        return None
+    qr = qrcode.QRCode(version=1, box_size=4, border=1)
+    qr.add_data(url)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="black", back_color="white")
+    buf = BytesIO()
+    img.save(buf, format="PNG")
+    buf.seek(0)
+    return ImageReader(buf)
+
+
+def _stamp_verify_qr(c: canvas.Canvas, profile: StudentProfile, doc_type: str, locale: str) -> None:
+    token = issue_document_token(profile=profile, doc_type=doc_type, locale=locale)
+    url = verify_page_url(token)
+    qr = _qr_image(url)
+    width, _height = A4
+    if qr:
+        c.drawImage(qr, width - 120, 40, width=70, height=70, mask="auto")
+    c.setFont("Helvetica", 7)
+    label = "Vérifier :" if locale.startswith("fr") else "Verify:"
+    c.drawString(72, 52, f"{label} {url[:90]}")
+    c.drawString(72, 40, token[:48] + "…")
 
 
 def _build_attestation_pdf(profile: StudentProfile, locale: str = "fr") -> bytes:
@@ -75,6 +105,7 @@ def _build_attestation_pdf(profile: StudentProfile, locale: str = "fr") -> bytes
         c.drawString(72, y, line)
         y -= 18
 
+    _stamp_verify_qr(c, profile, "attestation", locale)
     c.showPage()
     c.save()
     return buf.getvalue()
@@ -138,6 +169,7 @@ def _build_transcript_pdf(profile: StudentProfile, locale: str = "fr") -> bytes:
     c.setFont("Helvetica", 8)
     today = timezone.localdate().strftime("%d/%m/%Y")
     c.drawString(72, y, f"Abidjan · {today} · IUA Digital Campus")
+    _stamp_verify_qr(c, profile, "transcript", locale)
     c.showPage()
     c.save()
     return buf.getvalue()
@@ -209,6 +241,7 @@ def _build_admission_letter_pdf(profile: StudentProfile, locale: str = "fr") -> 
     for line in lines:
         c.drawString(72, y, line)
         y -= 18
+    _stamp_verify_qr(c, profile, "admission_letter", locale)
     c.showPage()
     c.save()
     return buf.getvalue()
@@ -250,6 +283,7 @@ def _build_equivalence_pdf(profile: StudentProfile, locale: str = "fr") -> bytes
     for line in lines:
         c.drawString(72, y, line)
         y -= 18
+    _stamp_verify_qr(c, profile, "equivalence", locale)
     c.showPage()
     c.save()
     return buf.getvalue()

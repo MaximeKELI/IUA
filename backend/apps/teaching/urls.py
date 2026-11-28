@@ -35,6 +35,7 @@ from apps.teaching.student_views import (
     StudentTeacherContactViewSet,
     student_hub,
 )
+from apps.teaching.calendar_views import unified_calendar, unified_calendar_ics
 from apps.teaching.payment_views import payment_confirm, payment_webhook
 from apps.teaching.ops_views import (
     AuditEventViewSet,
@@ -102,6 +103,8 @@ router.register(r"ops/scholarships", OpsScholarshipsViewSet, basename="ops-schol
 router.register(r"ops/cards", OpsStudentCardsViewSet, basename="ops-cards")
 
 urlpatterns = [
+    path("calendar/", unified_calendar, name="unified-calendar"),
+    path("calendar.ics", unified_calendar_ics, name="unified-calendar-ics"),
     path("teacher/insights/", teacher_insights, name="teacher-insights"),
     path("teacher/students/<uuid:student_id>/file/", student_pedagogical_file, name="student-ped-file"),
     path("student/hub/", student_hub, name="student-hub"),

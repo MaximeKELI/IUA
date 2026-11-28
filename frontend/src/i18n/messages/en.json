@@ -549,7 +549,31 @@
       "privacyLead": "Export your data or request erasure (DPO review within 30 days).",
       "privacyEraseBody": "This records an erasure request for the DPO. Data is not deleted immediately.",
       "privacyExportOk": "Export downloaded.",
-      "privacyEraseOk": "Erasure request recorded."
+      "privacyEraseOk": "Erasure request recorded.",
+      "hint": {
+        "edt": "This week's classes",
+        "grades": "Published results",
+        "bulletin": "PDF export",
+        "ects": "Credits earned",
+        "materials": "Course files",
+        "homework": "Upcoming deadlines",
+        "quizzes": "Auto-graded quizzes",
+        "visio": "Online rooms",
+        "exams": "Dates and rooms",
+        "evaluate": "Teacher feedback",
+        "announcements": "Campus news",
+        "attendance": "Absences & late",
+        "finance": "Due & receipts",
+        "scholarships": "Financial aid",
+        "library": "Catalog & loans",
+        "internships": "Agreements",
+        "career": "Jobs & guidance",
+        "clubs": "Associations",
+        "messages": "Message a teacher",
+        "offline": "Mobile cache"
+      },
+      "arrival": "Arrival checklist",
+      "calendar": "Unified calendar"
     },
     "teacher": {
       "dashboard": "Dashboard",
