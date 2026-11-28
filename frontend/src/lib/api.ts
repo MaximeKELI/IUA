@@ -17,6 +17,18 @@ export type LoginResponse = {
   user: AuthUser;
 };
 
+export type LoginResult =
+  | LoginResponse
+  | {
+      mfa_required: true;
+      mfa_token: string;
+      message?: string;
+    }
+  | {
+      mfa_enrollment_required: true;
+      message?: string;
+    };
+
 export type Page<T> = {
   count?: number;
   next: string | null;
@@ -158,11 +170,46 @@ async function authorizedFetch(
   return res;
 }
 
-export async function apiLogin(email: string, password: string): Promise<LoginResponse> {
+export async function syncSessionCookies(
+  access: string,
+  refresh: string,
+  roles?: string[],
+): Promise<void> {
+  try {
+    await fetch("/api/session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ access, refresh, roles }),
+    });
+  } catch {
+    /* non-fatal for API calls */
+  }
+}
+
+export async function clearSessionCookies(): Promise<void> {
+  try {
+    await fetch("/api/session", { method: "DELETE" });
+  } catch {
+    /* ignore */
+  }
+}
+
+export async function apiLogin(email: string, password: string): Promise<LoginResult> {
   const res = await fetchWithTimeout(`${API_URL}/auth/login/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
+    cache: "no-store",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return res.json();
+}
+
+export async function apiMfaVerify(mfaToken: string, code: string): Promise<LoginResponse> {
+  const res = await fetchWithTimeout(`${API_URL}/auth/mfa/verify/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ mfa_token: mfaToken, code }),
     cache: "no-store",
   });
   if (!res.ok) throw new Error(await parseError(res));
@@ -185,6 +232,7 @@ export async function apiLogout(): Promise<void> {
     }
   }
   clearSession();
+  await clearSessionCookies();
 }
 
 export async function apiGet<T>(path: string, token?: string | null): Promise<T> {
