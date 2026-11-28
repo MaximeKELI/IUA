@@ -24,8 +24,8 @@ class DeadLetterListView(generics.ListAPIView):
 
 
 class DeadLetterRetryView(APIView):
-    permission_classes = [require_permission("events.outbox.read")]
-    required_permission = "events.outbox.read"
+    permission_classes = [require_permission("events.outbox.write")]
+    required_permission = "events.outbox.write"
 
     def post(self, request, pk):
         dead = DeadLetterEvent.objects.filter(pk=pk, resolved=False).first()

@@ -31,7 +31,11 @@
     "linkedin": "خريجو IUA على لينكدإن",
     "currencyNote": "مبالغ إرشادية · أسعار داخلية لـ IUA",
     "close": "إغلاق",
-    "confirmation": "تأكيد"
+    "confirmation": "تأكيد",
+    "errorGeneric": "حدث خطأ.",
+    "skipToContent": "تخطي إلى المحتوى",
+    "retry": "إعادة المحاولة",
+    "empty": "لا توجد عناصر."
   },
   "nav": {
     "study": "الدراسة",
@@ -472,7 +476,14 @@
     "demoTeacher": "أستاذ",
     "demoSecret": "الأمانة",
     "demoDirection": "الإدارة",
-    "demoAdmin": "مشرف"
+    "demoAdmin": "مشرف",
+    "resetTitle": "كلمة مرور جديدة",
+    "resetLead": "اختر كلمة مرور قوية لحسابك في IUA.",
+    "resetSubmit": "حفظ كلمة المرور",
+    "resetDone": "تم تحديث كلمة المرور. يمكنك تسجيل الدخول.",
+    "newPassword": "كلمة المرور الجديدة",
+    "confirmPassword": "تأكيد كلمة المرور",
+    "passwordMismatch": "كلمتا المرور غير متطابقتين."
   },
   "portal": {
     "logout": "تسجيل الخروج",
@@ -527,7 +538,11 @@
       "docAttestation": "شهادة تسجيل",
       "docTranscript": "كشف الدرجات",
       "docAdmission": "خطاب القبول",
-      "docEquivalence": "شهادة معادلة"
+      "docEquivalence": "شهادة معادلة",
+      "privacyLead": "صدّر بياناتك أو اطلب المحو (مراجعة DPO خلال 30 يومًا).",
+      "privacyEraseBody": "يسجّل هذا طلب محو لمسؤول البيانات. لا تُحذف البيانات فورًا.",
+      "privacyExportOk": "تم تنزيل التصدير.",
+      "privacyEraseOk": "تم تسجيل طلب المحو."
     },
     "teacher": {
       "dashboard": "Dashboard",
@@ -557,7 +572,10 @@
       "groupClass": "Class life",
       "groupAdmin": "Follow-up & admin",
       "space": "فضاء الأستاذ",
-      "welcome": "مرحبًا"
+      "welcome": "مرحبًا",
+      "clearQueueTitle": "مسح قائمة الانتظار دون اتصال؟",
+      "clearQueueBody": "ستُفقد العمليات غير المتزامنة نهائيًا.",
+      "clearQueue": "مسح"
     },
     "admin": {
       "overview": "Overview",
@@ -589,7 +607,9 @@
       "groupScolarite": "Academics",
       "groupServices": "Services",
       "groupCampus": "Campus",
-      "space": "فضاء المشرف"
+      "space": "فضاء المشرف",
+      "events": "الأحداث / outbox",
+      "eventsLead": "الطابور والرسائل الميتة."
     },
     "direction": {
       "dashboard": "Dashboard",
@@ -650,7 +670,8 @@
         "paiements": "المدفوعات",
         "utilisateurs": "المستخدمون",
         "presences": "Présences / absences",
-        "securite": "الأمان"
+        "securite": "الأمان",
+        "evenements": "الأحداث / outbox"
       },
       "direction": {
         "home": "لوحة التحكم",

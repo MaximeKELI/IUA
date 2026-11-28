@@ -12,6 +12,8 @@ import { useAuthToken } from "@/lib/useAuthToken";
 
 export default function HorsLignePage() {
   const tPortal = useTranslations("portal");
+  const tt = useTranslations("portal.teacher");
+  const tc = useTranslations("common");
 
   const { token, ready } = useAuthToken();
   const [online, setOnline] = useState(true);
@@ -131,10 +133,10 @@ export default function HorsLignePage() {
 
       <ConfirmDialog
         open={confirmClear}
-        title="Vider la file hors-ligne ?"
-        description="Les opérations non synchronisées seront définitivement perdues."
-        confirmLabel="Vider"
-        cancelLabel="Annuler"
+        title={tt("clearQueueTitle")}
+        description={tt("clearQueueBody")}
+        confirmLabel={tt("clearQueue")}
+        cancelLabel={tc("cancel")}
         tone="danger"
         onCancel={() => setConfirmClear(false)}
         onConfirm={clearQueue}

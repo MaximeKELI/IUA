@@ -10,8 +10,9 @@ import { useAuthToken } from "@/lib/useAuthToken";
 const API_URL = (process.env.NEXT_PUBLIC_API_URL || "/api/v1").replace(/\/$/, "");
 
 type DocKind = "attestation" | "transcript" | "admission" | "equivalence";
+type DocTitleKey = "docAttestation" | "docTranscript" | "docAdmission" | "docEquivalence";
 
-const DOCS: { id: string; kind: DocKind; titleKey: string }[] = [
+const DOCS: { id: string; kind: DocKind; titleKey: DocTitleKey }[] = [
   { id: "certificate", kind: "attestation", titleKey: "docAttestation" },
   { id: "transcript", kind: "transcript", titleKey: "docTranscript" },
   { id: "admission", kind: "admission", titleKey: "docAdmission" },
@@ -28,6 +29,7 @@ const PATHS: Record<DocKind, string> = {
 export default function StudentDocumentsPage() {
   const tPortal = useTranslations("portal");
   const t = useTranslations("portal.student");
+  const tc = useTranslations("common");
   const locale = useLocale();
   const { ready } = useAuthToken();
   const [error, setError] = useState<string | null>(null);
@@ -60,7 +62,7 @@ export default function StudentDocumentsPage() {
       a.click();
       URL.revokeObjectURL(url);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error");
+      setError(err instanceof Error ? err.message : tc("errorGeneric"));
     } finally {
       setBusy(null);
     }
@@ -78,9 +80,7 @@ export default function StudentDocumentsPage() {
       <div className="mt-8 grid gap-4 md:grid-cols-2">
         {DOCS.map((doc) => (
           <article key={doc.id} className="rounded-xl bg-white p-5 shadow-soft">
-            <h2 className="font-display text-xl text-iua-navy">
-              {t.has(doc.titleKey as "docsBilingual") ? t(doc.titleKey as "docsBilingual") : doc.id}
-            </h2>
+            <h2 className="font-display text-xl text-iua-navy">{t(doc.titleKey)}</h2>
             <p className="mt-1 text-sm text-iua-muted">{locale.toUpperCase()}</p>
             <div className="mt-4 flex flex-wrap gap-2">
               {(["fr", "en"] as const).map((lang) => (

@@ -31,7 +31,11 @@
     "linkedin": "Alumni IUA sur LinkedIn",
     "currencyNote": "Montants indicatifs · taux internes IUA",
     "close": "Fermer",
-    "confirmation": "Confirmation"
+    "confirmation": "Confirmation",
+    "errorGeneric": "Une erreur est survenue.",
+    "skipToContent": "Aller au contenu",
+    "retry": "Réessayer",
+    "empty": "Aucun élément."
   },
   "nav": {
     "study": "Étudier",
@@ -472,7 +476,14 @@
     "demoTeacher": "Enseignant",
     "demoSecret": "Secrétariat",
     "demoDirection": "Direction",
-    "demoAdmin": "Admin"
+    "demoAdmin": "Admin",
+    "resetTitle": "Nouveau mot de passe",
+    "resetLead": "Choisissez un mot de passe robuste pour votre compte IUA.",
+    "resetSubmit": "Enregistrer le mot de passe",
+    "resetDone": "Mot de passe mis à jour. Vous pouvez vous connecter.",
+    "newPassword": "Nouveau mot de passe",
+    "confirmPassword": "Confirmer le mot de passe",
+    "passwordMismatch": "Les mots de passe ne correspondent pas."
   },
   "portal": {
     "logout": "Déconnexion",
@@ -527,7 +538,11 @@
       "docAttestation": "Attestation de scolarité",
       "docTranscript": "Relevé de notes",
       "docAdmission": "Lettre d'admission",
-      "docEquivalence": "Attestation d'équivalence"
+      "docEquivalence": "Attestation d'équivalence",
+      "privacyLead": "Exportez vos données ou demandez un effacement (revue DPO sous 30 jours).",
+      "privacyEraseBody": "Cette action enregistre une demande d'effacement pour le DPO. Les données ne sont pas supprimées immédiatement.",
+      "privacyExportOk": "Export téléchargé.",
+      "privacyEraseOk": "Demande d'effacement enregistrée."
     },
     "teacher": {
       "dashboard": "Tableau de bord",
@@ -557,7 +572,10 @@
       "groupClass": "Vie de classe",
       "groupAdmin": "Suivi & admin",
       "space": "Espace enseignant",
-      "welcome": "Bienvenue"
+      "welcome": "Bienvenue",
+      "clearQueueTitle": "Vider la file hors-ligne ?",
+      "clearQueueBody": "Les opérations non synchronisées seront définitivement perdues.",
+      "clearQueue": "Vider"
     },
     "admin": {
       "overview": "Vue d'ensemble",
@@ -589,7 +607,9 @@
       "groupScolarite": "Scolarité",
       "groupServices": "Services",
       "groupCampus": "Campus",
-      "space": "Espace admin"
+      "space": "Espace admin",
+      "events": "Événements / outbox",
+      "eventsLead": "File d'attente et lettres mortes."
     },
     "direction": {
       "dashboard": "Tableau de bord",
@@ -650,7 +670,8 @@
         "paiements": "Paiements & échéances",
         "utilisateurs": "Utilisateurs & rôles",
         "presences": "Présences / absences",
-        "securite": "Authentification MFA (TOTP)"
+        "securite": "Authentification MFA (TOTP)",
+        "evenements": "Événements / outbox"
       },
       "direction": {
         "home": "Tableau de bord",

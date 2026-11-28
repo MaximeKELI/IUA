@@ -31,7 +31,11 @@
     "linkedin": "Alumni IUA no LinkedIn",
     "currencyNote": "Valores indicativos · taxas internas IUA",
     "close": "Fechar",
-    "confirmation": "Confirmação"
+    "confirmation": "Confirmação",
+    "errorGeneric": "Ocorreu um erro.",
+    "skipToContent": "Saltar para o conteúdo",
+    "retry": "Tentar novamente",
+    "empty": "Sem itens."
   },
   "nav": {
     "study": "Estudar",
@@ -472,7 +476,14 @@
     "demoTeacher": "Docente",
     "demoSecret": "Secretariado",
     "demoDirection": "Direção",
-    "demoAdmin": "Admin"
+    "demoAdmin": "Admin",
+    "resetTitle": "Nova palavra-passe",
+    "resetLead": "Escolha uma palavra-passe forte para a sua conta IUA.",
+    "resetSubmit": "Guardar palavra-passe",
+    "resetDone": "Palavra-passe atualizada. Pode entrar.",
+    "newPassword": "Nova palavra-passe",
+    "confirmPassword": "Confirmar palavra-passe",
+    "passwordMismatch": "As palavras-passe não coincidem."
   },
   "portal": {
     "logout": "Sair",
@@ -527,7 +538,11 @@
       "docAttestation": "Atestado de matrícula",
       "docTranscript": "Histórico escolar",
       "docAdmission": "Carta de admissão",
-      "docEquivalence": "Certificado de equivalência"
+      "docEquivalence": "Certificado de equivalência",
+      "privacyLead": "Exporte os seus dados ou peça apagamento (revisão DPO em 30 dias).",
+      "privacyEraseBody": "Isto regista um pedido de apagamento para o DPO. Os dados não são apagados de imediato.",
+      "privacyExportOk": "Exportação descarregada.",
+      "privacyEraseOk": "Pedido de apagamento registado."
     },
     "teacher": {
       "dashboard": "Dashboard",
@@ -557,7 +572,10 @@
       "groupClass": "Class life",
       "groupAdmin": "Follow-up & admin",
       "space": "Espaço do docente",
-      "welcome": "Bem-vindo"
+      "welcome": "Bem-vindo",
+      "clearQueueTitle": "Limpar fila offline?",
+      "clearQueueBody": "As operações não sincronizadas serão perdidas.",
+      "clearQueue": "Limpar"
     },
     "admin": {
       "overview": "Overview",
@@ -589,7 +607,9 @@
       "groupScolarite": "Academics",
       "groupServices": "Services",
       "groupCampus": "Campus",
-      "space": "Espaço admin"
+      "space": "Espaço admin",
+      "events": "Eventos / outbox",
+      "eventsLead": "Fila e dead letters."
     },
     "direction": {
       "dashboard": "Dashboard",
@@ -650,7 +670,8 @@
         "paiements": "Pagamentos",
         "utilisateurs": "Utilizadores",
         "presences": "Présences / absences",
-        "securite": "Segurança"
+        "securite": "Segurança",
+        "evenements": "Eventos / outbox"
       },
       "direction": {
         "home": "Painel",

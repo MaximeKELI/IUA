@@ -36,6 +36,7 @@ BASE_PERMISSIONS = [
     ("services.request.manage", "Traiter les demandes administratives", "services"),
     ("services.request.create", "Créer une demande administrative", "services"),
     ("events.outbox.read", "Lire l'outbox", "events"),
+    ("events.outbox.write", "Réessayer / écrire l'outbox", "events"),
     ("notifications.read", "Lire les notifications", "notifications"),
     ("portal.direction.read", "Tableau de bord direction", "portal"),
 ]

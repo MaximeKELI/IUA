@@ -10,6 +10,7 @@ import { useAuthToken } from "@/lib/useAuthToken";
 
 export default function StudentPrivacyPage() {
   const t = useTranslations("portal");
+  const ts = useTranslations("portal.student");
   const tc = useTranslations("common");
   const { token, ready } = useAuthToken();
   const [busy, setBusy] = useState(false);
@@ -29,9 +30,9 @@ export default function StudentPrivacyPage() {
       a.download = `iua-dsar-export-${new Date().toISOString().slice(0, 10)}.json`;
       a.click();
       URL.revokeObjectURL(url);
-      setMsg("OK");
+      setMsg(ts("privacyExportOk"));
     } catch (err) {
-      setMsg(err instanceof Error ? err.message : "Error");
+      setMsg(err instanceof Error ? err.message : tc("errorGeneric"));
     } finally {
       setBusy(false);
     }
@@ -41,10 +42,10 @@ export default function StudentPrivacyPage() {
     setBusy(true);
     try {
       await apiSend("/privacy/erase-request/", token, "POST", { reason: "user_request" });
-      setMsg("erase_ok");
+      setMsg(ts("privacyEraseOk"));
       setEraseOpen(false);
     } catch (err) {
-      setMsg(err instanceof Error ? err.message : "Error");
+      setMsg(err instanceof Error ? err.message : tc("errorGeneric"));
     } finally {
       setBusy(false);
     }
@@ -53,9 +54,7 @@ export default function StudentPrivacyPage() {
   return (
     <PortalShell title={t("student.space")} nav={studentNav}>
       <h1 className="font-display text-3xl text-iua-navy">{t("pages.student.confidentialite")}</h1>
-      <p className="mt-2 max-w-2xl text-sm text-iua-muted">
-        DSAR — export your personal data or request erasure (reviewed by IUA DPO within 30 days).
-      </p>
+      <p className="mt-2 max-w-2xl text-sm text-iua-muted">{ts("privacyLead")}</p>
       <div className="mt-8 flex flex-wrap gap-3">
         <button
           type="button"
@@ -78,7 +77,7 @@ export default function StudentPrivacyPage() {
       <ConfirmDialog
         open={eraseOpen}
         title={t("pages.student.confidentialite")}
-        description="This records an erasure request for DPO review. It does not delete data immediately."
+        description={ts("privacyEraseBody")}
         confirmLabel={tc("confirm")}
         cancelLabel={tc("cancel")}
         tone="danger"

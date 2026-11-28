@@ -12,9 +12,13 @@ const nextConfig: NextConfig = {
   productionBrowserSourceMaps: false,
   // Keep Django trailing-slash URLs intact for the /api/v1 proxy route.
   skipTrailingSlashRedirect: true,
-  // Allow opening the app via LAN IP / 127.0.0.1 in Next 15 dev.
-  // Without the LAN host, Next blocks /_next/* and the UI stays blank/white.
-  allowedDevOrigins: ["127.0.0.1", "localhost", "192.168.1.64"],
+  // LAN hosts for Next 15 dev (comma-separated ALLOWED_DEV_ORIGINS).
+  allowedDevOrigins: (
+    process.env.ALLOWED_DEV_ORIGINS || "127.0.0.1,localhost"
+  )
+    .split(",")
+    .map((h) => h.trim())
+    .filter(Boolean),
   async rewrites() {
     return [
       {
@@ -66,6 +70,14 @@ const nextConfig: NextConfig = {
       { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
       { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
       { key: "Content-Security-Policy", value: csp },
+      ...(isProd
+        ? [
+            {
+              key: "Strict-Transport-Security",
+              value: "max-age=31536000; includeSubDomains; preload",
+            },
+          ]
+        : []),
     ];
     // Never immutable-cache /_next/static in development — chunk paths are stable
     // (no content hash), so the browser kept serving a broken UserAvatar/PortalShell

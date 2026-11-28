@@ -31,7 +31,11 @@
     "linkedin": "Alumni IUA en LinkedIn",
     "currencyNote": "Importes indicativos · tipos internos IUA",
     "close": "Cerrar",
-    "confirmation": "Confirmación"
+    "confirmation": "Confirmación",
+    "errorGeneric": "Se produjo un error.",
+    "skipToContent": "Saltar al contenido",
+    "retry": "Reintentar",
+    "empty": "Sin elementos."
   },
   "nav": {
     "study": "Estudiar",
@@ -472,7 +476,14 @@
     "demoTeacher": "Docente",
     "demoSecret": "Secretaría",
     "demoDirection": "Dirección",
-    "demoAdmin": "Admin"
+    "demoAdmin": "Admin",
+    "resetTitle": "Nueva contraseña",
+    "resetLead": "Elija una contraseña segura para su cuenta IUA.",
+    "resetSubmit": "Guardar contraseña",
+    "resetDone": "Contraseña actualizada. Puede iniciar sesión.",
+    "newPassword": "Nueva contraseña",
+    "confirmPassword": "Confirmar contraseña",
+    "passwordMismatch": "Las contraseñas no coinciden."
   },
   "portal": {
     "logout": "Cerrar sesión",
@@ -527,7 +538,11 @@
       "docAttestation": "Certificado de escolaridad",
       "docTranscript": "Expediente académico",
       "docAdmission": "Carta de admisión",
-      "docEquivalence": "Certificado de equivalencia"
+      "docEquivalence": "Certificado de equivalencia",
+      "privacyLead": "Exporte sus datos o solicite borrado (revisión DPO en 30 días).",
+      "privacyEraseBody": "Esto registra una solicitud de borrado para el DPO. Los datos no se eliminan de inmediato.",
+      "privacyExportOk": "Exportación descargada.",
+      "privacyEraseOk": "Solicitud de borrado registrada."
     },
     "teacher": {
       "dashboard": "Dashboard",
@@ -557,7 +572,10 @@
       "groupClass": "Class life",
       "groupAdmin": "Follow-up & admin",
       "space": "Espacio del docente",
-      "welcome": "Bienvenido"
+      "welcome": "Bienvenido",
+      "clearQueueTitle": "¿Vaciar la cola sin conexión?",
+      "clearQueueBody": "Las operaciones no sincronizadas se perderán.",
+      "clearQueue": "Vaciar"
     },
     "admin": {
       "overview": "Overview",
@@ -589,7 +607,9 @@
       "groupScolarite": "Academics",
       "groupServices": "Services",
       "groupCampus": "Campus",
-      "space": "Espacio admin"
+      "space": "Espacio admin",
+      "events": "Eventos / outbox",
+      "eventsLead": "Cola y dead letters."
     },
     "direction": {
       "dashboard": "Dashboard",
@@ -650,7 +670,8 @@
         "paiements": "Pagos",
         "utilisateurs": "Usuarios",
         "presences": "Présences / absences",
-        "securite": "Seguridad"
+        "securite": "Seguridad",
+        "evenements": "Eventos / outbox"
       },
       "direction": {
         "home": "Panel",

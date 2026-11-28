@@ -247,24 +247,30 @@ class PasswordResetRequestView(APIView):
         email = (request.data.get("email") or "").strip().lower()
         user = User.objects.filter(email__iexact=email, is_active=True).first()
         if user:
+            from django.conf import settings
+            import logging
+
             token = PasswordResetTokenGenerator().make_token(user)
             uid = str(user.pk)
-            # Frontend route is locale-prefixed; email uses relative path hint
-            reset_path = f"/connexion?reset={uid}:{token}"
+            locale = getattr(settings, "FRONTEND_DEFAULT_LOCALE", "fr")
+            origin = getattr(settings, "FRONTEND_ORIGIN", "http://127.0.0.1:3000").rstrip("/")
+            reset_url = f"{origin}/{locale}/connexion?reset={uid}:{token}"
             try:
                 send_mail(
                     subject="IUA — Réinitialisation du mot de passe",
                     message=(
                         f"Bonjour,\n\nPour réinitialiser votre mot de passe IUA, "
-                        f"ouvrez : {reset_path}\n\nSi vous n'êtes pas à l'origine de cette "
+                        f"ouvrez : {reset_url}\n\nSi vous n'êtes pas à l'origine de cette "
                         f"demande, ignorez cet e-mail."
                     ),
                     from_email=None,
                     recipient_list=[user.email],
-                    fail_silently=True,
+                    fail_silently=False,
                 )
             except Exception:
-                pass
+                logging.getLogger("iua.auth").exception(
+                    "password reset email failed for user_id=%s", uid
+                )
         return Response(
             {
                 "message": "Si un compte existe pour cet e-mail, un lien de réinitialisation a été envoyé."

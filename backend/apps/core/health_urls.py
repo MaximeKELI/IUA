@@ -106,9 +106,12 @@ class MetricsView(APIView):
         except Exception:
             pass
         try:
-            from apps.events.models import OutboxEvent
+            from apps.events.models import DeadLetterEvent, OutboxMessage
 
-            outbox_failed = OutboxEvent.objects.filter(status="failed").count()
+            outbox_failed = (
+                OutboxMessage.objects.filter(status=OutboxMessage.Status.FAILED).count()
+                + DeadLetterEvent.objects.filter(resolved=False).count()
+            )
         except Exception:
             pass
         body = "\n".join(

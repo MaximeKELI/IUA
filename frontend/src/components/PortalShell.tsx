@@ -139,7 +139,7 @@ export function PortalShell({
         href="#portal-main"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-white focus:px-3 focus:py-2 focus:text-iua-navy"
       >
-        Skip to content
+        {tc("skipToContent")}
       </a>
       <header className="sticky top-0 z-20 border-b border-iua-navy/10 bg-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
@@ -175,7 +175,7 @@ export function PortalShell({
             >
               {safeT((k) => tp(k as Parameters<typeof tp>[0]), "logout") ||
                 safeT((k) => tc(k as Parameters<typeof tc>[0]), "logout") ||
-                "Déconnexion"}
+                tc("logout")}
             </button>
           </div>
         </div>
@@ -183,18 +183,15 @@ export function PortalShell({
 
       <ConfirmDialog
         open={logoutOpen}
-        title={
-          safeT((k) => tc(k as Parameters<typeof tc>[0]), "logoutConfirmTitle") || "Se déconnecter ?"
-        }
+        title={safeT((k) => tc(k as Parameters<typeof tc>[0]), "logoutConfirmTitle") || tc("logoutConfirmTitle")}
         description={
-          safeT((k) => tc(k as Parameters<typeof tc>[0]), "logoutConfirmBody") ||
-          "Vous allez quitter votre espace sécurisé. Toute session ouverte sur cet appareil sera fermée."
+          safeT((k) => tc(k as Parameters<typeof tc>[0]), "logoutConfirmBody") || tc("logoutConfirmBody")
         }
         confirmLabel={
           safeT((k) => tc(k as Parameters<typeof tc>[0]), "logoutConfirmAction") ||
-          "Oui, me déconnecter"
+          tc("logoutConfirmAction")
         }
-        cancelLabel={safeT((k) => tc(k as Parameters<typeof tc>[0]), "cancel") || "Annuler"}
+        cancelLabel={safeT((k) => tc(k as Parameters<typeof tc>[0]), "cancel") || tc("cancel")}
         tone="danger"
         busy={logoutBusy}
         onCancel={() => {

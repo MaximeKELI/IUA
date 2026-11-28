@@ -187,7 +187,18 @@ CELERY_BEAT_SCHEDULE = {
         "task": "apps.events.tasks.relay_outbox",
         "schedule": 10.0,
     },
+    "purge-expired-records-daily": {
+        "task": "core.purge_expired_records",
+        "schedule": 60 * 60 * 24,
+    },
+    "detect-suspicious-logins": {
+        "task": "core.detect_suspicious_logins",
+        "schedule": 60 * 5,
+    },
 }
+
+FRONTEND_ORIGIN = os.getenv("FRONTEND_ORIGIN", "http://127.0.0.1:3000").rstrip("/")
+FRONTEND_DEFAULT_LOCALE = os.getenv("FRONTEND_DEFAULT_LOCALE", "fr")
 
 # MFA: sensitive roles must complete TOTP when enrolled; enrollment gate is opt-in
 MFA_SENSITIVE_ROLES = ("admin", "super_admin", "direction", "finance_dir")

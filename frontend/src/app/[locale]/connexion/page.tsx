@@ -9,12 +9,24 @@ import {
   apiMfaEnrollConfirm,
   apiMfaEnrollSetup,
   apiMfaVerify,
+  apiPasswordResetConfirm,
   apiPasswordResetRequest,
   syncSessionCookies,
 } from "@/lib/api";
 import { getAccessToken, getStoredUser, resolveHomePath, saveSession } from "@/lib/auth";
 
 const DEMO_LOGIN = process.env.NEXT_PUBLIC_DEMO_LOGIN === "true";
+
+function parseResetParam(): { uid: string; token: string } | null {
+  if (typeof window === "undefined") return null;
+  const raw = new URLSearchParams(window.location.search).get("reset");
+  if (!raw || !raw.includes(":")) return null;
+  const idx = raw.indexOf(":");
+  const uid = raw.slice(0, idx);
+  const token = raw.slice(idx + 1);
+  if (!uid || !token) return null;
+  return { uid, token };
+}
 
 export default function LoginPage() {
   const t = useTranslations("connexion");
@@ -43,14 +55,19 @@ export default function LoginPage() {
   const [enrollSecret, setEnrollSecret] = useState<string | null>(null);
   const [forgotMode, setForgotMode] = useState(false);
   const [forgotSent, setForgotSent] = useState(false);
+  const [resetCreds, setResetCreds] = useState<{ uid: string; token: string } | null>(null);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [resetDone, setResetDone] = useState(false);
 
   useEffect(() => {
+    setResetCreds(parseResetParam());
     if (!getAccessToken() && !getStoredUser()) {
       setChecking(false);
       return;
     }
     const user = getStoredUser();
-    if (user?.roles?.length) {
+    if (user?.roles?.length && !parseResetParam()) {
       router.replace(resolveHomePath(user.roles));
       return;
     }
@@ -76,6 +93,21 @@ export default function LoginPage() {
     setLoading(true);
     setError(null);
     try {
+      if (resetCreds && !resetDone) {
+        if (newPassword !== confirmPassword) {
+          setError(t("passwordMismatch"));
+          return;
+        }
+        await apiPasswordResetConfirm(resetCreds.uid, resetCreds.token, newPassword);
+        setResetDone(true);
+        setResetCreds(null);
+        if (typeof window !== "undefined") {
+          const url = new URL(window.location.href);
+          url.searchParams.delete("reset");
+          window.history.replaceState({}, "", url.pathname);
+        }
+        return;
+      }
       if (forgotMode) {
         await apiPasswordResetRequest(email);
         setForgotSent(true);
@@ -128,20 +160,29 @@ export default function LoginPage() {
     );
   }
 
-  const modeTitle = enrollSecret
-    ? t("mfaEnrollTitle")
-    : mfaToken
-      ? t("titleMfa")
-      : forgotMode
-        ? t("forgot")
-        : t("title");
-  const modeLead = enrollSecret
-    ? t("mfaEnrollLead")
-    : mfaToken
-      ? t("leadMfa")
-      : forgotMode
-        ? t("forgotSent")
-        : t("lead");
+  const inReset = !!resetCreds && !resetDone;
+  const modeTitle = inReset
+    ? t("resetTitle")
+    : resetDone
+      ? t("resetDone")
+      : enrollSecret
+        ? t("mfaEnrollTitle")
+        : mfaToken
+          ? t("titleMfa")
+          : forgotMode
+            ? t("forgot")
+            : t("title");
+  const modeLead = inReset
+    ? t("resetLead")
+    : resetDone
+      ? t("lead")
+      : enrollSecret
+        ? t("mfaEnrollLead")
+        : mfaToken
+          ? t("leadMfa")
+          : forgotMode
+            ? t("forgotSent")
+            : t("lead");
 
   return (
     <main className="grid min-h-[100svh] lg:grid-cols-2">
@@ -174,7 +215,7 @@ export default function LoginPage() {
             {forgotMode && forgotSent ? t("forgotSent") : modeLead}
           </p>
 
-          {!mfaToken && !enrollSecret && !forgotMode && presets.length > 0 && (
+          {!mfaToken && !enrollSecret && !forgotMode && !inReset && !resetDone && presets.length > 0 && (
             <div className="mt-6 flex flex-wrap gap-2" role="group" aria-label="Demo">
               {presets.map((p) => (
                 <button
@@ -205,7 +246,36 @@ export default function LoginPage() {
               </div>
             )}
 
-            {mfaToken || enrollSecret ? (
+            {inReset ? (
+              <>
+                <label className="block text-sm">
+                  <span className="mb-1.5 block font-medium text-iua-navy">{t("newPassword")}</span>
+                  <input
+                    type="password"
+                    required
+                    minLength={10}
+                    autoComplete="new-password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    aria-describedby={error ? errorId : undefined}
+                    className="w-full rounded-md border border-iua-navy/15 px-3 py-2.5 outline-none ring-iua-cyan transition focus:ring-2"
+                  />
+                </label>
+                <label className="block text-sm">
+                  <span className="mb-1.5 block font-medium text-iua-navy">{t("confirmPassword")}</span>
+                  <input
+                    type="password"
+                    required
+                    minLength={10}
+                    autoComplete="new-password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    aria-describedby={error ? errorId : undefined}
+                    className="w-full rounded-md border border-iua-navy/15 px-3 py-2.5 outline-none ring-iua-cyan transition focus:ring-2"
+                  />
+                </label>
+              </>
+            ) : mfaToken || enrollSecret ? (
               <label className="block text-sm">
                 <span className="mb-1.5 block font-medium text-iua-navy">{t("totp")}</span>
                 <input
@@ -222,7 +292,7 @@ export default function LoginPage() {
                   placeholder="••••••"
                 />
               </label>
-            ) : (
+            ) : !resetDone ? (
               <>
                 <label className="block text-sm">
                   <span className="mb-1.5 block font-medium text-iua-navy">{t("email")}</span>
@@ -251,27 +321,34 @@ export default function LoginPage() {
                   </label>
                 )}
               </>
-            )}
+            ) : null}
+
             {error && (
               <p id={errorId} className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
                 {error}
               </p>
             )}
-            <button
-              type="submit"
-              disabled={loading || (forgotMode && forgotSent)}
-              className="btn-shine w-full rounded-md bg-iua-navy py-3 text-sm font-semibold text-white transition hover:bg-iua-blue disabled:opacity-60"
-            >
-              {loading
-                ? "…"
-                : enrollSecret
-                  ? t("mfaConfirm")
-                  : mfaToken
-                    ? t("submitMfa")
-                    : forgotMode
-                      ? t("forgotSubmit")
-                      : t("submit")}
-            </button>
+
+            {!resetDone && (
+              <button
+                type="submit"
+                disabled={loading || (forgotMode && forgotSent)}
+                className="btn-shine w-full rounded-md bg-iua-navy py-3 text-sm font-semibold text-white transition hover:bg-iua-blue disabled:opacity-60"
+              >
+                {loading
+                  ? "…"
+                  : inReset
+                    ? t("resetSubmit")
+                    : enrollSecret
+                      ? t("mfaConfirm")
+                      : mfaToken
+                        ? t("submitMfa")
+                        : forgotMode
+                          ? t("forgotSubmit")
+                          : t("submit")}
+              </button>
+            )}
+
             {(mfaToken || enrollSecret) && (
               <button
                 type="button"
@@ -287,17 +364,18 @@ export default function LoginPage() {
                 ← {tc("back")}
               </button>
             )}
-            {!mfaToken && !enrollSecret && (
+            {!mfaToken && !enrollSecret && !inReset && (
               <button
                 type="button"
                 className="w-full text-sm text-iua-muted hover:text-iua-navy"
                 onClick={() => {
                   setForgotMode((v) => !v);
                   setForgotSent(false);
+                  setResetDone(false);
                   setError(null);
                 }}
               >
-                {forgotMode ? t("title") : t("forgot")}
+                {forgotMode || resetDone ? t("title") : t("forgot")}
               </button>
             )}
           </form>

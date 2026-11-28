@@ -42,8 +42,33 @@ PAYMENT_WEBHOOK_SECRET = os.getenv("PAYMENT_WEBHOOK_SECRET", "").strip()
 if not PAYMENT_WEBHOOK_SECRET:
     raise ImproperlyConfigured("PAYMENT_WEBHOOK_SECRET must be set in production.")
 
-# Prefer institutional Jitsi; warn if still on public meet.jit.si
-JITSI_BASE_URL = os.getenv("JITSI_BASE_URL", "").strip() or "https://meet.jit.si"
+JITSI_BASE_URL = os.getenv("JITSI_BASE_URL", "").strip()
+if not JITSI_BASE_URL or "meet.jit.si" in JITSI_BASE_URL:
+    raise ImproperlyConfigured(
+        "JITSI_BASE_URL must point to an institutional Jitsi (not public meet.jit.si)."
+    )
+
+FRONTEND_ORIGIN = os.getenv("FRONTEND_ORIGIN", "").rstrip("/")
+if not FRONTEND_ORIGIN:
+    raise ImproperlyConfigured("FRONTEND_ORIGIN must be set in production.")
+
+_csrf = [
+    o.strip()
+    for o in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
+    if o.strip()
+]
+if not _csrf:
+    raise ImproperlyConfigured("CSRF_TRUSTED_ORIGINS must be set in production.")
+CSRF_TRUSTED_ORIGINS = _csrf
+
+EMAIL_HOST = os.getenv("EMAIL_HOST", "").strip()
+if not EMAIL_HOST:
+    raise ImproperlyConfigured("EMAIL_HOST must be set in production.")
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
+EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "true").lower() == "true"
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "noreply@iua.local")
 
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"

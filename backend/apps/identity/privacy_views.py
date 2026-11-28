@@ -1,4 +1,4 @@
-"""GDPR-ish self-service data export (DSAR stub — production-ready structure)."""
+"""Self-service DSAR: authenticated JSON export + audited erasure request."""
 
 from django.utils import timezone
 from rest_framework.permissions import IsAuthenticated

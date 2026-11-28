@@ -31,7 +31,11 @@
     "linkedin": "IUA Alumni on LinkedIn",
     "currencyNote": "Indicative amounts · internal IUA rates",
     "close": "Close",
-    "confirmation": "Confirmation"
+    "confirmation": "Confirmation",
+    "errorGeneric": "Something went wrong.",
+    "skipToContent": "Skip to content",
+    "retry": "Retry",
+    "empty": "No items."
   },
   "nav": {
     "study": "Study",
@@ -472,7 +476,14 @@
     "demoTeacher": "Teacher",
     "demoSecret": "Secretariat",
     "demoDirection": "Leadership",
-    "demoAdmin": "Admin"
+    "demoAdmin": "Admin",
+    "resetTitle": "New password",
+    "resetLead": "Choose a strong password for your IUA account.",
+    "resetSubmit": "Save password",
+    "resetDone": "Password updated. You can sign in.",
+    "newPassword": "New password",
+    "confirmPassword": "Confirm password",
+    "passwordMismatch": "Passwords do not match."
   },
   "portal": {
     "logout": "Sign out",
@@ -527,7 +538,11 @@
       "docAttestation": "Enrollment certificate",
       "docTranscript": "Academic transcript",
       "docAdmission": "Admission letter",
-      "docEquivalence": "Equivalence certificate"
+      "docEquivalence": "Equivalence certificate",
+      "privacyLead": "Export your data or request erasure (DPO review within 30 days).",
+      "privacyEraseBody": "This records an erasure request for the DPO. Data is not deleted immediately.",
+      "privacyExportOk": "Export downloaded.",
+      "privacyEraseOk": "Erasure request recorded."
     },
     "teacher": {
       "dashboard": "Dashboard",
@@ -557,7 +572,10 @@
       "groupClass": "Class life",
       "groupAdmin": "Follow-up & admin",
       "space": "Teacher portal",
-      "welcome": "Welcome"
+      "welcome": "Welcome",
+      "clearQueueTitle": "Clear offline queue?",
+      "clearQueueBody": "Unsynced operations will be permanently lost.",
+      "clearQueue": "Clear"
     },
     "admin": {
       "overview": "Overview",
@@ -589,7 +607,9 @@
       "groupScolarite": "Academics",
       "groupServices": "Services",
       "groupCampus": "Campus",
-      "space": "Admin portal"
+      "space": "Admin portal",
+      "events": "Events / outbox",
+      "eventsLead": "Queue and dead letters."
     },
     "direction": {
       "dashboard": "Dashboard",
@@ -650,7 +670,8 @@
         "paiements": "Payments",
         "utilisateurs": "Users",
         "presences": "Présences / absences",
-        "securite": "Security"
+        "securite": "Security",
+        "evenements": "Events / outbox"
       },
       "direction": {
         "home": "Dashboard",
