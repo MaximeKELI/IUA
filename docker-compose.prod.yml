@@ -89,6 +89,8 @@ services:
       dockerfile: Dockerfile
     environment:
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://api.example.com/api/v1}
+      NEXT_PUBLIC_COOKIE_ONLY_AUTH: "true"
+      NEXT_PUBLIC_DEMO_LOGIN: "false"
     ports:
       - "3000:3000"
     depends_on:

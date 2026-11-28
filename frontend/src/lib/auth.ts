@@ -46,18 +46,26 @@ const ACCESS_KEY = "iua_access";
 const REFRESH_KEY = "iua_refresh";
 const USER_KEY = "iua_user";
 
+/** Opt-in: no JWTs in localStorage (HttpOnly cookies + credentials:include). */
+export function isCookieOnlyAuth(): boolean {
+  return process.env.NEXT_PUBLIC_COOKIE_ONLY_AUTH === "true";
+}
+
 export function saveSession(access: string, refresh: string, user: AuthUser) {
-  // Prefer HttpOnly cookies for tokens; localStorage kept as fallback / UX cache only.
-  if (access) localStorage.setItem(ACCESS_KEY, access);
-  else localStorage.removeItem(ACCESS_KEY);
-  if (refresh) localStorage.setItem(REFRESH_KEY, refresh);
-  else localStorage.removeItem(REFRESH_KEY);
-  // Never persist permissions secrets; roles OK for UI routing
-  const safe = { ...user };
-  localStorage.setItem(USER_KEY, JSON.stringify(safe));
+  if (isCookieOnlyAuth()) {
+    localStorage.removeItem(ACCESS_KEY);
+    localStorage.removeItem(REFRESH_KEY);
+  } else {
+    if (access) localStorage.setItem(ACCESS_KEY, access);
+    else localStorage.removeItem(ACCESS_KEY);
+    if (refresh) localStorage.setItem(REFRESH_KEY, refresh);
+    else localStorage.removeItem(REFRESH_KEY);
+  }
+  localStorage.setItem(USER_KEY, JSON.stringify(user));
 }
 
 export function updateAccessToken(access: string, refresh?: string) {
+  if (isCookieOnlyAuth()) return;
   localStorage.setItem(ACCESS_KEY, access);
   if (refresh) localStorage.setItem(REFRESH_KEY, refresh);
 }
@@ -70,11 +78,16 @@ export function clearSession() {
 
 export function getAccessToken(): string | null {
   if (typeof window === "undefined") return null;
+  if (isCookieOnlyAuth()) {
+    // Sentinel: API layer uses credentials:include; Authorization omitted.
+    return getStoredUser() ? "cookie" : null;
+  }
   return localStorage.getItem(ACCESS_KEY);
 }
 
 export function getRefreshToken(): string | null {
   if (typeof window === "undefined") return null;
+  if (isCookieOnlyAuth()) return null;
   return localStorage.getItem(REFRESH_KEY);
 }
 
@@ -93,22 +106,4 @@ export function setStoredUser(user: AuthUser) {
   localStorage.setItem(USER_KEY, JSON.stringify(user));
 }
 
-export function resolveHomePath(roles: string[]): string {
-  if (roles.includes("direction") || roles.includes("super_admin") || roles.includes("finance_dir")) {
-    return "/portail/direction";
-  }
-  if (
-    roles.includes("admin") ||
-    roles.includes("academic_dir") ||
-    roles.includes("secretariat") ||
-    roles.includes("faculty_head") ||
-    roles.includes("dept_head") ||
-    roles.includes("hr") ||
-    roles.includes("it")
-  ) {
-    return "/portail/admin";
-  }
-  if (roles.includes("teacher")) return "/portail/enseignant";
-  if (roles.includes("student") || roles.includes("alumni")) return "/portail/etudiant";
-  return "/connexion";
-}
+export { resolveHomePath } from "./authPaths";

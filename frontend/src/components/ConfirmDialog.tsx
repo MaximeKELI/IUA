@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useId, useRef } from "react";
 
 type ConfirmDialogProps = {
@@ -16,7 +17,7 @@ type ConfirmDialogProps = {
 };
 
 /**
- * Accessible confirmation dialog.
+ * Accessible confirmation dialog with focus trap.
  * Cancel is focused by default to reduce accidental destructive actions.
  */
 export function ConfirmDialog({
@@ -30,17 +31,39 @@ export function ConfirmDialog({
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
+  const t = useTranslations("common");
   const titleId = useId();
   const descId = useId();
+  const panelRef = useRef<HTMLDivElement>(null);
   const cancelRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (!open) return;
     const prev = document.activeElement as HTMLElement | null;
     cancelRef.current?.focus();
+
     function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape" && !busy) onCancel();
+      if (e.key === "Escape" && !busy) {
+        e.preventDefault();
+        onCancel();
+        return;
+      }
+      if (e.key !== "Tab" || !panelRef.current) return;
+      const focusable = panelRef.current.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      );
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     }
+
     document.addEventListener("keydown", onKey);
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -63,20 +86,24 @@ export function ConfirmDialog({
       <button
         type="button"
         className="absolute inset-0 bg-iua-navy/45 backdrop-blur-[2px] transition"
-        aria-label={cancelLabel}
+        aria-label={t("close")}
+        tabIndex={-1}
         disabled={busy}
         onClick={() => {
           if (!busy) onCancel();
         }}
       />
       <div
+        ref={panelRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
         aria-describedby={descId}
         className="relative z-[81] w-full max-w-md animate-[fadeUp_0.2s_ease_both] rounded-2xl bg-white p-5 shadow-soft ring-1 ring-iua-navy/10 sm:p-6"
       >
-        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-iua-cyan">Confirmation</p>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-iua-cyan">
+          {t("confirmation")}
+        </p>
         <h2 id={titleId} className="mt-2 font-display text-2xl text-iua-navy">
           {title}
         </h2>

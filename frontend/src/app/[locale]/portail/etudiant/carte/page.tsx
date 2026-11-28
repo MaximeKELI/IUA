@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useEffect, useRef, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
 import { UserAvatar } from "@/components/UserAvatar";
@@ -26,6 +28,8 @@ type Dash = {
 };
 
 export default function CartePage() {
+  const tPortal = useTranslations("portal");
+
   const { token, ready } = useAuthToken();
   const [data, setData] = useState<Dash | null>(null);
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -61,8 +65,8 @@ export default function CartePage() {
   }
 
   return (
-    <PortalShell title="Espace étudiant" nav={studentNav}>
-      <h1 className="font-display text-3xl text-iua-navy">Carte / profil</h1>
+    <PortalShell title={tPortal("student.space")} nav={studentNav}>
+      <h1 className="font-display text-3xl text-iua-navy">{tPortal("pages.student.carte")}</h1>
       <p className="mt-2 text-sm text-iua-muted">
         Votre identité numérique IUA — ajoutez une photo et présentez votre carte sur le campus.
       </p>

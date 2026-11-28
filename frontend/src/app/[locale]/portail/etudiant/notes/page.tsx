@@ -1,6 +1,6 @@
 "use client";
 
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
 import { apiGet, apiGetCached, Page, unwrapList } from "@/lib/api";
@@ -44,6 +44,8 @@ function toOver20(score: string, max: string) {
 }
 
 export default function StudentNotesPage() {
+  const tPortal = useTranslations("portal");
+
   const locale = useLocale();
   const { token, ready } = useAuthToken();
   const [grades, setGrades] = useState<Grade[]>([]);
@@ -137,9 +139,9 @@ export default function StudentNotesPage() {
   }, [filtered]);
 
   return (
-    <PortalShell title="Espace étudiant" nav={studentNav}>
+    <PortalShell title={tPortal("student.space")} nav={studentNav}>
       <p className="text-xs uppercase tracking-[0.18em] text-iua-cyan">Résultats</p>
-      <h1 className="mt-2 font-display text-3xl text-iua-navy">Notes & résultats</h1>
+      <h1 className="mt-2 font-display text-3xl text-iua-navy">{tPortal("pages.student.notes")}</h1>
       <p className="mt-2 text-sm text-iua-muted">
         Notes publiées par vos enseignants. Moyenne calculée sur 20.
       </p>

@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { FormEvent, useEffect, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
 import { apiGet, apiSend, clearApiMemoryCache, Page, unwrapList } from "@/lib/api";
@@ -22,6 +24,8 @@ type Year = { id: string; name: string; is_current: boolean };
 type TeacherOption = { id: string; label: string; staff_id: string };
 
 export default function AdminEnseignementsPage() {
+  const tPortal = useTranslations("portal");
+
   const { token, ready } = useAuthToken();
   const roles = getStoredUser()?.roles || [];
   const canEdit = canEditTeaching(roles);
@@ -102,7 +106,7 @@ export default function AdminEnseignementsPage() {
   return (
     <PortalShell title={resolveOpsTitle(roles)} nav={resolveOpsNav(roles)}>
       <p className="text-xs uppercase tracking-[0.18em] text-iua-cyan">Pédagogie</p>
-      <h1 className="mt-2 font-display text-3xl text-iua-navy">Affectations enseignants</h1>
+      <h1 className="mt-2 font-display text-3xl text-iua-navy">{tPortal("pages.admin.enseignements")}</h1>
       <p className="mt-2 text-sm text-iua-muted">
         {canEdit
           ? "Associez un enseignant à une matière pour ouvrir la saisie des notes."

@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { FormEvent, useEffect, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
 import { apiGet, apiSend, clearApiMemoryCache, Page, unwrapList } from "@/lib/api";
@@ -19,6 +21,8 @@ type Program = {
 type Institution = { id: string; name: string; code: string };
 
 export default function AdminFormationsPage() {
+  const tPortal = useTranslations("portal");
+
   const { token, ready } = useAuthToken();
   const roles = getStoredUser()?.roles || [];
   const [faculties, setFaculties] = useState<Faculty[]>([]);
@@ -96,7 +100,7 @@ export default function AdminFormationsPage() {
   return (
     <PortalShell title={resolveOpsTitle(roles)} nav={resolveOpsNav(roles)}>
       <p className="text-xs uppercase tracking-[0.18em] text-iua-cyan">Référentiels</p>
-      <h1 className="mt-2 font-display text-3xl text-iua-navy">Formations</h1>
+      <h1 className="mt-2 font-display text-3xl text-iua-navy">{tPortal("pages.admin.formations")}</h1>
       <p className="mt-2 text-sm text-iua-muted">Facultés et programmes de l&apos;établissement.</p>
       {error && <p className="mt-4 text-sm text-red-700">{error}</p>}
       {ok && <p className="mt-4 text-sm text-emerald-700">{ok}</p>}

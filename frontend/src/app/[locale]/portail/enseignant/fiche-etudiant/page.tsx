@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useEffect, useMemo, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
 import { apiGet } from "@/lib/api";
@@ -30,6 +32,8 @@ type FilePayload = {
 };
 
 export default function FicheEtudiantPage() {
+  const tPortal = useTranslations("portal");
+
   const { token, ready, students } = useTeacherAssignments();
   const [studentId, setStudentId] = useState("");
   const [query, setQuery] = useState("");
@@ -59,8 +63,8 @@ export default function FicheEtudiantPage() {
   }, [ready, token, studentId]);
 
   return (
-    <PortalShell title="Espace enseignant" nav={teacherNav}>
-      <h1 className="font-display text-3xl text-iua-navy">Fiche pédagogique étudiant</h1>
+    <PortalShell title={tPortal("teacher.space")} nav={teacherNav}>
+      <h1 className="font-display text-3xl text-iua-navy">{tPortal("pages.teacher.fiche-etudiant")}</h1>
       <p className="mt-2 text-sm text-iua-muted">
         Historique des notes, absences et alertes pédagogiques pour un suivi individualisé.
       </p>

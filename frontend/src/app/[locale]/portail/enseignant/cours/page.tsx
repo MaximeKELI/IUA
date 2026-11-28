@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { Link } from "@/i18n/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
@@ -36,6 +38,8 @@ type TeacherDashboard = {
 };
 
 export default function TeacherCoursPage() {
+  const tPortal = useTranslations("portal");
+
   const { token, ready } = useAuthToken();
   const [items, setItems] = useState<Assignment[]>([]);
   const [stats, setStats] = useState<Record<string, SubjectStat>>({});
@@ -66,8 +70,8 @@ export default function TeacherCoursPage() {
   }, [stats]);
 
   return (
-    <PortalShell title="Espace enseignant" nav={teacherNav}>
-      <h1 className="font-display text-3xl text-iua-navy">Mes cours</h1>
+    <PortalShell title={tPortal("teacher.space")} nav={teacherNav}>
+      <h1 className="font-display text-3xl text-iua-navy">{tPortal("pages.teacher.cours")}</h1>
       <p className="mt-2 text-sm text-iua-muted">
         Matières qui vous sont affectées pour l’année — avec couverture des notes.
       </p>

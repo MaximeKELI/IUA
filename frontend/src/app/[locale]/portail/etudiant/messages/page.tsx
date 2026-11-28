@@ -1,4 +1,6 @@
 "use client";
+
+import { useTranslations } from "next-intl";
 import { FormEvent, useEffect, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
 import { apiGet, apiSend } from "@/lib/api";
@@ -6,6 +8,8 @@ import { studentNav } from "@/lib/navigation";
 import { useAuthToken } from "@/lib/useAuthToken";
 type C = { subject: string; subject_id: string; teacher: string; email: string };
 export default function Page() {
+  const tPortal = useTranslations("portal");
+
   const { token, ready } = useAuthToken();
   const [contacts, setContacts] = useState<C[]>([]);
   const [form, setForm] = useState({ subject: "", body: "" });
@@ -14,8 +18,8 @@ export default function Page() {
   useEffect(()=>{ if(!ready||!token) return; apiGet<C[]>("/student/contacts/", token).then(d=>{ setContacts(d); if(d[0]) setForm(f=>({...f, subject:d[0].subject_id})); }); },[ready,token]);
   async function onSubmit(e: FormEvent){ e.preventDefault(); if(!token) return; try{ await apiSend("/student/contacts/", token, "POST", form); setMsg("Message envoyé à l'enseignant (notification)."); setForm(f=>({...f, body:""})); } catch(err){ setError(err instanceof Error?err.message:"Échec"); } }
   return (
-    <PortalShell title="Espace étudiant" nav={studentNav}>
-      <h1 className="font-display text-3xl text-iua-navy">Contacter un enseignant</h1>
+    <PortalShell title={tPortal("student.space")} nav={studentNav}>
+      <h1 className="font-display text-3xl text-iua-navy">{tPortal("pages.student.messages")}</h1>
       <p className="mt-2 text-sm text-iua-muted">Écrivez à l&apos;enseignant d&apos;une de vos matières.</p>
       {msg && <p className="mt-4 text-sm text-emerald-700">{msg}</p>}
       {error && <p className="mt-4 text-sm text-red-700">{error}</p>}

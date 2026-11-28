@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { FormEvent, useEffect, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
 import { apiGet, apiSend, unwrapList } from "@/lib/api";
@@ -25,6 +27,8 @@ const statusLabel: Record<string, string> = {
 };
 
 export default function TeacherDemandesPage() {
+  const tPortal = useTranslations("portal");
+
   const { token, ready } = useAuthToken();
   const [items, setItems] = useState<AdminRequest[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -71,8 +75,8 @@ export default function TeacherDemandesPage() {
   }
 
   return (
-    <PortalShell title="Espace enseignant" nav={teacherNav}>
-      <h1 className="font-display text-3xl text-iua-navy">Demandes</h1>
+    <PortalShell title={tPortal("teacher.space")} nav={teacherNav}>
+      <h1 className="font-display text-3xl text-iua-navy">{tPortal("pages.teacher.demandes")}</h1>
       <p className="mt-2 text-sm text-iua-muted">
         Attestation, matériel, planning… adressez-vous au secrétariat depuis ici.
       </p>

@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { FormEvent, useEffect, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
 import { apiGet, apiSend, clearApiMemoryCache, Page, unwrapList } from "@/lib/api";
@@ -21,6 +23,8 @@ type Enrollment = {
 };
 
 export default function AdminInscriptionsPage() {
+  const tPortal = useTranslations("portal");
+
   const { token, ready } = useAuthToken();
   const roles = getStoredUser()?.roles || [];
   const showIds = canSeeStudentIds(roles);
@@ -91,7 +95,7 @@ export default function AdminInscriptionsPage() {
   return (
     <PortalShell title={resolveOpsTitle(roles)} nav={resolveOpsNav(roles)}>
       <p className="text-xs uppercase tracking-[0.18em] text-iua-cyan">Scolarité</p>
-      <h1 className="mt-2 font-display text-3xl text-iua-navy">Inscriptions</h1>
+      <h1 className="mt-2 font-display text-3xl text-iua-navy">{tPortal("pages.admin.inscriptions")}</h1>
       <p className="mt-2 text-sm text-iua-muted">
         Inscrivez un étudiant à une formation / promotion.
         {!showIds && " Les matricules restent masqués pour la direction."}

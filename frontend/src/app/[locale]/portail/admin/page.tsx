@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { Link } from "@/i18n/navigation";
 import { useEffect, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
@@ -45,6 +47,8 @@ const QUICK = [
 ];
 
 export default function AdminPortalPage() {
+  const tPortal = useTranslations("portal");
+
   const [data, setData] = useState<AdminDashboard | null>(null);
   const [error, setError] = useState<string | null>(null);
   const roles = getStoredUser()?.roles || [];
@@ -60,7 +64,7 @@ export default function AdminPortalPage() {
 
   return (
     <PortalShell title={resolveOpsTitle(roles)} nav={resolveOpsNav(roles)}>
-      <h1 className="font-display text-3xl text-iua-navy">Vue d&apos;ensemble</h1>
+      <h1 className="font-display text-3xl text-iua-navy">{tPortal("pages.admin.home")}</h1>
       <p className="mt-2 text-sm text-iua-muted">
         Secrétariat / administration — 20 accès opérationnels.
       </p>

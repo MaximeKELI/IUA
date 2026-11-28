@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useEffect, useState } from "react";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { PortalShell } from "@/components/PortalShell";
@@ -9,6 +11,8 @@ import { OfflineGradeOp, readOfflineQueue, writeOfflineQueue } from "@/lib/teach
 import { useAuthToken } from "@/lib/useAuthToken";
 
 export default function HorsLignePage() {
+  const tPortal = useTranslations("portal");
+
   const { token, ready } = useAuthToken();
   const [online, setOnline] = useState(true);
   const [queue, setQueue] = useState<OfflineGradeOp[]>([]);
@@ -63,8 +67,8 @@ export default function HorsLignePage() {
   }
 
   return (
-    <PortalShell title="Espace enseignant" nav={teacherNav}>
-      <h1 className="font-display text-3xl text-iua-navy">Mode hors-ligne</h1>
+    <PortalShell title={tPortal("teacher.space")} nav={teacherNav}>
+      <h1 className="font-display text-3xl text-iua-navy">{tPortal("pages.teacher.hors-ligne")}</h1>
       <p className="mt-2 max-w-2xl text-sm text-iua-muted">
         Saisissez des notes même sans réseau : elles sont mises en file locale puis synchronisées dès
         le retour de connexion (préparation app mobile / usage terrain).

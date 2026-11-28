@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useCallback, useEffect, useState } from "react";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { PortalShell } from "@/components/PortalShell";
@@ -22,6 +24,8 @@ type App = {
 type Pending = { id: string; status: "accepted" | "rejected" | "under_review" } | null;
 
 export default function AdminAdmissionsPage() {
+  const tPortal = useTranslations("portal");
+
   const { token, ready } = useAuthToken();
   const roles = getStoredUser()?.roles || [];
   const canAct = canManageAdminRequests(roles, getStoredUser()?.permissions);
@@ -68,7 +72,7 @@ export default function AdminAdmissionsPage() {
   return (
     <PortalShell title={resolveOpsTitle(roles)} nav={resolveOpsNav(roles)}>
       <p className="text-xs uppercase tracking-[0.18em] text-iua-cyan">Admissions</p>
-      <h1 className="mt-2 font-display text-3xl text-iua-navy">Candidatures internationales</h1>
+      <h1 className="mt-2 font-display text-3xl text-iua-navy">{tPortal("pages.admin.admissions")}</h1>
       <p className="mt-2 text-sm text-iua-muted">
         Dossiers soumis via le formulaire public. Validez selon votre grade.
       </p>

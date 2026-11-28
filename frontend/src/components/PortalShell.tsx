@@ -135,6 +135,12 @@ export function PortalShell({
 
   return (
     <div className="min-h-[100svh] bg-iua-mist">
+      <a
+        href="#portal-main"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-white focus:px-3 focus:py-2 focus:text-iua-navy"
+      >
+        Skip to content
+      </a>
       <header className="sticky top-0 z-20 border-b border-iua-navy/10 bg-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
           <div className="flex items-center gap-3">
@@ -143,6 +149,8 @@ export function PortalShell({
               className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-iua-navy text-white lg:hidden"
               onClick={() => setMenuOpen((v) => !v)}
               aria-label="Menu"
+              aria-expanded={menuOpen}
+              aria-controls="portal-nav"
             >
               {menuOpen ? "×" : "☰"}
             </button>
@@ -197,8 +205,10 @@ export function PortalShell({
 
       <div className="mx-auto grid max-w-7xl lg:grid-cols-[260px_1fr]">
         <aside
+          id="portal-nav"
           className={`${menuOpen ? "block" : "hidden"} px-3 py-5 lg:block lg:min-h-[calc(100svh-65px)]`}
           style={{ backgroundColor: "#0A2342", color: "#ffffff" }}
+          aria-label={safeT((k) => tp(k as Parameters<typeof tp>[0]), "nav") || "Navigation"}
         >
           <p className="px-3 text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color: "rgba(255,255,255,0.55)" }}>
             {safeT((k) => tp(k as Parameters<typeof tp>[0]), "nav") || "Navigation"}
@@ -222,28 +232,32 @@ export function PortalShell({
                     const label = tr(link.labelKey);
                     return (
                       <li key={link.href}>
-                        <Link
-                          href={soon ? "#" : link.href}
-                          onClick={(e) => {
-                            if (soon) e.preventDefault();
-                            setMenuOpen(false);
-                          }}
-                          className="flex items-center justify-between rounded-md px-3 py-2.5 text-sm font-medium transition"
-                          style={
-                            active
-                              ? { backgroundColor: "#3DB8E8", color: "#0A2342" }
-                              : soon
-                                ? { color: "rgba(255,255,255,0.35)", cursor: "default" }
-                                : { color: "rgba(255,255,255,0.92)" }
-                          }
-                        >
-                          <span>{label}</span>
-                          {soon && (
+                        {soon ? (
+                          <button
+                            type="button"
+                            disabled
+                            className="flex w-full items-center justify-between rounded-md px-3 py-2.5 text-sm font-medium"
+                            style={{ color: "rgba(255,255,255,0.35)", cursor: "not-allowed" }}
+                          >
+                            <span>{label}</span>
                             <span className="text-[10px] uppercase tracking-wide" style={{ color: "rgba(255,255,255,0.5)" }}>
                               {tc("soon")}
                             </span>
-                          )}
-                        </Link>
+                          </button>
+                        ) : (
+                          <Link
+                            href={link.href}
+                            onClick={() => setMenuOpen(false)}
+                            className="flex items-center justify-between rounded-md px-3 py-2.5 text-sm font-medium transition"
+                            style={
+                              active
+                                ? { backgroundColor: "#3DB8E8", color: "#0A2342" }
+                                : { color: "rgba(255,255,255,0.92)" }
+                            }
+                          >
+                            <span>{label}</span>
+                          </Link>
+                        )}
                       </li>
                     );
                   })}
@@ -253,7 +267,7 @@ export function PortalShell({
           </div>
         </aside>
 
-        <main className="px-4 py-8 sm:px-6 lg:px-8 animate-[fadeUp_0.35s_ease_both]">
+        <main id="portal-main" className="px-4 py-8 sm:px-6 lg:px-8 animate-[fadeUp_0.35s_ease_both]">
           {children}
         </main>
       </div>

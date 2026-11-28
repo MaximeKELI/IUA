@@ -7,7 +7,9 @@ from django.conf import settings
 from django.core import signing
 
 MFA_TOKEN_SALT = "iua.mfa.pending"
+MFA_ENROLL_SALT = "iua.mfa.enroll"
 MFA_TOKEN_MAX_AGE = 300  # 5 minutes
+MFA_ENROLL_MAX_AGE = 900  # 15 minutes
 
 
 def user_needs_mfa_challenge(user) -> bool:
@@ -35,6 +37,20 @@ def issue_mfa_token(user_id: str) -> str:
 def parse_mfa_token(token: str) -> str | None:
     try:
         data = signing.loads(token, salt=MFA_TOKEN_SALT, max_age=MFA_TOKEN_MAX_AGE)
+        return data.get("uid")
+    except signing.BadSignature:
+        return None
+
+
+def issue_mfa_enroll_token(user_id: str) -> str:
+    return signing.dumps({"uid": str(user_id), "purpose": "enroll"}, salt=MFA_ENROLL_SALT)
+
+
+def parse_mfa_enroll_token(token: str) -> str | None:
+    try:
+        data = signing.loads(token, salt=MFA_ENROLL_SALT, max_age=MFA_ENROLL_MAX_AGE)
+        if data.get("purpose") != "enroll":
+            return None
         return data.get("uid")
     except signing.BadSignature:
         return None

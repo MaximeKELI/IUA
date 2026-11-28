@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useEffect, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
 import { apiGet, Page, unwrapList } from "@/lib/api";
@@ -27,6 +29,8 @@ type Grade = {
 };
 
 export default function AdminNotesConsultPage() {
+  const tPortal = useTranslations("portal");
+
   const { token, ready } = useAuthToken();
   const roles = getStoredUser()?.roles || [];
   const showIds = canSeeStudentIds(roles);
@@ -44,7 +48,7 @@ export default function AdminNotesConsultPage() {
   return (
     <PortalShell title={resolveOpsTitle(roles)} nav={resolveOpsNav(roles)}>
       <p className="text-xs uppercase tracking-[0.18em] text-iua-cyan">Pédagogie</p>
-      <h1 className="mt-2 font-display text-3xl text-iua-navy">Notes des enseignants</h1>
+      <h1 className="mt-2 font-display text-3xl text-iua-navy">{tPortal("pages.admin.notes")}</h1>
       <p className="mt-2 max-w-2xl text-sm text-iua-muted">
         {editable
           ? "Notes déjà saisies. La saisie se fait dans l'espace enseignant."

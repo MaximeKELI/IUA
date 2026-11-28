@@ -1,4 +1,6 @@
 "use client";
+
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
 import { apiGet, unwrapList } from "@/lib/api";
@@ -10,6 +12,8 @@ import { useAuthToken } from "@/lib/useAuthToken";
 type Row = Record<string, unknown>;
 
 export default function AdminPage() {
+  const tPortal = useTranslations("portal");
+
   const { token, ready } = useAuthToken();
   const roles = getStoredUser()?.roles || [];
   const [rows, setRows] = useState<Row[]>([]);
@@ -23,7 +27,7 @@ export default function AdminPage() {
   const cols: [string, string][] = [["student_number", "Matricule"], ["full_name", "Nom"], ["program", "Formation"], ["cohort", "Cohorte"]];
   return (
     <PortalShell title={resolveOpsTitle(roles)} nav={resolveOpsNav(roles)}>
-      <h1 className="font-display text-3xl text-iua-navy">Cartes / profils</h1>
+      <h1 className="font-display text-3xl text-iua-navy">{tPortal("pages.admin.cartes")}</h1>
       <p className="mt-2 text-sm text-iua-muted">Fiches étudiantes pour cartes.</p>
       {error && <p className="mt-4 text-sm text-red-700">{error}</p>}
       <div className="mt-8 overflow-x-auto rounded-xl bg-white shadow-soft">

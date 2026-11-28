@@ -80,6 +80,8 @@ const statusLabel: Record<string, string> = {
 };
 
 export default function StudentPortalPage() {
+  const tPortal = useTranslations("portal");
+
   const locale = useLocale();
   const t = useTranslations("portal.student");
   const [data, setData] = useState<StudentDashboard | null>(null);
@@ -197,8 +199,8 @@ export default function StudentPortalPage() {
                   href={item.href}
                   className="rounded-xl bg-white p-4 shadow-soft transition hover:bg-iua-mist"
                 >
-                  <h3 className="font-semibold text-iua-navy">{item.title}</h3>
-                  <p className="mt-1 text-sm text-iua-muted">{item.body}</p>
+                  <h3 className="font-semibold text-iua-navy">{t(item.key)}</h3>
+                  <p className="mt-1 text-sm text-iua-muted">{t("groupServices")}</p>
                 </Link>
               ))}
             </div>

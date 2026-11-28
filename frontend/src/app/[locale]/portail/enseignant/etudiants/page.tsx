@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { Link } from "@/i18n/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
@@ -111,7 +113,7 @@ function TeacherStudentsInner() {
 
   return (
     <>
-      <h1 className="font-display text-3xl text-iua-navy">Mes étudiants</h1>
+      <h1 className="font-display text-3xl text-iua-navy">{tPortal("pages.teacher.etudiants")}</h1>
       <p className="mt-2 text-sm text-iua-muted">
         Étudiants des formations liées à vos matières.
       </p>
@@ -215,8 +217,10 @@ function TeacherStudentsInner() {
 }
 
 export default function TeacherStudentsPage() {
+  const tPortal = useTranslations("portal");
+
   return (
-    <PortalShell title="Espace enseignant" nav={teacherNav}>
+    <PortalShell title={tPortal("teacher.space")} nav={teacherNav}>
       <Suspense fallback={<p className="text-sm text-iua-muted">Chargement…</p>}>
         <TeacherStudentsInner />
       </Suspense>

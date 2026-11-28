@@ -17,10 +17,12 @@
 | Contrôle | Mesure |
 |----------|--------|
 | Mots de passe | Argon2 / PBKDF2 Django, politique longueur + complexité |
-| Sessions | Rotation refresh tokens, révocation |
-| MFA | TOTP obligatoire pour rôles sensibles (finance, direction, admin) |
+| Sessions | JWT HttpOnly cookies (`iua_access` / `iua_refresh`) + CSRF double-submit (`iua_csrf` + `X-IUA-CSRF`) |
+| Access TTL | 15 minutes ; refresh blacklisté au logout / rotation |
+| MFA | TOTP (pyotp) pour rôles sensibles (finance, direction, admin) |
 | Brute force | Rate limit login + lockout progressif |
 | Reset password | Tokens one-time, TTL court |
+| Tokens body | Désactivés en prod (`IUA_EXPOSE_TOKENS_IN_BODY=false`) |
 
 ---
 
@@ -38,11 +40,14 @@ Scopes optionnels : `faculty_id`, `program_id`, `cohort_id`.
 
 - ORM Django → anti SQLi
 - Templates/React échappement → XSS
-- CSRF tokens pour cookies session
-- Headers sécurisés (CSP, HSTS, X-Frame-Options) via Nginx
+- CSRF double-submit sur mutations cookie-auth (middleware + front)
+- Headers sécurisés (CSP, HSTS, COOP/CORP, X-Frame-Options) via Nginx + ExtremeSecurityMiddleware
+- Media authentifié (`/api/v1/media/`) — `/media/` public refusé en nginx
 - Upload : types MIME allowlist, scan taille, stockage hors webroot
 - HTTPS obligatoire en prod
-- CORS strict (origines connues)
+- CORS credentials + origines connues uniquement
+- Conteneurs Docker non-root (`USER iua`)
+- DSAR : `GET /api/v1/privacy/export/` + demande d'effacement auditée
 
 ---
 

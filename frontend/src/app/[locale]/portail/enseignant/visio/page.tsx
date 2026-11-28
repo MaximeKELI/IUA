@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { FormEvent, useEffect, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
 import { apiGet, apiSend, clearApiMemoryCache, Page, unwrapList } from "@/lib/api";
@@ -17,6 +19,8 @@ type Meeting = {
 };
 
 export default function VisioPage() {
+  const tPortal = useTranslations("portal");
+
   const { token, ready, assignments } = useTeacherAssignments();
   const [items, setItems] = useState<Meeting[]>([]);
   const [form, setForm] = useState({ subject: "", title: "", room_name: "", scheduled_at: "" });
@@ -49,8 +53,8 @@ export default function VisioPage() {
   }
 
   return (
-    <PortalShell title="Espace enseignant" nav={teacherNav}>
-      <h1 className="font-display text-3xl text-iua-navy">Visio Jitsi</h1>
+    <PortalShell title={tPortal("teacher.space")} nav={teacherNav}>
+      <h1 className="font-display text-3xl text-iua-navy">{tPortal("pages.teacher.visio")}</h1>
       <p className="mt-2 text-sm text-iua-muted">
         Créez une salle de visioconférence liée à votre cours — ouverture directe dans Jitsi Meet.
       </p>

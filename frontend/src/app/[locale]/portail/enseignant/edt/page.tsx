@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { FormEvent, useEffect, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
 import { apiGet, apiSend, clearApiMemoryCache, Page, unwrapList } from "@/lib/api";
@@ -22,6 +24,8 @@ type Slot = {
 const DAYS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
 
 export default function EdtPage() {
+  const tPortal = useTranslations("portal");
+
   const { token, ready, assignments } = useTeacherAssignments();
   const [slots, setSlots] = useState<Slot[]>([]);
   const [form, setForm] = useState({
@@ -67,8 +71,8 @@ export default function EdtPage() {
   }
 
   return (
-    <PortalShell title="Espace enseignant" nav={teacherNav}>
-      <h1 className="font-display text-3xl text-iua-navy">Emploi du temps</h1>
+    <PortalShell title={tPortal("teacher.space")} nav={teacherNav}>
+      <h1 className="font-display text-3xl text-iua-navy">{tPortal("pages.teacher.edt")}</h1>
       <p className="mt-2 text-sm text-iua-muted">Vos créneaux hebdomadaires, salles et lien visio associé.</p>
       {error && <p className="mt-4 text-sm text-red-700">{error}</p>}
       {ok && <p className="mt-4 text-sm text-emerald-700">{ok}</p>}

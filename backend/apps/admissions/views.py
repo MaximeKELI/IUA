@@ -60,6 +60,13 @@ class AdmissionApplicationViewSet(viewsets.ModelViewSet):
         app.reviewed_by = request.user
         app.reviewed_at = timezone.now()
         app.save()
+        if app.status == AdmissionApplication.Status.ACCEPTED:
+            try:
+                _provision_accepted_applicant(app)
+            except Exception:
+                import logging
+
+                logging.getLogger("iua.admissions").exception("provision on accept failed")
         try:
             from apps.teaching.ops_views import log_audit
 
@@ -74,3 +81,46 @@ class AdmissionApplicationViewSet(viewsets.ModelViewSet):
 
             logging.getLogger("iua.audit").exception("admission review audit failed")
         return Response(AdmissionApplicationSerializer(app).data)
+
+
+def _provision_accepted_applicant(app: AdmissionApplication) -> None:
+    """Create student user shell after acceptance (password via reset flow)."""
+    import secrets
+
+    from django.db import transaction
+
+    from apps.academic.models import StudentProfile
+    from apps.identity.models import User
+    from apps.identity.services import assign_role
+
+    local = (app.email or "candidat").split("@")[0][:40]
+    with transaction.atomic():
+        user = User.objects.filter(email__iexact=app.email).first()
+        if not user:
+            user = User.objects.create_user(
+                email=app.email.lower(),
+                password=secrets.token_urlsafe(24),
+                first_name=local[:150] or "Candidat",
+                last_name=(app.nationality or "Admis")[:150],
+                is_active=True,
+            )
+        assign_role(user, "student")
+        if not StudentProfile.objects.filter(user=user).exists():
+            StudentProfile.objects.create(
+                user=user,
+                student_number=f"ADM-{str(app.id)[:8].upper()}",
+                status="active",
+                level="",
+            )
+        try:
+            from apps.notifications.models import Notification
+
+            Notification.objects.create(
+                recipient=user,
+                title="Admission acceptée",
+                body="Votre candidature IUA a été acceptée. Définissez votre mot de passe via « Mot de passe oublié ».",
+                category="admissions",
+            )
+        except Exception:
+            pass
+

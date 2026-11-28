@@ -99,3 +99,30 @@ def test_privacy_export(seeded):
     assert res.status_code == 200
     assert res.data["subject"]["email"] == "dpo@demo.iua.local"
     assert "retention_note" in res.data
+
+
+@pytest.mark.django_db
+def test_cookie_mutation_requires_csrf(seeded):
+    _user("csrf@demo.iua.local", "student")
+    client = APIClient()
+    login = client.post(
+        reverse("auth-login"),
+        {"email": "csrf@demo.iua.local", "password": "SecurePass123!"},
+        format="json",
+    )
+    assert login.status_code == 200
+    client.cookies = login.cookies
+    blocked = client.post(reverse("auth-logout"), {}, format="json")
+    assert blocked.status_code == 403
+    assert blocked.json()["code"] == "csrf"
+
+
+@pytest.mark.django_db
+def test_health_live_ready(seeded):
+    client = APIClient()
+    live = client.get("/health/live/")
+    ready = client.get("/health/ready/")
+    assert live.status_code == 200
+    assert live.json()["status"] == "alive"
+    assert ready.status_code == 200
+    assert ready.json()["status"] == "ready"

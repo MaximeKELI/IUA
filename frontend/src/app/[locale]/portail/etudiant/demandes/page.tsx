@@ -1,6 +1,6 @@
 "use client";
 
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
 import { apiGet, apiSend, unwrapList } from "@/lib/api";
@@ -56,6 +56,8 @@ const presets: Record<string, { subject: string; body: string }> = {
 };
 
 export default function StudentDemandesPage() {
+  const tPortal = useTranslations("portal");
+
   const locale = useLocale();
   const { token, ready } = useAuthToken();
   const [items, setItems] = useState<AdminRequest[]>([]);
@@ -134,9 +136,9 @@ export default function StudentDemandesPage() {
   }
 
   return (
-    <PortalShell title="Espace étudiant" nav={studentNav}>
+    <PortalShell title={tPortal("student.space")} nav={studentNav}>
       <p className="text-xs uppercase tracking-[0.18em] text-iua-cyan">Démarches</p>
-      <h1 className="mt-2 font-display text-3xl text-iua-navy">Demandes administratives</h1>
+      <h1 className="mt-2 font-display text-3xl text-iua-navy">{tPortal("pages.student.demandes")}</h1>
       <p className="mt-2 max-w-xl text-sm text-iua-muted">
         Attestation de scolarité, relevé de notes, certificat… Déposez et suivez vos demandes ici.
         Elles sont traitées par le <strong>secrétariat</strong> (pas par les enseignants).

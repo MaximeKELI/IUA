@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useCallback, useEffect, useState } from "react";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { PortalShell } from "@/components/PortalShell";
@@ -26,6 +28,8 @@ type CatchUp = {
 type Pending = { id: string; status: "approved" | "rejected" } | null;
 
 export default function AdminRattrapagesPage() {
+  const tPortal = useTranslations("portal");
+
   const { token, ready } = useAuthToken();
   const roles = getStoredUser()?.roles || [];
   const canAct = canOverseeCatchUps(roles);
@@ -66,7 +70,7 @@ export default function AdminRattrapagesPage() {
   return (
     <PortalShell title={resolveOpsTitle(roles)} nav={resolveOpsNav(roles)}>
       <p className="text-xs uppercase tracking-[0.18em] text-iua-cyan">Supervision académique</p>
-      <h1 className="mt-2 font-display text-3xl text-iua-navy">Rattrapages / Session 2</h1>
+      <h1 className="mt-2 font-display text-3xl text-iua-navy">{tPortal("pages.admin.rattrapages")}</h1>
       <p className="mt-2 max-w-2xl text-sm text-iua-muted">
         Les enseignants créent et gèrent les dossiers. Secrétariat, direction académique et direction
         peuvent valider en supervision.

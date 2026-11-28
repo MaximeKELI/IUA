@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useEffect, useMemo, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
 import { apiGet, Page, unwrapList } from "@/lib/api";
@@ -19,6 +21,8 @@ type Evaluation = {
 };
 
 export default function EvaluationsPage() {
+  const tPortal = useTranslations("portal");
+
   const { token, ready } = useTeacherAssignments();
   const [items, setItems] = useState<Evaluation[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -51,8 +55,8 @@ export default function EvaluationsPage() {
   }, [items]);
 
   return (
-    <PortalShell title="Espace enseignant" nav={teacherNav}>
-      <h1 className="font-display text-3xl text-iua-navy">Évaluations des enseignements</h1>
+    <PortalShell title={tPortal("teacher.space")} nav={teacherNav}>
+      <h1 className="font-display text-3xl text-iua-navy">{tPortal("pages.teacher.evaluations")}</h1>
       <p className="mt-2 text-sm text-iua-muted">
         Retours étudiants (anonymes possibles) sur clarté, utilité, rythme et satisfaction globale.
       </p>

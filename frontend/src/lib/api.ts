@@ -19,7 +19,7 @@ export type LoginResponse = {
 };
 
 export type LoginResult =
-  | LoginResponse
+  | (Partial<LoginResponse> & { cookie_auth?: boolean; user: AuthUser })
   | {
       mfa_required: true;
       mfa_token: string;
@@ -27,6 +27,7 @@ export type LoginResult =
     }
   | {
       mfa_enrollment_required: true;
+      mfa_enrollment_token?: string;
       message?: string;
     };
 
@@ -105,7 +106,7 @@ function authHeaders(token?: string | null): HeadersInit {
     "Content-Type": "application/json",
     Accept: "application/json",
   };
-  if (token) headers.Authorization = `Bearer ${token}`;
+  if (token && token !== "cookie") headers.Authorization = `Bearer ${token}`;
   const csrf = readCsrfCookie();
   if (csrf) headers["X-IUA-CSRF"] = csrf;
   return headers;
@@ -199,10 +200,15 @@ export async function syncSessionCookies(
   roles?: string[],
 ): Promise<void> {
   try {
+    const payload: Record<string, unknown> = {};
+    if (access && access !== "cookie") payload.access = access;
+    if (refresh && refresh !== "cookie") payload.refresh = refresh;
+    if (roles) payload.roles = roles;
+    if (!Object.keys(payload).length) return;
     await fetch("/api/session", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ access, refresh, roles }),
+      body: JSON.stringify(payload),
     });
   } catch {
     /* non-fatal for API calls */
@@ -237,6 +243,59 @@ export async function apiMfaVerify(mfaToken: string, code: string): Promise<Logi
   });
   if (!res.ok) throw new Error(await parseError(res));
   return res.json();
+}
+
+export async function apiMfaEnrollSetup(enrollToken: string): Promise<{
+  secret: string;
+  otpauth_uri: string;
+  mfa_enrollment_token: string;
+}> {
+  const res = await fetchWithTimeout(`${API_URL}/auth/mfa/enroll/setup/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ mfa_enrollment_token: enrollToken }),
+    cache: "no-store",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return res.json();
+}
+
+export async function apiMfaEnrollConfirm(
+  enrollToken: string,
+  code: string,
+): Promise<Partial<LoginResponse> & { user: AuthUser; cookie_auth?: boolean }> {
+  const res = await fetchWithTimeout(`${API_URL}/auth/mfa/enroll/confirm/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ mfa_enrollment_token: enrollToken, code }),
+    cache: "no-store",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return res.json();
+}
+
+export async function apiPasswordResetRequest(email: string): Promise<void> {
+  const res = await fetchWithTimeout(`${API_URL}/auth/password/reset/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+    cache: "no-store",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+}
+
+export async function apiPasswordResetConfirm(
+  uid: string,
+  token: string,
+  password: string,
+): Promise<void> {
+  const res = await fetchWithTimeout(`${API_URL}/auth/password/reset/confirm/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ uid, token, password }),
+    cache: "no-store",
+  });
+  if (!res.ok) throw new Error(await parseError(res));
 }
 
 export async function apiLogout(): Promise<void> {

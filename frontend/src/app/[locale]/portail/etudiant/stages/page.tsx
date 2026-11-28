@@ -1,4 +1,6 @@
 "use client";
+
+import { useTranslations } from "next-intl";
 import { FormEvent, useEffect, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
 import { apiGet, apiSend, clearApiMemoryCache, unwrapList } from "@/lib/api";
@@ -7,6 +9,8 @@ import { studentNav } from "@/lib/navigation";
 import { useAuthToken } from "@/lib/useAuthToken";
 type I = { id: string; company: string; role: string; city: string; status: string; notes: string };
 export default function Page() {
+  const tPortal = useTranslations("portal");
+
   const { token, ready } = useAuthToken();
   const [items, setItems] = useState<I[]>([]);
   const [form, setForm] = useState({ company: "", role: "", city: "Abidjan", status: "searching", notes: "" });
@@ -15,8 +19,8 @@ export default function Page() {
   useEffect(()=>{ if(ready&&token) void reload(); },[ready,token]);
   async function onSubmit(e: FormEvent){ e.preventDefault(); if(!token) return; await apiSend("/student/internships/", token, "POST", form); clearApiMemoryCache(); setMsg("Stage enregistré."); setForm({company:"",role:"",city:"Abidjan",status:"searching",notes:""}); await reload(); }
   return (
-    <PortalShell title="Espace étudiant" nav={studentNav}>
-      <h1 className="font-display text-3xl text-iua-navy">Stages</h1>
+    <PortalShell title={tPortal("student.space")} nav={studentNav}>
+      <h1 className="font-display text-3xl text-iua-navy">{tPortal("pages.student.stages")}</h1>
       <p className="mt-2 text-sm text-iua-muted">Suivez vos recherches et stages en entreprise.</p>
       {msg && <p className="mt-4 text-sm text-emerald-700">{msg}</p>}
       <form onSubmit={onSubmit} className="mt-8 grid gap-3 rounded-xl bg-white p-5 shadow-soft md:grid-cols-2">

@@ -49,9 +49,15 @@ class AttendanceSessionSerializer(serializers.ModelSerializer):
         read_only_fields = ("teacher",)
 
     def get_present_count(self, obj):
+        annotated = getattr(obj, "present_count", None)
+        if annotated is not None:
+            return annotated
         return obj.records.filter(status__in=["present", "late"]).count()
 
     def get_absent_count(self, obj):
+        annotated = getattr(obj, "absent_count", None)
+        if annotated is not None:
+            return annotated
         return obj.records.filter(status="absent").count()
 
 

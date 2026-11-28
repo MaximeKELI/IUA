@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useEffect, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
 import { apiGet } from "@/lib/api";
@@ -18,6 +20,8 @@ type Inst = {
 };
 
 export default function InstitutionPage() {
+  const tPortal = useTranslations("portal");
+
   const { token, ready } = useAuthToken();
   const [inst, setInst] = useState<Inst | null>(null);
 
@@ -27,8 +31,8 @@ export default function InstitutionPage() {
   }, [ready, token]);
 
   return (
-    <PortalShell title="Direction" nav={directionNav}>
-      <h1 className="font-display text-3xl text-iua-navy">Fiche établissement</h1>
+    <PortalShell title={tPortal("direction.space")} nav={directionNav}>
+      <h1 className="font-display text-3xl text-iua-navy">{tPortal("pages.direction.etablissement")}</h1>
       <p className="mt-2 text-sm text-iua-muted">Identité officielle de l&apos;IUA.</p>
       {inst && (
         <dl className="mt-8 grid gap-4 rounded-xl bg-white p-6 text-sm shadow-soft sm:grid-cols-2">

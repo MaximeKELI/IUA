@@ -126,6 +126,10 @@ class LoginAttempt(UUIDModel):
 
     class Meta:
         ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["email", "successful", "created_at"]),
+            models.Index(fields=["ip_address", "created_at"]),
+        ]
 
 
 class PersonProfile(UUIDModel, TimeStampedModel, SoftDeleteModel):

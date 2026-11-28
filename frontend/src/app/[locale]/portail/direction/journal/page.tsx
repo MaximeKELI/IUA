@@ -1,4 +1,6 @@
 "use client";
+
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
 import { apiGet, unwrapList } from "@/lib/api";
@@ -9,6 +11,8 @@ import { useAuthToken } from "@/lib/useAuthToken";
 type Row = Record<string, unknown>;
 
 export default function DirPage() {
+  const tPortal = useTranslations("portal");
+
   const { token, ready } = useAuthToken();
   const [rows, setRows] = useState<Row[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -20,8 +24,8 @@ export default function DirPage() {
   }, [ready, token]);
   const cols: [string, string][] = [["actor_name", "Acteur"], ["action", "Action"], ["entity", "Entité"], ["detail", "Détail"]];
   return (
-    <PortalShell title="Direction" nav={directionNav}>
-      <h1 className="font-display text-3xl text-iua-navy">Journal d'activité</h1>
+    <PortalShell title={tPortal("direction.space")} nav={directionNav}>
+      <h1 className="font-display text-3xl text-iua-navy">{tPortal("pages.direction.journal")}</h1>
       <p className="mt-2 text-sm text-iua-muted">Audit léger des actions ops.</p>
       {error && <p className="mt-4 text-sm text-red-700">{error}</p>}
       <div className="mt-8 overflow-x-auto rounded-xl bg-white shadow-soft">

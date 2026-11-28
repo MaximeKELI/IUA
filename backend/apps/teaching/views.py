@@ -116,6 +116,24 @@ class AttendanceSessionViewSet(TeacherScopedMixin, viewsets.ModelViewSet):
     )
     filterset_fields = ("subject", "academic_year", "session_date")
 
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .annotate(
+                present_count=Count(
+                    "records",
+                    filter=Q(records__status__in=["present", "late"]),
+                    distinct=True,
+                ),
+                absent_count=Count(
+                    "records",
+                    filter=Q(records__status="absent"),
+                    distinct=True,
+                ),
+            )
+        )
+
     def get_permissions(self):
         return [require_permission("academic.grades.manage")()]
 
@@ -444,12 +462,41 @@ def teacher_insights(request):
         teacher=staff, due_at__lt=now, is_published=True
     ).annotate(subs=Count("submissions")).filter(subs=0).count() if staff else 0
 
+    # Batch aggregates — avoid per-assignment N+1 queries
+    grade_stats = {
+        row["subject_id"]: row
+        for row in Grade.objects.filter(subject_id__in=subject_ids, entry_status="scored", score__isnull=False)
+        .values("subject_id")
+        .annotate(avg=Avg("score"), graded=Count("student_id", distinct=True))
+    }
+    draft_stats = {
+        row["subject_id"]: row["n"]
+        for row in Grade.objects.filter(subject_id__in=subject_ids, is_published=False)
+        .values("subject_id")
+        .annotate(n=Count("id"))
+    }
+    program_ids = {
+        a.subject.course_unit.program_id
+        for a in assignments
+        if a.subject_id and getattr(a.subject, "course_unit", None) and a.subject.course_unit.program_id
+    }
+    program_counts = {
+        row["program_id"]: row["n"]
+        for row in StudentProfile.objects.filter(program_id__in=program_ids)
+        .values("program_id")
+        .annotate(n=Count("id"))
+    }
     by_subject = []
     for a in assignments:
-        grades = Grade.objects.filter(subject=a.subject, entry_status="scored", score__isnull=False)
-        avg = grades.aggregate(v=Avg("score"))["v"]
-        students = StudentProfile.objects.filter(program=a.subject.course_unit.program).count()
-        graded = grades.values("student_id").distinct().count()
+        gs = grade_stats.get(a.subject_id, {})
+        avg = gs.get("avg")
+        graded = gs.get("graded") or 0
+        program_id = (
+            a.subject.course_unit.program_id
+            if getattr(a.subject, "course_unit", None)
+            else None
+        )
+        students = program_counts.get(program_id, 0) if program_id else 0
         by_subject.append(
             {
                 "subject_id": str(a.subject_id),
@@ -459,7 +506,7 @@ def teacher_insights(request):
                 "students": students,
                 "graded_students": graded,
                 "coverage_pct": round((graded / students) * 100) if students else 0,
-                "drafts": Grade.objects.filter(subject=a.subject, is_published=False).count(),
+                "drafts": draft_stats.get(a.subject_id, 0),
             }
         )
 

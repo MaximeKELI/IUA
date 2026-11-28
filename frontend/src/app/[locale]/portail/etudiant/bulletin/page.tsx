@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useEffect, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
 import { apiGet, unwrapList } from "@/lib/api";
@@ -21,6 +23,8 @@ type Grade = {
 };
 
 export default function BulletinPage() {
+  const tPortal = useTranslations("portal");
+
   const { token, ready } = useAuthToken();
   const [grades, setGrades] = useState<Grade[]>([]);
 
@@ -56,13 +60,13 @@ export default function BulletinPage() {
       })
       .join("");
     win.document.write(
-      `<!doctype html><html><head><title>Bulletin IUA</title></head><body style="font-family:system-ui;padding:24px"><h1>Bulletin de notes — IUA</h1><p>${new Date().toLocaleString("fr-FR")}</p><table style="border-collapse:collapse;width:100%"><thead><tr><th>Matière</th><th>Moyenne</th><th>Appréciation</th></tr></thead><tbody>${rows}</tbody></table><script>window.print()</script></body></html>`,
+      `<!doctype html><html><head><title>Bulletin IUA</title></head><body style="font-family:system-ui;padding:24px"><h1>{tPortal("pages.student.bulletin")}</h1><p>${new Date().toLocaleString("fr-FR")}</p><table style="border-collapse:collapse;width:100%"><thead><tr><th>Matière</th><th>Moyenne</th><th>Appréciation</th></tr></thead><tbody>${rows}</tbody></table><script>window.print()</script></body></html>`,
     );
     win.document.close();
   }
 
   return (
-    <PortalShell title="Espace étudiant" nav={studentNav}>
+    <PortalShell title={tPortal("student.space")} nav={studentNav}>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="font-display text-3xl text-iua-navy">Bulletin / export</h1>

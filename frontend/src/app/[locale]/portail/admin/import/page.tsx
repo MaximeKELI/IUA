@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { FormEvent, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
 import { apiSend } from "@/lib/api";
@@ -8,6 +10,8 @@ import { resolveOpsNav, resolveOpsTitle } from "@/lib/portalCapabilities";
 import { useAuthToken } from "@/lib/useAuthToken";
 
 export default function ImportPage() {
+  const tPortal = useTranslations("portal");
+
   const { token } = useAuthToken();
   const roles = getStoredUser()?.roles || [];
   const [csv, setCsv] = useState(
@@ -31,7 +35,7 @@ export default function ImportPage() {
 
   return (
     <PortalShell title={resolveOpsTitle(roles)} nav={resolveOpsNav(roles)}>
-      <h1 className="font-display text-3xl text-iua-navy">Import CSV étudiants</h1>
+      <h1 className="font-display text-3xl text-iua-navy">{tPortal("pages.admin.import")}</h1>
       <p className="mt-2 text-sm text-iua-muted">
         Collez un CSV pour prévisualiser (sécurisé, sans écriture).
       </p>

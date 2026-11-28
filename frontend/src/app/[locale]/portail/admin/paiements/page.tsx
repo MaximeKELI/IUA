@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useCallback, useEffect, useState } from "react";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { PortalShell } from "@/components/PortalShell";
@@ -18,6 +20,8 @@ type Row = {
 };
 
 export default function AdminPaiementsPage() {
+  const tPortal = useTranslations("portal");
+
   const { token, ready } = useAuthToken();
   const roles = getStoredUser()?.roles || [];
   const canConfirm = canManageAdminRequests(roles, getStoredUser()?.permissions);
@@ -57,7 +61,7 @@ export default function AdminPaiementsPage() {
 
   return (
     <PortalShell title={resolveOpsTitle(roles)} nav={resolveOpsNav(roles)}>
-      <h1 className="font-display text-3xl text-iua-navy">Paiements & échéances</h1>
+      <h1 className="font-display text-3xl text-iua-navy">{tPortal("pages.admin.paiements")}</h1>
       <p className="mt-2 text-sm text-iua-muted">
         Suivi des paiements. Confirmez la réception manuellement ou via webhook signé.
       </p>
@@ -111,7 +115,7 @@ export default function AdminPaiementsPage() {
 
       <ConfirmDialog
         open={!!pendingId}
-        title="Confirmer la réception du paiement ?"
+        title={tPortal("admin.space")}
         description="Le statut passera à « Payé ». Cette action est journalisée."
         confirmLabel="Confirmer"
         cancelLabel="Annuler"

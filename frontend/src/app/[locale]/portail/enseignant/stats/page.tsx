@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useEffect, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { PortalShell } from "@/components/PortalShell";
@@ -22,6 +24,8 @@ type Insights = {
 };
 
 export default function StatsPage() {
+  const tPortal = useTranslations("portal");
+
   const { token, ready } = useAuthToken();
   const [data, setData] = useState<Insights | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -34,8 +38,8 @@ export default function StatsPage() {
   }, [ready, token]);
 
   return (
-    <PortalShell title="Espace enseignant" nav={teacherNav}>
-      <h1 className="font-display text-3xl text-iua-navy">Stats & comparaisons</h1>
+    <PortalShell title={tPortal("teacher.space")} nav={teacherNav}>
+      <h1 className="font-display text-3xl text-iua-navy">{tPortal("pages.teacher.stats")}</h1>
       <p className="mt-2 text-sm text-iua-muted">
         Moyennes par matière, couverture de saisie et comparaison des promotions / années.
       </p>

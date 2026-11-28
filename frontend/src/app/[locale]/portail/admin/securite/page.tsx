@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { FormEvent, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
 import { apiSend } from "@/lib/api";
@@ -10,6 +12,8 @@ import { useAuthToken } from "@/lib/useAuthToken";
 type Setup = { secret: string; otpauth_uri: string };
 
 export default function AdminSecuritePage() {
+  const tPortal = useTranslations("portal");
+
   const { token, ready } = useAuthToken();
   const roles = getStoredUser()?.roles || [];
   const [setup, setSetup] = useState<Setup | null>(null);
@@ -53,7 +57,7 @@ export default function AdminSecuritePage() {
   return (
     <PortalShell title={resolveOpsTitle(roles)} nav={resolveOpsNav(roles)}>
       <p className="text-xs uppercase tracking-[0.18em] text-iua-cyan">Sécurité</p>
-      <h1 className="mt-2 font-display text-3xl text-iua-navy">Authentification MFA (TOTP)</h1>
+      <h1 className="mt-2 font-display text-3xl text-iua-navy">{tPortal("pages.admin.securite")}</h1>
       <p className="mt-2 max-w-2xl text-sm text-iua-muted">
         Recommandé pour admin, direction et finance. Utilisez Google Authenticator, Authy ou
         équivalent.

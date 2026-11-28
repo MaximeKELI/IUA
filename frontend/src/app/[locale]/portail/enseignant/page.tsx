@@ -58,6 +58,8 @@ const staffTypeLabel: Record<string, string> = {
 };
 
 export default function TeacherPortalPage() {
+  const tPortal = useTranslations("portal");
+
   const t = useTranslations("portal.teacher");
   const [data, setData] = useState<TeacherDashboard | null>(null);
   const [error, setError] = useState<string | null>(null);

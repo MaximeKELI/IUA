@@ -80,6 +80,7 @@ export const studentNav: PortalGroup[] = [
       { href: "/portail/etudiant/messages", labelKey: "portal.student.messages", status: "active" },
       { href: "/portail/etudiant/carte", labelKey: "portal.student.card", status: "active" },
       { href: "/portail/etudiant/hors-ligne", labelKey: "portal.student.offline", status: "active" },
+      { href: "/portail/etudiant/confidentialite", labelKey: "portal.student.privacy", status: "active" },
       { href: "/portail/etudiant/demandes", labelKey: "portal.student.requests", status: "active" },
       { href: "/portail/etudiant/notifications", labelKey: "portal.student.notifications", status: "active" },
     ],

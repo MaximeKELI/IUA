@@ -62,6 +62,10 @@ class AttendanceRecord(UUIDModel, TimeStampedModel):
 
     class Meta:
         unique_together = ("session", "student")
+        indexes = [
+            models.Index(fields=["session", "status"]),
+            models.Index(fields=["status", "created_at"]),
+        ]
 
 
 class ScheduleSlot(UUIDModel, TimeStampedModel):

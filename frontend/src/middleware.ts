@@ -1,29 +1,27 @@
 import createMiddleware from "next-intl/middleware";
 import { NextRequest, NextResponse } from "next/server";
 import { routing } from "./i18n/routing";
+import { canAccessPortalPath } from "./lib/portalAccess";
+import { resolveHomePath } from "./lib/authPaths";
 
 const intlMiddleware = createMiddleware(routing);
 
 const PORTAL_RE = /^\/(fr|en|pt|es|ar)\/portail(\/|$)/;
 const LOGIN_RE = /^\/(fr|en|pt|es|ar)\/connexion(\/|$)/;
 
-function canAccess(pathWithoutLocale: string, roles: string[]): boolean {
-  if (!pathWithoutLocale.startsWith("/portail")) return true;
-  const admin = ["admin", "super_admin", "secretariat", "academic_dir", "faculty_head", "dept_head", "hr", "it"];
-  const direction = ["direction", "super_admin", "finance_dir", "admin", "academic_dir"];
-  if (pathWithoutLocale.startsWith("/portail/etudiant")) {
-    return roles.some((r) => ["student", "alumni", ...admin].includes(r));
+/** Minimal JWT exp check (no signature verify in Edge — presence + expiry only). */
+function accessLooksValid(token: string): boolean {
+  try {
+    const parts = token.split(".");
+    if (parts.length !== 3) return false;
+    const payload = JSON.parse(
+      atob(parts[1].replace(/-/g, "+").replace(/_/g, "/")),
+    ) as { exp?: number };
+    if (!payload.exp) return true;
+    return payload.exp * 1000 > Date.now() - 30_000;
+  } catch {
+    return false;
   }
-  if (pathWithoutLocale.startsWith("/portail/enseignant")) {
-    return roles.some((r) => ["teacher", ...admin].includes(r));
-  }
-  if (pathWithoutLocale.startsWith("/portail/admin")) {
-    return roles.some((r) => [...admin, ...direction].includes(r));
-  }
-  if (pathWithoutLocale.startsWith("/portail/direction")) {
-    return roles.some((r) => direction.includes(r));
-  }
-  return roles.length > 0;
 }
 
 export default function middleware(request: NextRequest) {
@@ -32,11 +30,17 @@ export default function middleware(request: NextRequest) {
 
   if (PORTAL_RE.test(pathname)) {
     const access = request.cookies.get("iua_access")?.value;
-    if (!access) {
+    if (!access || !accessLooksValid(access)) {
       const locale = pathname.split("/")[1] || "fr";
       const url = request.nextUrl.clone();
       url.pathname = `/${locale}/connexion`;
-      return NextResponse.redirect(url);
+      const res = NextResponse.redirect(url);
+      if (access && !accessLooksValid(access)) {
+        res.cookies.set("iua_access", "", { path: "/", maxAge: 0 });
+        res.cookies.set("iua_refresh", "", { path: "/", maxAge: 0 });
+        res.cookies.set("iua_roles", "", { path: "/", maxAge: 0 });
+      }
+      return res;
     }
     const rolesRaw = request.cookies.get("iua_roles")?.value;
     let roles: string[] = [];
@@ -46,23 +50,16 @@ export default function middleware(request: NextRequest) {
       roles = [];
     }
     const withoutLocale = "/" + pathname.split("/").slice(2).join("/");
-    if (roles.length && !canAccess(withoutLocale.startsWith("/") ? withoutLocale : `/${withoutLocale}`, roles)) {
+    const path = withoutLocale.startsWith("/") ? withoutLocale : `/${withoutLocale}`;
+    if (roles.length && !canAccessPortalPath(path, roles)) {
       const locale = pathname.split("/")[1] || "fr";
-      const home =
-        roles.includes("direction") || roles.includes("super_admin") || roles.includes("finance_dir")
-          ? "direction"
-          : roles.some((r) => ["admin", "secretariat", "academic_dir", "it"].includes(r))
-            ? "admin"
-            : roles.includes("teacher")
-              ? "enseignant"
-              : "etudiant";
+      const home = resolveHomePath(roles).replace(/^\//, "");
       const url = request.nextUrl.clone();
-      url.pathname = `/${locale}/portail/${home}`;
+      url.pathname = `/${locale}/${home}`;
       return NextResponse.redirect(url);
     }
   }
 
-  // Already logged-in users hitting login → bounce to portal root (client also handles)
   if (LOGIN_RE.test(pathname) && request.cookies.get("iua_access")?.value) {
     /* allow page — client redirects by role */
   }

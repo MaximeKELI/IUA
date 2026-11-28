@@ -1,6 +1,6 @@
 "use client";
 
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { PortalShell } from "@/components/PortalShell";
@@ -62,6 +62,8 @@ const enrollmentStatus: Record<string, string> = {
 };
 
 export default function StudentCoursPage() {
+  const tPortal = useTranslations("portal");
+
   const locale = useLocale();
   const { token, ready } = useAuthToken();
   const [dash, setDash] = useState<Dashboard | null>(null);
@@ -135,9 +137,9 @@ export default function StudentCoursPage() {
   }, [filtered]);
 
   return (
-    <PortalShell title="Espace étudiant" nav={studentNav}>
+    <PortalShell title={tPortal("student.space")} nav={studentNav}>
       <p className="text-xs uppercase tracking-[0.18em] text-iua-cyan">Parcours</p>
-      <h1 className="mt-2 font-display text-3xl text-iua-navy">Cours & matières</h1>
+      <h1 className="mt-2 font-display text-3xl text-iua-navy">{tPortal("pages.student.cours")}</h1>
       {dash && (
         <p className="mt-2 text-sm text-iua-muted">
           {dash.profile.program_code

@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { FormEvent, useEffect, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
 import { apiGet, apiSend } from "@/lib/api";
@@ -15,6 +17,8 @@ type Contact = {
 };
 
 export default function EvaluerPage() {
+  const tPortal = useTranslations("portal");
+
   const { token, ready } = useAuthToken();
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [form, setForm] = useState({
@@ -79,8 +83,8 @@ export default function EvaluerPage() {
   }
 
   return (
-    <PortalShell title="Espace étudiant" nav={studentNav}>
-      <h1 className="font-display text-3xl text-iua-navy">Évaluer mes cours</h1>
+    <PortalShell title={tPortal("student.space")} nav={studentNav}>
+      <h1 className="font-display text-3xl text-iua-navy">{tPortal("pages.student.evaluer")}</h1>
       <p className="mt-2 text-sm text-iua-muted">
         Donnez votre avis (anonyme possible) pour améliorer la pédagogie.
       </p>

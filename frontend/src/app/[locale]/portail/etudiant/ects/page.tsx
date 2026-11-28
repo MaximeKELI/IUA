@@ -1,16 +1,20 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { PortalShell } from "@/components/PortalShell";
 import { studentNav } from "@/lib/navigation";
 import { useStudentHub } from "@/lib/student";
 import { Link } from "@/i18n/navigation";
 
 export default function EctsPage() {
+  const tPortal = useTranslations("portal");
+
   const { hub, error } = useStudentHub();
 
   return (
-    <PortalShell title="Espace étudiant" nav={studentNav}>
-      <h1 className="font-display text-3xl text-iua-navy">Progression ECTS</h1>
+    <PortalShell title={tPortal("student.space")} nav={studentNav}>
+      <h1 className="font-display text-3xl text-iua-navy">{tPortal("pages.student.ects")}</h1>
       <p className="mt-2 text-sm text-iua-muted">
         Crédits acquis vs volume du programme (estimation basée sur les matières validées ≥ 10/20).
       </p>

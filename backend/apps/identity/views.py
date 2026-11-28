@@ -63,13 +63,16 @@ class LoginView(APIView):
         user: User = serializer.validated_data["user"]
 
         if user_must_enroll_mfa(user):
+            from apps.identity.mfa import issue_mfa_enroll_token
+
             return Response(
                 {
                     "mfa_enrollment_required": True,
-                    "message": "L'inscription MFA est obligatoire pour ce grade. Contactez l'IT.",
+                    "mfa_enrollment_token": issue_mfa_enroll_token(user.id),
+                    "message": "L'inscription MFA est obligatoire pour ce grade.",
                     "user": {"id": str(user.id), "email": user.email, "roles": user.role_codes()},
                 },
-                status=status.HTTP_403_FORBIDDEN,
+                status=status.HTTP_200_OK,
             )
 
         if user_needs_mfa_challenge(user):
@@ -156,6 +159,154 @@ class MfaEnableView(APIView):
         request.user.mfa_enabled = True
         request.user.save(update_fields=["mfa_enabled"])
         return Response({"mfa_enabled": True, "message": "MFA activé."})
+
+
+class MfaEnrollSetupView(APIView):
+    """Pre-auth MFA enrollment setup using short-lived enroll token."""
+
+    permission_classes = [AllowAny]
+    authentication_classes = []
+    throttle_classes = [LoginRateThrottle]
+
+    def post(self, request):
+        from apps.identity.mfa import new_totp_secret, parse_mfa_enroll_token, provisioning_uri
+
+        token = request.data.get("mfa_enrollment_token") or ""
+        uid = parse_mfa_enroll_token(token)
+        if not uid:
+            return Response(
+                {"code": "invalid", "message": "Jeton d'inscription MFA invalide ou expiré."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            user = User.objects.get(pk=uid, is_active=True)
+        except User.DoesNotExist:
+            return Response(
+                {"code": "invalid", "message": "Utilisateur introuvable."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        secret = new_totp_secret()
+        user.mfa_secret = secret
+        user.mfa_enabled = False
+        user.save(update_fields=["mfa_secret", "mfa_enabled"])
+        return Response(
+            {
+                "secret": secret,
+                "otpauth_uri": provisioning_uri(secret, user.email),
+                "mfa_enrollment_token": token,
+            }
+        )
+
+
+class MfaEnrollConfirmView(APIView):
+    """Confirm TOTP during forced enrollment, then issue session cookies."""
+
+    permission_classes = [AllowAny]
+    authentication_classes = []
+    throttle_classes = [LoginRateThrottle]
+
+    def post(self, request):
+        from apps.identity.mfa import parse_mfa_enroll_token, verify_totp
+
+        token = request.data.get("mfa_enrollment_token") or ""
+        code = request.data.get("code") or ""
+        uid = parse_mfa_enroll_token(token)
+        if not uid:
+            return Response(
+                {"code": "invalid", "message": "Jeton d'inscription MFA invalide ou expiré."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            user = User.objects.get(pk=uid, is_active=True)
+        except User.DoesNotExist:
+            return Response(
+                {"code": "invalid", "message": "Utilisateur introuvable."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if not user.mfa_secret or not verify_totp(user.mfa_secret, code):
+            return Response(
+                {"code": "invalid", "message": "Code TOTP incorrect."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        user.mfa_enabled = True
+        user.save(update_fields=["mfa_enabled"])
+        return _auth_response(user, request)
+
+
+class PasswordResetRequestView(APIView):
+    """Always return 200 to avoid email enumeration."""
+
+    permission_classes = [AllowAny]
+    authentication_classes = []
+    throttle_classes = [LoginRateThrottle]
+
+    def post(self, request):
+        from django.contrib.auth.tokens import PasswordResetTokenGenerator
+        from django.core.mail import send_mail
+
+        email = (request.data.get("email") or "").strip().lower()
+        user = User.objects.filter(email__iexact=email, is_active=True).first()
+        if user:
+            token = PasswordResetTokenGenerator().make_token(user)
+            uid = str(user.pk)
+            # Frontend route is locale-prefixed; email uses relative path hint
+            reset_path = f"/connexion?reset={uid}:{token}"
+            try:
+                send_mail(
+                    subject="IUA — Réinitialisation du mot de passe",
+                    message=(
+                        f"Bonjour,\n\nPour réinitialiser votre mot de passe IUA, "
+                        f"ouvrez : {reset_path}\n\nSi vous n'êtes pas à l'origine de cette "
+                        f"demande, ignorez cet e-mail."
+                    ),
+                    from_email=None,
+                    recipient_list=[user.email],
+                    fail_silently=True,
+                )
+            except Exception:
+                pass
+        return Response(
+            {
+                "message": "Si un compte existe pour cet e-mail, un lien de réinitialisation a été envoyé."
+            }
+        )
+
+
+class PasswordResetConfirmView(APIView):
+    permission_classes = [AllowAny]
+    authentication_classes = []
+    throttle_classes = [LoginRateThrottle]
+
+    def post(self, request):
+        from django.contrib.auth.password_validation import validate_password
+        from django.contrib.auth.tokens import PasswordResetTokenGenerator
+        from django.core.exceptions import ValidationError
+
+        uid = request.data.get("uid") or ""
+        token = request.data.get("token") or ""
+        password = request.data.get("password") or ""
+        try:
+            user = User.objects.get(pk=uid, is_active=True)
+        except (User.DoesNotExist, ValueError, ValidationError):
+            return Response(
+                {"code": "invalid", "message": "Lien de réinitialisation invalide."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if not PasswordResetTokenGenerator().check_token(user, token):
+            return Response(
+                {"code": "invalid", "message": "Lien de réinitialisation invalide ou expiré."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            validate_password(password, user=user)
+        except ValidationError as exc:
+            return Response(
+                {"code": "invalid", "message": " ".join(exc.messages)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        user.set_password(password)
+        user.save(update_fields=["password"])
+        return Response({"message": "Mot de passe mis à jour. Vous pouvez vous connecter."})
 
 
 class LogoutView(APIView):

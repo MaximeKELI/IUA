@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { PortalShell } from "@/components/PortalShell";
@@ -332,7 +334,7 @@ function TeacherNotesInner() {
         return `<tr><td style="padding:6px;border:1px solid #ccc">${i + 1}</td><td style="padding:6px;border:1px solid #ccc">${student.student_number || ""}</td><td style="padding:6px;border:1px solid #ccc">${student.full_name}</td>${tds}<td style="padding:6px;border:1px solid #ccc;text-align:center">${avg ?? "—"}</td><td style="padding:6px;border:1px solid #ccc;text-align:center">${appr.label}</td></tr>`;
       })
       .join("");
-    win.document.write(`<!doctype html><html><head><title>Carnet ${subjectName}</title></head><body style="font-family:system-ui;padding:24px"><h1>IUA — Carnet de notes</h1><h2>${subjectName}</h2><p>Export ${new Date().toLocaleString("fr-FR")} · GMT</p><table style="border-collapse:collapse;width:100%;font-size:12px"><thead><tr><th>#</th><th>Matricule</th><th>Nom</th>${columns.map((c) => `<th>${c.label}</th>`).join("")}<th>Moy.</th><th>Appréciation</th></tr></thead><tbody>${rowsHtml}</tbody></table><script>window.print()</script></body></html>`);
+    win.document.write(`<!doctype html><html><head><title>Carnet ${subjectName}</title></head><body style="font-family:system-ui;padding:24px"><h1>{tPortal("pages.teacher.notes")}</h1><h2>${subjectName}</h2><p>Export ${new Date().toLocaleString("fr-FR")} · GMT</p><table style="border-collapse:collapse;width:100%;font-size:12px"><thead><tr><th>#</th><th>Matricule</th><th>Nom</th>${columns.map((c) => `<th>${c.label}</th>`).join("")}<th>Moy.</th><th>Appréciation</th></tr></thead><tbody>${rowsHtml}</tbody></table><script>window.print()</script></body></html>`);
     win.document.close();
   }
 
@@ -366,7 +368,7 @@ function TeacherNotesInner() {
   }
 
   return (
-    <PortalShell title="Espace enseignant" nav={teacherNav}>
+    <PortalShell title={tPortal("teacher.space")} nav={teacherNav}>
       <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
         <div>
           <h1 className="font-display text-3xl text-iua-navy">Carnet de notes</h1>
@@ -616,6 +618,8 @@ function TeacherNotesInner() {
 }
 
 export default function TeacherNotesPage() {
+  const tPortal = useTranslations("portal");
+
   return (
     <Suspense
       fallback={

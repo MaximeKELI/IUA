@@ -57,6 +57,8 @@ const QUICK = [
 ];
 
 export default function DirectionPortalPage() {
+  const tPortal = useTranslations("portal");
+
   const [data, setData] = useState<DirectionDashboard | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { token, ready } = useAuthToken();
@@ -73,8 +75,8 @@ export default function DirectionPortalPage() {
   const intl = hub?.international;
 
   return (
-    <PortalShell title="Direction" nav={directionNav}>
-      <h1 className="font-display text-3xl text-iua-navy">Tableau de bord</h1>
+    <PortalShell title={tPortal("direction.space")} nav={directionNav}>
+      <h1 className="font-display text-3xl text-iua-navy">{tPortal("pages.direction.home")}</h1>
       <p className="mt-2 max-w-2xl text-sm text-iua-muted">
         Pilotage IUA — 20 accès direction (KPI, qualité, ouverture, gouvernance).
       </p>

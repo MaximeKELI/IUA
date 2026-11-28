@@ -81,3 +81,22 @@ class AuditLog(UUIDModel, TimeStampedModel):
 
     def __str__(self) -> str:
         return f"{self.action} {self.entity_type}:{self.entity_id}"
+
+
+class DataRetentionPolicy(UUIDModel, TimeStampedModel):
+    """Configurable retention windows for compliance purge jobs."""
+
+    code = models.CharField(max_length=64, unique=True)
+    name = models.CharField(max_length=128)
+    resource = models.CharField(
+        max_length=64,
+        help_text="Logical resource: login_attempts, notifications, audit_logs",
+    )
+    retention_days = models.PositiveIntegerField(default=365)
+    enabled = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["code"]
+
+    def __str__(self) -> str:
+        return f"{self.code} ({self.retention_days}d)"

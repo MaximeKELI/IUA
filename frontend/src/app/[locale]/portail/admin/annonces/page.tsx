@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { FormEvent, useEffect, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
 import { apiGet, apiSend, unwrapList } from "@/lib/api";
@@ -17,6 +19,8 @@ type Ann = {
 };
 
 export default function AdminAnnoncesPage() {
+  const tPortal = useTranslations("portal");
+
   const { token, ready } = useAuthToken();
   const roles = getStoredUser()?.roles || [];
   const [items, setItems] = useState<Ann[]>([]);
@@ -44,7 +48,7 @@ export default function AdminAnnoncesPage() {
 
   return (
     <PortalShell title={resolveOpsTitle(roles)} nav={resolveOpsNav(roles)}>
-      <h1 className="font-display text-3xl text-iua-navy">Annonces campus</h1>
+      <h1 className="font-display text-3xl text-iua-navy">{tPortal("pages.admin.annonces")}</h1>
       <p className="mt-2 text-sm text-iua-muted">Publier une communication institutionnelle.</p>
       {msg && <p className="mt-4 text-sm text-emerald-700">{msg}</p>}
       <form onSubmit={onSubmit} className="mt-6 max-w-xl space-y-3 rounded-xl bg-white p-5 shadow-soft">

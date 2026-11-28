@@ -1,14 +1,18 @@
 "use client";
+
+import { useTranslations } from "next-intl";
 import { PortalShell } from "@/components/PortalShell";
 import { directionNav } from "@/lib/navigation";
 import { useDirectionHub } from "@/lib/ops";
 
 export default function FinanceDirPage() {
+  const tPortal = useTranslations("portal");
+
   const { hub, error } = useDirectionHub();
   const f = hub?.finance;
   return (
-    <PortalShell title="Direction" nav={directionNav}>
-      <h1 className="font-display text-3xl text-iua-navy">Synthèse finance</h1>
+    <PortalShell title={tPortal("direction.space")} nav={directionNav}>
+      <h1 className="font-display text-3xl text-iua-navy">{tPortal("pages.direction.finance")}</h1>
       <p className="mt-2 text-sm text-iua-muted">Vue consolidée des paiements étudiants.</p>
       {error && <p className="mt-4 text-sm text-red-700">{error}</p>}
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

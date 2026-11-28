@@ -1,10 +1,14 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { PortalShell } from "@/components/PortalShell";
 import { directionNav } from "@/lib/navigation";
 import { useDirectionHub } from "@/lib/ops";
 
 export default function ReportsPage() {
+  const tPortal = useTranslations("portal");
+
   const { hub } = useDirectionHub();
 
   function exportCsv() {
@@ -27,8 +31,8 @@ export default function ReportsPage() {
   }
 
   return (
-    <PortalShell title="Direction" nav={directionNav}>
-      <h1 className="font-display text-3xl text-iua-navy">Rapports export</h1>
+    <PortalShell title={tPortal("direction.space")} nav={directionNav}>
+      <h1 className="font-display text-3xl text-iua-navy">{tPortal("pages.direction.rapports")}</h1>
       <p className="mt-2 text-sm text-iua-muted">Téléchargez un CSV des indicateurs clés.</p>
       <button
         type="button"

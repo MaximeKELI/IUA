@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { FormEvent, useEffect, useState } from "react";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { PortalShell } from "@/components/PortalShell";
@@ -21,6 +23,8 @@ type CatchUp = {
 };
 
 export default function RattrapagesPage() {
+  const tPortal = useTranslations("portal");
+
   const { token, ready, assignments, students } = useTeacherAssignments();
   const [items, setItems] = useState<CatchUp[]>([]);
   const [form, setForm] = useState({
@@ -88,8 +92,8 @@ export default function RattrapagesPage() {
   }
 
   return (
-    <PortalShell title="Espace enseignant" nav={teacherNav}>
-      <h1 className="font-display text-3xl text-iua-navy">Rattrapages / Session 2</h1>
+    <PortalShell title={tPortal("teacher.space")} nav={teacherNav}>
+      <h1 className="font-display text-3xl text-iua-navy">{tPortal("pages.teacher.rattrapages")}</h1>
       <p className="mt-2 text-sm text-iua-muted">Gérez les demandes de seconde chance et leur validation.</p>
       {error && <p className="mt-4 text-sm text-red-700">{error}</p>}
       {ok && <p className="mt-4 text-sm text-emerald-700">{ok}</p>}

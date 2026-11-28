@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { FormEvent, useEffect, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
 import { apiGet, apiSend, clearApiMemoryCache, Page, unwrapList } from "@/lib/api";
@@ -18,6 +20,8 @@ type Signature = {
 };
 
 export default function PvPage() {
+  const tPortal = useTranslations("portal");
+
   const { token, ready, assignments } = useTeacherAssignments();
   const [items, setItems] = useState<Signature[]>([]);
   const [form, setForm] = useState({
@@ -58,8 +62,8 @@ export default function PvPage() {
   }
 
   return (
-    <PortalShell title="Espace enseignant" nav={teacherNav}>
-      <h1 className="font-display text-3xl text-iua-navy">PV de notes & signature</h1>
+    <PortalShell title={tPortal("teacher.space")} nav={teacherNav}>
+      <h1 className="font-display text-3xl text-iua-navy">{tPortal("pages.teacher.pv")}</h1>
       <p className="mt-2 text-sm text-iua-muted">
         Gèle un instantané du carnet et attache une signature nominative avec hash d&apos;intégrité.
       </p>

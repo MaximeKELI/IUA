@@ -1,4 +1,6 @@
 "use client";
+
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
 import { apiGet, apiSend, unwrapList } from "@/lib/api";
@@ -8,6 +10,8 @@ import { useAuthToken } from "@/lib/useAuthToken";
 type Q = { id: string; prompt: string; choices: {id:string;text:string}[]; points: string };
 type Quiz = { id: string; title: string; subject_name?: string; duration_minutes: number; questions?: Q[] };
 export default function Page() {
+  const tPortal = useTranslations("portal");
+
   const { token, ready } = useAuthToken();
   const [items, setItems] = useState<Quiz[]>([]);
   const [active, setActive] = useState<Quiz | null>(null);
@@ -23,8 +27,8 @@ export default function Page() {
     } catch (err) { setError(err instanceof Error ? err.message : "Échec"); }
   }
   return (
-    <PortalShell title="Espace étudiant" nav={studentNav}>
-      <h1 className="font-display text-3xl text-iua-navy">QCM</h1>
+    <PortalShell title={tPortal("student.space")} nav={studentNav}>
+      <h1 className="font-display text-3xl text-iua-navy">{tPortal("pages.student.qcm")}</h1>
       <p className="mt-2 text-sm text-iua-muted">Quiz auto-corrigés publiés par vos enseignants.</p>
       {error && <p className="mt-4 text-sm text-red-700">{error}</p>}
       {result && <p className="mt-4 text-sm text-emerald-700">{result}</p>}

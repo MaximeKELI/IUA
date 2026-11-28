@@ -163,3 +163,115 @@ def student_transcript_pdf(request):
     locale = (request.query_params.get("lang") or "fr").lower()
     pdf = _build_transcript_pdf(profile, locale=locale)
     return _pdf_response(pdf, f"releve-{profile.student_number}-{locale}.pdf")
+
+
+def _build_admission_letter_pdf(profile: StudentProfile, locale: str = "fr") -> bytes:
+    buf = BytesIO()
+    c = canvas.Canvas(buf, pagesize=A4)
+    width, height = A4
+    y = height - 72
+    title = "LETTRE D'ADMISSION" if locale.startswith("fr") else "ADMISSION LETTER"
+    c.setFont("Helvetica-Bold", 16)
+    c.drawCentredString(width / 2, y, "Institut Universitaire d'Abidjan")
+    y -= 28
+    c.setFont("Helvetica-Bold", 14)
+    c.drawCentredString(width / 2, y, title)
+    y -= 48
+    c.setFont("Helvetica", 11)
+    program = profile.program.name if profile.program_id else "—"
+    today = timezone.localdate().strftime("%d/%m/%Y")
+    if locale.startswith("fr"):
+        lines = [
+            f"Madame, Monsieur {profile.user.full_name},",
+            "",
+            f"Nous avons le plaisir de confirmer votre admission",
+            f"à l'IUA pour la formation : {program}.",
+            f"Matricule : {profile.student_number}",
+            f"Niveau : {profile.level or '—'}",
+            "",
+            f"Fait à Abidjan, le {today}.",
+            "",
+            "Document généré électroniquement — IUA Digital Campus.",
+        ]
+    else:
+        lines = [
+            f"Dear {profile.user.full_name},",
+            "",
+            f"We are pleased to confirm your admission",
+            f"to IUA for the program: {program}.",
+            f"Student ID: {profile.student_number}",
+            f"Level: {profile.level or '—'}",
+            "",
+            f"Issued in Abidjan on {today}.",
+            "",
+            "Electronically generated — IUA Digital Campus.",
+        ]
+    for line in lines:
+        c.drawString(72, y, line)
+        y -= 18
+    c.showPage()
+    c.save()
+    return buf.getvalue()
+
+
+def _build_equivalence_pdf(profile: StudentProfile, locale: str = "fr") -> bytes:
+    buf = BytesIO()
+    c = canvas.Canvas(buf, pagesize=A4)
+    width, height = A4
+    y = height - 72
+    title = "ATTESTATION D'ÉQUIVALENCE" if locale.startswith("fr") else "EQUIVALENCE CERTIFICATE"
+    c.setFont("Helvetica-Bold", 16)
+    c.drawCentredString(width / 2, y, "Institut Universitaire d'Abidjan")
+    y -= 28
+    c.setFont("Helvetica-Bold", 14)
+    c.drawCentredString(width / 2, y, title)
+    y -= 48
+    c.setFont("Helvetica", 11)
+    today = timezone.localdate().strftime("%d/%m/%Y")
+    program = profile.program.name if profile.program_id else "—"
+    if locale.startswith("fr"):
+        lines = [
+            f"Certifie que {profile.user.full_name} ({profile.student_number})",
+            f"suit le programme {program}.",
+            "Cette attestation peut accompagner une demande d'équivalence",
+            "auprès d'établissements partenaires.",
+            "",
+            f"Fait à Abidjan, le {today}.",
+        ]
+    else:
+        lines = [
+            f"Certifies that {profile.user.full_name} ({profile.student_number})",
+            f"is enrolled in {program}.",
+            "This certificate may support an equivalence request",
+            "with partner institutions.",
+            "",
+            f"Issued in Abidjan on {today}.",
+        ]
+    for line in lines:
+        c.drawString(72, y, line)
+        y -= 18
+    c.showPage()
+    c.save()
+    return buf.getvalue()
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def student_admission_letter_pdf(request):
+    profile = _student_or_403(request.user)
+    if not profile:
+        return Response({"detail": "Profil étudiant requis."}, status=403)
+    locale = (request.query_params.get("lang") or "fr").lower()
+    pdf = _build_admission_letter_pdf(profile, locale=locale)
+    return _pdf_response(pdf, f"admission-{profile.student_number}-{locale}.pdf")
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def student_equivalence_pdf(request):
+    profile = _student_or_403(request.user)
+    if not profile:
+        return Response({"detail": "Profil étudiant requis."}, status=403)
+    locale = (request.query_params.get("lang") or "fr").lower()
+    pdf = _build_equivalence_pdf(profile, locale=locale)
+    return _pdf_response(pdf, f"equivalence-{profile.student_number}-{locale}.pdf")

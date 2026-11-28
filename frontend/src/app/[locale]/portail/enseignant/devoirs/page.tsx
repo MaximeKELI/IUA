@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { FormEvent, useEffect, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
 import { apiGet, apiSend, clearApiMemoryCache, Page, unwrapList } from "@/lib/api";
@@ -19,6 +21,8 @@ type Homework = {
 };
 
 export default function DevoirsPage() {
+  const tPortal = useTranslations("portal");
+
   const { token, ready, assignments } = useTeacherAssignments();
   const [items, setItems] = useState<Homework[]>([]);
   const [form, setForm] = useState({
@@ -60,8 +64,8 @@ export default function DevoirsPage() {
   }
 
   return (
-    <PortalShell title="Espace enseignant" nav={teacherNav}>
-      <h1 className="font-display text-3xl text-iua-navy">Devoirs en ligne</h1>
+    <PortalShell title={tPortal("teacher.space")} nav={teacherNav}>
+      <h1 className="font-display text-3xl text-iua-navy">{tPortal("pages.teacher.devoirs")}</h1>
       <p className="mt-2 text-sm text-iua-muted">Publiez un devoir avec date limite, consignes et suivi des remises.</p>
       {error && <p className="mt-4 text-sm text-red-700">{error}</p>}
       {ok && <p className="mt-4 text-sm text-emerald-700">{ok}</p>}

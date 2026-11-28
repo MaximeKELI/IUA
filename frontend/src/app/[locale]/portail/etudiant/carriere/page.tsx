@@ -1,4 +1,6 @@
 "use client";
+
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
 import { apiGet, unwrapList } from "@/lib/api";
@@ -7,12 +9,14 @@ import { studentNav } from "@/lib/navigation";
 import { useAuthToken } from "@/lib/useAuthToken";
 type Opp = { id: string; title: string; company: string; kind: string; location: string; description: string; url: string; deadline: string | null };
 export default function Page() {
+  const tPortal = useTranslations("portal");
+
   const { token, ready } = useAuthToken();
   const [items, setItems] = useState<Opp[]>([]);
   useEffect(()=>{ if(!ready||!token) return; apiGet<Page<Opp>>("/student/careers/", token).then(d=>setItems(unwrapList(d))); },[ready,token]);
   return (
-    <PortalShell title="Espace étudiant" nav={studentNav}>
-      <h1 className="font-display text-3xl text-iua-navy">Orientation carrière</h1>
+    <PortalShell title={tPortal("student.space")} nav={studentNav}>
+      <h1 className="font-display text-3xl text-iua-navy">{tPortal("pages.student.carriere")}</h1>
       <p className="mt-2 text-sm text-iua-muted">Offres d&apos;emploi, stages et événements pro.</p>
       <div className="mt-8 space-y-3">{items.map(o=>(
         <article key={o.id} className="rounded-xl bg-white p-5 shadow-soft">

@@ -28,6 +28,8 @@ class StaffSwaggerView(SpectacularSwaggerView):
 urlpatterns = [
     path("", RootView.as_view(), name="root"),
     path("admin/", admin.site.urls),
+    # Probe endpoints outside /api/v1 for load balancers / k8s
+    path("health/", include("apps.core.health_urls")),
     path("api/schema/", StaffSchemaView.as_view(), name="schema"),
     path(
         "api/docs/",

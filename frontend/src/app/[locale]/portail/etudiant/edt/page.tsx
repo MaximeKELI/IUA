@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useEffect, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
 import { apiGet, unwrapList } from "@/lib/api";
@@ -11,6 +13,8 @@ type Slot = { id: string; subject_name?: string; weekday: number; weekday_label?
 const DAYS = ["Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi","Dimanche"];
 
 export default function StudentEdtPage() {
+  const tPortal = useTranslations("portal");
+
   const { token, ready } = useAuthToken();
   const [slots, setSlots] = useState<Slot[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -19,8 +23,8 @@ export default function StudentEdtPage() {
     apiGet<Page<Slot>>("/student/schedule/?page_size=100", token).then((d) => setSlots(unwrapList(d))).catch((e) => setError(e instanceof Error ? e.message : "Erreur"));
   }, [ready, token]);
   return (
-    <PortalShell title="Espace étudiant" nav={studentNav}>
-      <h1 className="font-display text-3xl text-iua-navy">Emploi du temps</h1>
+    <PortalShell title={tPortal("student.space")} nav={studentNav}>
+      <h1 className="font-display text-3xl text-iua-navy">{tPortal("pages.student.edt")}</h1>
       <p className="mt-2 text-sm text-iua-muted">Vos créneaux de cours par jour — salles et liens visio.</p>
       {error && <p className="mt-4 text-sm text-red-700">{error}</p>}
       <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">

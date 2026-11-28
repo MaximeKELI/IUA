@@ -1,14 +1,18 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { PortalShell } from "@/components/PortalShell";
 import { directionNav } from "@/lib/navigation";
 import { useDirectionHub } from "@/lib/ops";
 
 export default function AlumniPage() {
+  const tPortal = useTranslations("portal");
+
   const { hub } = useDirectionHub();
   return (
-    <PortalShell title="Direction" nav={directionNav}>
-      <h1 className="font-display text-3xl text-iua-navy">Alumni & réseau</h1>
+    <PortalShell title={tPortal("direction.space")} nav={directionNav}>
+      <h1 className="font-display text-3xl text-iua-navy">{tPortal("pages.direction.alumni")}</h1>
       <p className="mt-2 text-sm text-iua-muted">
         Suivi du réseau alumni IUA à l&apos;international.
       </p>

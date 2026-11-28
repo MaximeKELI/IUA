@@ -20,6 +20,8 @@ type Grade = {
 };
 
 export default function StudentOfflinePage() {
+  const tPortal = useTranslations("portal");
+
   const t = useTranslations("portal.student");
   const tc = useTranslations("common");
   const { token, ready } = useAuthToken();

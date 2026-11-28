@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
 import {
@@ -44,6 +46,8 @@ const emptyForm: FormState = {
 type Program = { id: string; name: string; code: string };
 
 export default function AdminUsersPage() {
+  const tPortal = useTranslations("portal");
+
   const [users, setUsers] = useState<ManagedUser[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
   const [programs, setPrograms] = useState<Program[]>([]);
@@ -165,7 +169,7 @@ export default function AdminUsersPage() {
   return (
     <PortalShell title={resolveOpsTitle(myRoles)} nav={resolveOpsNav(myRoles)}>
       <p className="text-xs uppercase tracking-[0.18em] text-iua-cyan">Autorisations</p>
-      <h1 className="mt-2 font-display text-3xl text-iua-navy">Utilisateurs & rôles</h1>
+      <h1 className="mt-2 font-display text-3xl text-iua-navy">{tPortal("pages.admin.utilisateurs")}</h1>
       <p className="mt-2 max-w-2xl text-sm text-iua-muted">
         Créez un compte et attribuez les rôles. C&apos;est ici que l&apos;accès est accordé.
         {!showStudentIds && " Les matricules restent masqués pour votre profil."}

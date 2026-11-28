@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { Link } from "@/i18n/navigation";
 import { AdminRequestWorkbench } from "@/components/AdminRequestWorkbench";
 import { PortalShell } from "@/components/PortalShell";
@@ -8,11 +10,13 @@ import { directionNav } from "@/lib/navigation";
 import { useAuthToken } from "@/lib/useAuthToken";
 
 export default function DirectionDemandesPage() {
+  const tPortal = useTranslations("portal");
+
   const { token, ready } = useAuthToken();
   const roles = getStoredUser()?.roles || [];
 
   return (
-    <PortalShell title="Direction" nav={directionNav}>
+    <PortalShell title={tPortal("direction.space")} nav={directionNav}>
       <AdminRequestWorkbench
         token={token}
         ready={ready}

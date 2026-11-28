@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useEffect, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
 import { apiGet, unwrapList } from "@/lib/api";
@@ -16,6 +18,8 @@ type Row = {
 };
 
 export default function PvPage() {
+  const tPortal = useTranslations("portal");
+
   const { token, ready } = useAuthToken();
   const [rows, setRows] = useState<Row[]>([]);
 
@@ -27,8 +31,8 @@ export default function PvPage() {
   }, [ready, token]);
 
   return (
-    <PortalShell title="Direction" nav={directionNav}>
-      <h1 className="font-display text-3xl text-iua-navy">PV & signatures</h1>
+    <PortalShell title={tPortal("direction.space")} nav={directionNav}>
+      <h1 className="font-display text-3xl text-iua-navy">{tPortal("pages.direction.pv")}</h1>
       <p className="mt-2 text-sm text-iua-muted">
         Procès-verbaux de notes signés par les enseignants.
       </p>

@@ -1,4 +1,6 @@
 "use client";
+
+import { useTranslations } from "next-intl";
 import { FormEvent, useEffect, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
 import { apiGet, apiSend, unwrapList } from "@/lib/api";
@@ -7,6 +9,8 @@ import { studentNav } from "@/lib/navigation";
 import { useAuthToken } from "@/lib/useAuthToken";
 type Hw = { id: string; title: string; instructions: string; due_at: string; subject_name?: string; allow_late: boolean };
 export default function Page() {
+  const tPortal = useTranslations("portal");
+
   const { token, ready } = useAuthToken();
   const [items, setItems] = useState<Hw[]>([]);
   const [open, setOpen] = useState<string | null>(null);
@@ -19,8 +23,8 @@ export default function Page() {
     try { await apiSend(`/student/homeworks/${open}/submit/`, token, "POST", { content }); setMsg("Devoir remis."); setContent(""); setOpen(null);} catch(err){ setError(err instanceof Error?err.message:"Échec"); }
   }
   return (
-    <PortalShell title="Espace étudiant" nav={studentNav}>
-      <h1 className="font-display text-3xl text-iua-navy">Devoirs à rendre</h1>
+    <PortalShell title={tPortal("student.space")} nav={studentNav}>
+      <h1 className="font-display text-3xl text-iua-navy">{tPortal("pages.student.devoirs")}</h1>
       <p className="mt-2 text-sm text-iua-muted">Deadlines, consignes et remise en ligne.</p>
       {error && <p className="mt-4 text-sm text-red-700">{error}</p>}
       {msg && <p className="mt-4 text-sm text-emerald-700">{msg}</p>}

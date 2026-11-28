@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { FormEvent, useEffect, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
 import { apiGet, apiSend, clearApiMemoryCache, Page, unwrapList } from "@/lib/api";
@@ -32,6 +34,8 @@ const empty = (subject: string): Scheme => ({
 });
 
 export default function BaremesPage() {
+  const tPortal = useTranslations("portal");
+
   const { token, ready, assignments, error: bootError } = useTeacherAssignments();
   const [subjectId, setSubjectId] = useState("");
   const [form, setForm] = useState<Scheme>(empty(""));
@@ -89,8 +93,8 @@ export default function BaremesPage() {
   }
 
   return (
-    <PortalShell title="Espace enseignant" nav={teacherNav}>
-      <h1 className="font-display text-3xl text-iua-navy">Barèmes & coefficients</h1>
+    <PortalShell title={tPortal("teacher.space")} nav={teacherNav}>
+      <h1 className="font-display text-3xl text-iua-navy">{tPortal("pages.teacher.baremes")}</h1>
       <p className="mt-2 text-sm text-iua-muted">
         Configurez le nombre d&apos;interros/devoirs et les poids. Le carnet se met à jour automatiquement.
       </p>

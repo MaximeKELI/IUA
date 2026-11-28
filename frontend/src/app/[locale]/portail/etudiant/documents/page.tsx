@@ -1,7 +1,7 @@
 "use client";
 
+import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
-import { useTranslations } from "next-intl";
 import { PortalShell } from "@/components/PortalShell";
 import { getAccessToken } from "@/lib/auth";
 import { studentNav } from "@/lib/navigation";
@@ -9,27 +9,26 @@ import { useAuthToken } from "@/lib/useAuthToken";
 
 const API_URL = (process.env.NEXT_PUBLIC_API_URL || "/api/v1").replace(/\/$/, "");
 
-type DocKind = "attestation" | "transcript";
+type DocKind = "attestation" | "transcript" | "admission" | "equivalence";
 
-const docs: {
-  id: string;
-  fr: string;
-  en: string;
-  kind?: DocKind;
-}[] = [
-  {
-    id: "certificate",
-    fr: "Attestation de scolarité",
-    en: "Enrollment certificate",
-    kind: "attestation",
-  },
-  { id: "transcript", fr: "Relevé de notes", en: "Academic transcript", kind: "transcript" },
-  { id: "admission", fr: "Lettre d'admission", en: "Admission letter" },
-  { id: "equivalence", fr: "Attestation d'équivalence", en: "Equivalence statement" },
+const DOCS: { id: string; kind: DocKind; titleKey: string }[] = [
+  { id: "certificate", kind: "attestation", titleKey: "docAttestation" },
+  { id: "transcript", kind: "transcript", titleKey: "docTranscript" },
+  { id: "admission", kind: "admission", titleKey: "docAdmission" },
+  { id: "equivalence", kind: "equivalence", titleKey: "docEquivalence" },
 ];
 
+const PATHS: Record<DocKind, string> = {
+  attestation: "/documents/attestation/",
+  transcript: "/documents/transcript/",
+  admission: "/documents/admission-letter/",
+  equivalence: "/documents/equivalence/",
+};
+
 export default function StudentDocumentsPage() {
+  const tPortal = useTranslations("portal");
   const t = useTranslations("portal.student");
+  const locale = useLocale();
   const { ready } = useAuthToken();
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
@@ -37,22 +36,22 @@ export default function StudentDocumentsPage() {
   async function download(kind: DocKind, lang: "fr" | "en") {
     if (!ready) return;
     const token = getAccessToken();
-    if (!token) {
-      setError("Session expirée.");
-      return;
-    }
     const key = `${kind}-${lang}`;
     setBusy(key);
     setError(null);
     try {
-      const path =
-        kind === "transcript"
-          ? `/documents/transcript/?lang=${lang}`
-          : `/documents/attestation/?lang=${lang}`;
-      const res = await fetch(`${API_URL}${path}`, {
-        headers: { Authorization: `Bearer ${token}`, Accept: "application/pdf" },
+      const headers: Record<string, string> = { Accept: "application/pdf" };
+      if (token && token !== "cookie") headers.Authorization = `Bearer ${token}`;
+      const csrf =
+        typeof document !== "undefined"
+          ? document.cookie.match(/(?:^|; )iua_csrf=([^;]*)/)?.[1]
+          : null;
+      if (csrf) headers["X-IUA-CSRF"] = decodeURIComponent(csrf);
+      const res = await fetch(`${API_URL}${PATHS[kind]}?lang=${lang}`, {
+        headers,
+        credentials: "include",
       });
-      if (!res.ok) throw new Error(`Échec téléchargement (${res.status})`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -61,14 +60,14 @@ export default function StudentDocumentsPage() {
       a.click();
       URL.revokeObjectURL(url);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Échec");
+      setError(err instanceof Error ? err.message : "Error");
     } finally {
       setBusy(null);
     }
   }
 
   return (
-    <PortalShell title="Étudiant" nav={studentNav}>
+    <PortalShell title={tPortal("student.space")} nav={studentNav}>
       <h1 className="font-display text-3xl text-iua-navy">{t("docsBilingual")}</h1>
       <p className="mt-2 max-w-2xl text-sm text-iua-muted">{t("docsLead")}</p>
       {error && (
@@ -77,35 +76,24 @@ export default function StudentDocumentsPage() {
         </p>
       )}
       <div className="mt-8 grid gap-4 md:grid-cols-2">
-        {docs.map((doc) => (
+        {DOCS.map((doc) => (
           <article key={doc.id} className="rounded-xl bg-white p-5 shadow-soft">
-            <h2 className="font-display text-xl text-iua-navy">{doc.fr}</h2>
-            <p className="mt-1 text-sm text-iua-muted">{doc.en}</p>
+            <h2 className="font-display text-xl text-iua-navy">
+              {t.has(doc.titleKey as "docsBilingual") ? t(doc.titleKey as "docsBilingual") : doc.id}
+            </h2>
+            <p className="mt-1 text-sm text-iua-muted">{locale.toUpperCase()}</p>
             <div className="mt-4 flex flex-wrap gap-2">
-              {doc.kind ? (
-                <>
-                  <button
-                    type="button"
-                    disabled={!!busy}
-                    onClick={() => void download(doc.kind!, "fr")}
-                    className="rounded-md bg-iua-navy px-3 py-2 text-xs font-semibold text-white disabled:opacity-60"
-                  >
-                    {busy === `${doc.kind}-fr` ? "…" : "PDF FR"}
-                  </button>
-                  <button
-                    type="button"
-                    disabled={!!busy}
-                    onClick={() => void download(doc.kind!, "en")}
-                    className="rounded-md border border-iua-navy/15 px-3 py-2 text-xs font-semibold text-iua-navy disabled:opacity-60"
-                  >
-                    {busy === `${doc.kind}-en` ? "…" : "PDF EN"}
-                  </button>
-                </>
-              ) : (
-                <span className="text-xs text-iua-muted">
-                  Bientôt — ouvrez une demande administrative.
-                </span>
-              )}
+              {(["fr", "en"] as const).map((lang) => (
+                <button
+                  key={lang}
+                  type="button"
+                  disabled={!!busy}
+                  onClick={() => void download(doc.kind, lang)}
+                  className="rounded-md bg-iua-navy px-3 py-2 text-xs font-semibold text-white disabled:opacity-60"
+                >
+                  {busy === `${doc.kind}-${lang}` ? "…" : `PDF ${lang.toUpperCase()}`}
+                </button>
+              ))}
             </div>
           </article>
         ))}
