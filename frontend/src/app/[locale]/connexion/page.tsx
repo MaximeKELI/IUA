@@ -62,14 +62,23 @@ export default function LoginPage() {
 
   useEffect(() => {
     setResetCreds(parseResetParam());
-    if (!getAccessToken() && !getStoredUser()) {
-      setChecking(false);
-      return;
-    }
-    const user = getStoredUser();
-    if (user?.roles?.length && !parseResetParam()) {
-      router.replace(resolveHomePath(user.roles));
-      return;
+    try {
+      const reset = parseResetParam();
+      if (reset) {
+        setChecking(false);
+        return;
+      }
+      const user = getStoredUser();
+      const access = getAccessToken();
+      if (user?.roles?.length && access) {
+        // Always clear checking before navigate — otherwise a hung redirect
+        // leaves the page on "Vérification…" forever.
+        setChecking(false);
+        router.replace(resolveHomePath(user.roles));
+        return;
+      }
+    } catch {
+      /* fall through to login form */
     }
     setChecking(false);
   }, [router]);

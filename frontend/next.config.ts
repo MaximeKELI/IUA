@@ -12,9 +12,10 @@ const nextConfig: NextConfig = {
   productionBrowserSourceMaps: false,
   // Keep Django trailing-slash URLs intact for the /api/v1 proxy route.
   skipTrailingSlashRedirect: true,
-  // LAN hosts for Next 15 dev (comma-separated ALLOWED_DEV_ORIGINS).
+  // LAN hosts for Next 15 dev — without the LAN IP, /_next/* is blocked and
+  // client hydration never runs (page stuck on "Vérification de votre session…").
   allowedDevOrigins: (
-    process.env.ALLOWED_DEV_ORIGINS || "127.0.0.1,localhost"
+    process.env.ALLOWED_DEV_ORIGINS || "127.0.0.1,localhost,192.168.1.64"
   )
     .split(",")
     .map((h) => h.trim())
