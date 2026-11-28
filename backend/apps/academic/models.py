@@ -245,10 +245,22 @@ class Grade(UUIDModel, TimeStampedModel):
     student = models.ForeignKey(StudentProfile, on_delete=models.CASCADE, related_name="grades")
     subject = models.ForeignKey(Subject, on_delete=models.PROTECT, related_name="grades")
     academic_year = models.ForeignKey(AcademicYear, on_delete=models.PROTECT, related_name="grades")
+    class EntryStatus(models.TextChoices):
+        SCORED = "scored", "Noté"
+        ABSENT = "absent", "Absent"
+        EXCUSED = "excused", "Excusé"
+        DISPENSED = "dispensed", "Dispensé"
+        UNGRADED = "ungraded", "Non noté"
+
     kind = models.CharField(max_length=16, choices=Kind.choices, default=Kind.CC)
     label = models.CharField(max_length=128, blank=True)
-    score = models.DecimalField(max_digits=5, decimal_places=2)
+    sequence = models.PositiveSmallIntegerField(default=1)  # Interro 1, Interro 2…
+    score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     max_score = models.DecimalField(max_digits=5, decimal_places=2, default=20)
+    entry_status = models.CharField(
+        max_length=16, choices=EntryStatus.choices, default=EntryStatus.SCORED
+    )
+    comment = models.TextField(blank=True)
     recorded_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -263,6 +275,7 @@ class Grade(UUIDModel, TimeStampedModel):
             models.Index(fields=["student", "academic_year"]),
             models.Index(fields=["subject", "academic_year"]),
             models.Index(fields=["-created_at"]),
+            models.Index(fields=["subject", "kind", "sequence"]),
         ]
 
 

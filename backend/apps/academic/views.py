@@ -302,10 +302,15 @@ class GradeViewSet(viewsets.ModelViewSet):
         self._assert_teacher_can_grade(user, subject, student)
         grade = serializer.save(recorded_by=user)
         if grade.is_published:
+            body = (
+                f"Note publiée : {grade.score}/{grade.max_score}"
+                if grade.score is not None
+                else f"Statut : {grade.get_entry_status_display()}"
+            )
             Notification.objects.create(
                 recipient=grade.student.user,
                 title=f"Nouvelle note — {grade.subject.name}",
-                body=f"Note publiée : {grade.score}/{grade.max_score}",
+                body=body,
                 category="grades",
                 data={"grade_id": str(grade.id)},
             )

@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "apps.core",
     "apps.identity",
     "apps.academic",
+    "apps.teaching",
     "apps.events",
     "apps.notifications",
 ]
