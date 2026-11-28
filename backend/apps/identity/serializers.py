@@ -24,6 +24,7 @@ class RoleSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     roles = serializers.SerializerMethodField()
     full_name = serializers.CharField(read_only=True)
+    avatar_url = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -34,6 +35,7 @@ class UserSerializer(serializers.ModelSerializer):
             "last_name",
             "full_name",
             "phone",
+            "avatar_url",
             "is_active",
             "mfa_enabled",
             "roles",
@@ -42,6 +44,18 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_roles(self, obj: User) -> list[str]:
         return obj.role_codes()
+
+    def get_avatar_url(self, obj: User) -> str | None:
+        if not obj.avatar:
+            return None
+        try:
+            url = obj.avatar.url
+        except ValueError:
+            return None
+        request = self.context.get("request")
+        if request is not None:
+            return request.build_absolute_uri(url)
+        return url
 
 
 class UserProvisionSerializer(serializers.Serializer):

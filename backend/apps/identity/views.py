@@ -41,7 +41,7 @@ class LoginView(APIView):
             {
                 "access": str(refresh.access_token),
                 "refresh": str(refresh),
-                "user": UserSerializer(user).data,
+                "user": UserSerializer(user, context={"request": request}).data,
             }
         )
 
@@ -71,7 +71,48 @@ class MeView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        return Response(UserSerializer(request.user).data)
+        return Response(UserSerializer(request.user, context={"request": request}).data)
+
+    def patch(self, request):
+        """Update own profile fields and/or avatar (multipart)."""
+        user: User = request.user
+        updated: list[str] = []
+        first_name = request.data.get("first_name")
+        last_name = request.data.get("last_name")
+        phone = request.data.get("phone")
+        if first_name is not None:
+            user.first_name = str(first_name).strip()[:150]
+            updated.append("first_name")
+        if last_name is not None:
+            user.last_name = str(last_name).strip()[:150]
+            updated.append("last_name")
+        if phone is not None:
+            user.phone = str(phone).strip()[:32]
+            updated.append("phone")
+        avatar = request.FILES.get("avatar")
+        if avatar is not None:
+            if avatar.size > 2 * 1024 * 1024:
+                return Response(
+                    {"code": "invalid", "message": "Photo trop lourde (max 2 Mo)."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            content_type = getattr(avatar, "content_type", "") or ""
+            if not content_type.startswith("image/"):
+                return Response(
+                    {"code": "invalid", "message": "Fichier image requis (JPG/PNG/WebP)."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            if user.avatar:
+                user.avatar.delete(save=False)
+            user.avatar = avatar
+            updated.append("avatar")
+        if not updated:
+            return Response(
+                {"code": "invalid", "message": "Aucun champ à mettre à jour."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        user.save(update_fields=updated)
+        return Response(UserSerializer(user, context={"request": request}).data)
 
 
 class UserViewSet(viewsets.ModelViewSet):

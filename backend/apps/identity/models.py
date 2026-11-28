@@ -35,11 +35,17 @@ class Role(UUIDModel, TimeStampedModel):
         return self.code
 
 
+def user_avatar_path(instance: "User", filename: str) -> str:
+    ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else "jpg"
+    return f"avatars/{instance.pk}.{ext}"
+
+
 class User(AbstractBaseUser, PermissionsMixin, UUIDModel):
     email = models.EmailField(unique=True)
     first_name = models.CharField(max_length=150)
     last_name = models.CharField(max_length=150)
     phone = models.CharField(max_length=32, blank=True)
+    avatar = models.ImageField(upload_to=user_avatar_path, blank=True, null=True)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     mfa_enabled = models.BooleanField(default=False)
