@@ -76,3 +76,28 @@ def test_mfa_enroll_flow(seeded, settings):
 def test_health_metrics_alive(seeded):
     client = APIClient()
     assert client.get("/health/live/").status_code == 200
+
+
+@pytest.mark.django_db
+def test_password_reset_email_uses_frontend_origin(seeded, settings):
+    settings.EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
+    settings.FRONTEND_ORIGIN = "https://campus.example.com"
+    settings.FRONTEND_DEFAULT_LOCALE = "fr"
+    _user("reset@demo.iua.local", "student")
+    client = APIClient()
+    res = client.post(
+        reverse("auth-password-reset"),
+        {"email": "reset@demo.iua.local"},
+        format="json",
+    )
+    assert res.status_code == 200
+    assert len(mail.outbox) == 1
+    assert "https://campus.example.com/fr/connexion?reset=" in mail.outbox[0].body
+
+
+@pytest.mark.django_db
+def test_health_metrics(seeded):
+    client = APIClient()
+    res = client.get("/health/metrics/")
+    assert res.status_code == 200
+    assert b"iua_users_active" in res.content
