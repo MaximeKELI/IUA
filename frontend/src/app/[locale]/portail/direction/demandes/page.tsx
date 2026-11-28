@@ -1,48 +1,97 @@
 "use client";
+
 import { useEffect, useState } from "react";
+import { Link } from "@/i18n/navigation";
 import { PortalShell } from "@/components/PortalShell";
-import { apiGet, unwrapList } from "@/lib/api";
+import { apiGet, apiSend, unwrapList } from "@/lib/api";
 import type { Page } from "@/lib/api";
 import { directionNav } from "@/lib/navigation";
 import { useAuthToken } from "@/lib/useAuthToken";
 
-type Row = Record<string, unknown>;
+type Row = {
+  id: string;
+  requester_name?: string;
+  kind: string;
+  subject: string;
+  status: string;
+  admin_note?: string;
+};
 
-export default function DirPage() {
+export default function DirectionDemandesPage() {
   const { token, ready } = useAuthToken();
   const [rows, setRows] = useState<Row[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [msg, setMsg] = useState<string | null>(null);
+
+  async function load() {
+    if (!token) return;
+    const data = await apiGet<Page<Row>>("/admin-requests/?page_size=100", token);
+    setRows(unwrapList(data));
+  }
+
   useEffect(() => {
     if (!ready || !token) return;
-    apiGet<Page<Row> | { results: Row[] } | Row[]>("/admin-requests/?page_size=100", token)
-      .then((d) => setRows(Array.isArray(d) ? d : unwrapList(d as Page<Row>)))
-      .catch((e) => setError(e instanceof Error ? e.message : "Erreur"));
+    load().catch((e) => setError(e instanceof Error ? e.message : "Erreur"));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready, token]);
-  const cols: [string, string][] = [["requester_name", "Demandeur"], ["kind", "Type"], ["subject", "Objet"], ["status", "Statut"]];
+
+  async function setStatus(id: string, status: string) {
+    if (!token) return;
+    try {
+      await apiSend(`/admin-requests/${id}/`, token, "PATCH", { status });
+      setMsg(status === "done" ? "Demande accordée." : "Statut mis à jour.");
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Échec");
+    }
+  }
+
+  const pending = rows.filter((r) => r.status === "pending");
+
   return (
     <PortalShell title="Direction" nav={directionNav}>
       <h1 className="font-display text-3xl text-iua-navy">Demandes administratives</h1>
-      <p className="mt-2 text-sm text-iua-muted">File des demandes (supervision).</p>
+      <p className="mt-2 text-sm text-iua-muted">
+        Traitement normalement assuré par le <strong>secrétariat</strong>. La direction peut aussi
+        accorder ou refuser en supervision.
+      </p>
+      <Link href="/portail/admin/demandes" className="mt-3 inline-flex text-sm font-semibold text-iua-cyan">
+        Ouvrir la file secrétariat →
+      </Link>
       {error && <p className="mt-4 text-sm text-red-700">{error}</p>}
-      <div className="mt-8 overflow-x-auto rounded-xl bg-white shadow-soft">
-        <table className="min-w-full text-sm">
-          <thead className="bg-iua-mist text-left text-xs uppercase tracking-wide text-iua-muted">
-            <tr>{cols.map(([k, l]) => <th key={k} className="px-4 py-3">{l}</th>)}</tr>
-          </thead>
-          <tbody className="divide-y divide-iua-navy/10">
-            {rows.length === 0 && (
-              <tr><td className="px-4 py-4 text-iua-muted" colSpan={cols.length}>Aucune donnée</td></tr>
+      {msg && <p className="mt-4 text-sm text-emerald-700">{msg}</p>}
+      <p className="mt-6 text-sm text-iua-muted">{pending.length} en attente</p>
+      <ul className="mt-4 divide-y divide-iua-navy/10 rounded-xl bg-white shadow-soft">
+        {rows.length === 0 && <li className="px-5 py-4 text-sm text-iua-muted">Aucune demande.</li>}
+        {rows.map((r) => (
+          <li key={r.id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-3 text-sm">
+            <div>
+              <p className="font-medium text-iua-navy">{r.subject}</p>
+              <p className="text-xs text-iua-muted">
+                {r.requester_name || "—"} · {r.kind} · {r.status}
+              </p>
+            </div>
+            {r.status === "pending" && (
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => void setStatus(r.id, "done")}
+                  className="rounded-md bg-emerald-700 px-3 py-1.5 text-xs font-semibold text-white"
+                >
+                  Accorder
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void setStatus(r.id, "rejected")}
+                  className="rounded-md bg-red-700 px-3 py-1.5 text-xs font-semibold text-white"
+                >
+                  Refuser
+                </button>
+              </div>
             )}
-            {rows.map((r, i) => (
-              <tr key={String(r.id ?? i)}>
-                {cols.map(([k]) => (
-                  <td key={k} className="px-4 py-3">{String(r[k] ?? "—")}</td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+          </li>
+        ))}
+      </ul>
     </PortalShell>
   );
 }

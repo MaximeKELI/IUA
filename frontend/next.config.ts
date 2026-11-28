@@ -13,7 +13,8 @@ const nextConfig: NextConfig = {
   // Keep Django trailing-slash URLs intact for the /api/v1 proxy route.
   skipTrailingSlashRedirect: true,
   // Allow opening the app via LAN IP / 127.0.0.1 in Next 15 dev.
-  allowedDevOrigins: ["127.0.0.1", "localhost"],
+  // Without the LAN host, Next blocks /_next/* and the UI stays blank/white.
+  allowedDevOrigins: ["127.0.0.1", "localhost", "192.168.1.64"],
   async rewrites() {
     return [
       {

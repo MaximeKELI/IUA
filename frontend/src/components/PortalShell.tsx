@@ -10,6 +10,32 @@ import { apiGet, apiLogout, AuthUser, clearApiMemoryCache } from "@/lib/api";
 import { getAccessToken, getStoredUser, setStoredUser } from "@/lib/auth";
 import { PortalGroup } from "@/lib/navigation";
 
+/** Visible label even if i18n key is missing or returns empty. */
+function humanizeKey(key: unknown): string {
+  if (typeof key !== "string" || !key.trim()) return "Menu";
+  const last = key.includes(".") ? key.slice(key.lastIndexOf(".") + 1) : key;
+  return last
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/^./, (c) => c.toUpperCase());
+}
+
+function safeT(
+  translate: (key: string) => string,
+  key: string,
+  has?: (key: string) => boolean,
+): string | null {
+  try {
+    if (typeof has === "function" && !has(key)) return null;
+    const value = translate(key);
+    if (typeof value === "string" && value.trim().length > 0 && !value.startsWith("portal.")) {
+      return value;
+    }
+  } catch {
+    /* missing / corrupt message */
+  }
+  return null;
+}
+
 export function PortalShell({
   title,
   nav,
@@ -26,6 +52,17 @@ export function PortalShell({
   const t = useTranslations();
   const tc = useTranslations("common");
   const tp = useTranslations("portal");
+
+  function tr(key: unknown): string {
+    if (typeof key !== "string" || !key) return "Menu";
+    return (
+      safeT(
+        (k) => t(k as Parameters<typeof t>[0]),
+        key,
+        typeof t.has === "function" ? (k) => t.has(k as Parameters<typeof t.has>[0]) : undefined,
+      ) || humanizeKey(key)
+    );
+  }
 
   useEffect(() => {
     const stored = getStoredUser();
@@ -80,7 +117,7 @@ export function PortalShell({
           <div className="flex items-center gap-3">
             <button
               type="button"
-              className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-iua-mist text-iua-navy lg:hidden"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-iua-navy text-white lg:hidden"
               onClick={() => setMenuOpen((v) => !v)}
               aria-label="Menu"
             >
@@ -104,7 +141,7 @@ export function PortalShell({
               onClick={() => void logout()}
               className="rounded-md border border-iua-navy/15 px-3 py-2 text-sm text-iua-navy transition hover:bg-iua-navy hover:text-white"
             >
-              {tp("logout")}
+              {safeT((k) => tp(k as Parameters<typeof tp>[0]), "logout") || "Déconnexion"}
             </button>
           </div>
         </div>
@@ -114,19 +151,28 @@ export function PortalShell({
         <aside
           className={`${
             menuOpen ? "block" : "hidden"
-          } border-b border-iua-navy/10 bg-white px-4 py-5 lg:block lg:min-h-[calc(100svh-65px)] lg:border-b-0 lg:border-e`}
+          } border-b border-iua-navy/10 bg-[#F3F6FA] px-3 py-5 lg:block lg:min-h-[calc(100svh-65px)] lg:border-b-0 lg:border-e lg:border-iua-navy/10`}
         >
-          <p className="px-2 text-[11px] uppercase tracking-[0.18em] text-iua-muted">{tp("nav")}</p>
-          <div className="mt-4 space-y-6">
+          <p className="px-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-iua-navy/55">
+            {safeT((k) => tp(k as Parameters<typeof tp>[0]), "nav") || "Navigation"}
+          </p>
+          <div className="mt-4 space-y-5">
             {filteredNav.map((group) => (
               <div key={group.titleKey}>
-                <p className="px-2 text-xs font-semibold uppercase tracking-[0.12em] text-iua-navy/45">
-                  {t(group.titleKey)}
+                <p className="px-3 text-[11px] font-bold uppercase tracking-[0.14em] text-iua-navy">
+                  {tr(group.titleKey)}
                 </p>
                 <ul className="mt-2 space-y-1">
                   {group.links.map((link) => {
-                    const active = pathname === link.href;
+                    const active =
+                      pathname === link.href ||
+                      (link.href !== "/portail/enseignant" &&
+                        link.href !== "/portail/etudiant" &&
+                        link.href !== "/portail/admin" &&
+                        link.href !== "/portail/direction" &&
+                        pathname.startsWith(link.href));
                     const soon = link.status === "soon";
+                    const label = tr(link.labelKey);
                     return (
                       <li key={link.href}>
                         <Link
@@ -135,15 +181,15 @@ export function PortalShell({
                             if (soon) e.preventDefault();
                             setMenuOpen(false);
                           }}
-                          className={`flex items-center justify-between rounded-md px-3 py-2.5 text-sm transition ${
+                          className={`flex items-center justify-between rounded-md px-3 py-2.5 text-sm font-medium transition ${
                             active
-                              ? "bg-iua-navy text-white"
+                              ? "bg-iua-navy text-white shadow-sm"
                               : soon
-                                ? "cursor-default text-iua-muted/60"
-                                : "text-iua-navy/80 hover:bg-iua-mist"
+                                ? "cursor-default text-iua-navy/40"
+                                : "text-iua-navy hover:bg-white"
                           }`}
                         >
-                          <span>{t(link.labelKey)}</span>
+                          <span>{label}</span>
                           {soon && (
                             <span className="text-[10px] uppercase tracking-wide">{tc("soon")}</span>
                           )}

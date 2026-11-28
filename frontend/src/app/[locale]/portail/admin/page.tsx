@@ -67,11 +67,33 @@ export default function AdminPortalPage() {
       {error && <p className="mt-6 text-red-700">{error}</p>}
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <Stat label="Demandes" value={String(hub?.pending_requests ?? "—")} accent={(hub?.pending_requests ?? 0) > 0} />
+        <Link href="/portail/admin/demandes" className="block">
+          <Stat
+            label="Demandes à traiter"
+            value={String(hub?.pending_requests ?? "—")}
+            accent={(hub?.pending_requests ?? 0) > 0}
+          />
+        </Link>
         <Stat label="À payer" value={String(hub?.payments_due ?? "—")} />
         <Stat label="Examens" value={String(hub?.upcoming_exams ?? "—")} />
         <Stat label="Étudiants" value={String(hub?.students ?? data?.stats.students ?? "—")} />
       </div>
+      {(hub?.pending_requests ?? 0) > 0 && (
+        <Link
+          href="/portail/admin/demandes"
+          className="mt-4 flex items-center justify-between rounded-xl bg-amber-50 px-5 py-4 text-amber-950 shadow-soft"
+        >
+          <div>
+            <p className="font-semibold">
+              {hub?.pending_requests} demande{(hub?.pending_requests ?? 0) > 1 ? "s" : ""} en attente
+            </p>
+            <p className="mt-0.5 text-sm text-amber-900/70">
+              Accorder ou refuser les attestations / relevés des étudiants
+            </p>
+          </div>
+          <span className="text-sm font-semibold">Traiter →</span>
+        </Link>
+      )}
 
       {data && (
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

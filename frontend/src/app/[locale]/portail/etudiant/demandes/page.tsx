@@ -3,7 +3,8 @@
 import { useLocale } from "next-intl";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
-import { apiGet, apiSend, Page, unwrapList } from "@/lib/api";
+import { apiGet, apiSend, unwrapList } from "@/lib/api";
+import type { Page } from "@/lib/api";
 import { useAuthToken } from "@/lib/useAuthToken";
 import { studentNav } from "@/lib/navigation";
 
@@ -138,6 +139,7 @@ export default function StudentDemandesPage() {
       <h1 className="mt-2 font-display text-3xl text-iua-navy">Demandes administratives</h1>
       <p className="mt-2 max-w-xl text-sm text-iua-muted">
         Attestation de scolarité, relevé de notes, certificat… Déposez et suivez vos demandes ici.
+        Elles sont traitées par le <strong>secrétariat</strong> (pas par les enseignants).
       </p>
       {error && (
         <p className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">

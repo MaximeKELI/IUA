@@ -55,7 +55,7 @@ export default async function LocaleLayout({
         <link rel="preload" href="/brand/logo-iua-white-v2.svg" as="image" type="image/svg+xml" />
       </head>
       <body className="font-sans antialiased">
-        <NextIntlClientProvider messages={messages}>
+        <NextIntlClientProvider locale={locale} messages={messages} timeZone="Africa/Abidjan">
           {children}
           <WhatsAppFloat />
         </NextIntlClientProvider>

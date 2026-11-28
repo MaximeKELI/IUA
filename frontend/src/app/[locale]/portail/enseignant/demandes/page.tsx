@@ -2,7 +2,8 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
-import { apiGet, apiSend, Page, unwrapList } from "@/lib/api";
+import { apiGet, apiSend, unwrapList } from "@/lib/api";
+import type { Page } from "@/lib/api";
 import { useAuthToken } from "@/lib/useAuthToken";
 import { teacherNav } from "@/lib/navigation";
 
