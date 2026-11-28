@@ -269,3 +269,8 @@ from apps.teaching.student_models import (  # noqa: E402,F401
     ScholarshipOffer,
     StudentPayment,
 )
+from apps.teaching.ops_models import (  # noqa: E402,F401
+    AuditEvent,
+    CampusAnnouncement,
+    MobilityPartner,
+)

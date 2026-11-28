@@ -35,6 +35,27 @@ from apps.teaching.student_views import (
     StudentTeacherContactViewSet,
     student_hub,
 )
+from apps.teaching.ops_views import (
+    AuditEventViewSet,
+    CampusAnnouncementViewSet,
+    MobilityPartnerViewSet,
+    OpsCohortViewSet,
+    OpsExamsViewSet,
+    OpsInternshipsViewSet,
+    OpsPaymentsViewSet,
+    OpsScheduleViewSet,
+    OpsScholarshipsViewSet,
+    OpsStudentCardsViewSet,
+    direction_hub,
+    direction_institution,
+    direction_performance,
+    direction_pv,
+    direction_quality,
+    ops_attendance_export,
+    ops_hub,
+    ops_import_students_preview,
+    ops_queue,
+)
 
 router = DefaultRouter()
 router.register(r"grade-schemes", GradeSchemeViewSet, basename="grade-schemes")
@@ -67,8 +88,29 @@ router.register(r"student/attendance", StudentAttendanceViewSet, basename="stude
 router.register(r"student/quizzes", StudentQuizViewSet, basename="student-quizzes")
 router.register(r"student/contacts", StudentTeacherContactViewSet, basename="student-contacts")
 
+# Direction / secretariat ops
+router.register(r"ops/announcements", CampusAnnouncementViewSet, basename="ops-announcements")
+router.register(r"ops/partners", MobilityPartnerViewSet, basename="ops-partners")
+router.register(r"ops/audit", AuditEventViewSet, basename="ops-audit")
+router.register(r"ops/cohorts", OpsCohortViewSet, basename="ops-cohorts")
+router.register(r"ops/schedule", OpsScheduleViewSet, basename="ops-schedule")
+router.register(r"ops/payments", OpsPaymentsViewSet, basename="ops-payments")
+router.register(r"ops/exams", OpsExamsViewSet, basename="ops-exams")
+router.register(r"ops/internships", OpsInternshipsViewSet, basename="ops-internships")
+router.register(r"ops/scholarships", OpsScholarshipsViewSet, basename="ops-scholarships")
+router.register(r"ops/cards", OpsStudentCardsViewSet, basename="ops-cards")
+
 urlpatterns = [
     path("teacher/insights/", teacher_insights, name="teacher-insights"),
     path("teacher/students/<uuid:student_id>/file/", student_pedagogical_file, name="student-ped-file"),
     path("student/hub/", student_hub, name="student-hub"),
+    path("direction/hub/", direction_hub, name="direction-hub"),
+    path("direction/performance/", direction_performance, name="direction-performance"),
+    path("direction/institution/", direction_institution, name="direction-institution"),
+    path("direction/quality/", direction_quality, name="direction-quality"),
+    path("direction/pv/", direction_pv, name="direction-pv"),
+    path("ops/hub/", ops_hub, name="ops-hub"),
+    path("ops/attendance/", ops_attendance_export, name="ops-attendance"),
+    path("ops/import-preview/", ops_import_students_preview, name="ops-import-preview"),
+    path("ops/queue/", ops_queue, name="ops-queue"),
 ] + router.urls

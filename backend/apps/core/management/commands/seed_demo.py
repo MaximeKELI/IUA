@@ -32,6 +32,7 @@ from apps.teaching.student_models import (
     ScholarshipOffer,
     StudentPayment,
 )
+from apps.teaching.ops_models import AuditEvent, CampusAnnouncement, MobilityPartner
 
 
 class Command(BaseCommand):
@@ -284,6 +285,29 @@ class Command(BaseCommand):
         )
         # Ensure club joinable (membership optional — student can join via UI)
         _ = club
+
+        MobilityPartner.objects.get_or_create(
+            name="Université Félix Houphouët-Boigny",
+            defaults={"region": "CEDEAO", "focus": "Échanges Licence / Master", "country": "Côte d'Ivoire"},
+        )
+        MobilityPartner.objects.get_or_create(
+            name="Réseau partenaires Europe (pilote)",
+            defaults={"region": "UE", "focus": "Mobilités type Erasmus+", "country": "France"},
+        )
+        CampusAnnouncement.objects.get_or_create(
+            title="Rentrée 2026-2027 — inscriptions ouvertes",
+            defaults={
+                "body": "Les dossiers d'inscription sont ouverts jusqu'à fin septembre.",
+                "audience": "all",
+                "is_published": True,
+                "author": secretariat_user,
+            },
+        )
+        AuditEvent.objects.get_or_create(
+            action="seed_demo",
+            entity="System",
+            defaults={"actor": admin_user, "detail": "Chargement données démo direction/secrétariat"},
+        )
 
         emit_event(
             event_type="STUDENT_REGISTERED",
