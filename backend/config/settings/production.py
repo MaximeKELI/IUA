@@ -39,3 +39,9 @@ IUA_REQUIRE_MFA_ENROLLMENT = os.getenv("IUA_REQUIRE_MFA_ENROLLMENT", "true").low
 PAYMENT_WEBHOOK_SECRET = os.getenv("PAYMENT_WEBHOOK_SECRET", "").strip()
 if not PAYMENT_WEBHOOK_SECRET:
     raise ImproperlyConfigured("PAYMENT_WEBHOOK_SECRET must be set in production.")
+
+# Prefer institutional Jitsi; warn if still on public meet.jit.si
+JITSI_BASE_URL = os.getenv("JITSI_BASE_URL", "").strip() or "https://meet.jit.si"
+
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"

@@ -110,7 +110,29 @@ class AuditEventSerializer(serializers.ModelSerializer):
 
 
 def log_audit(user, action, entity="", detail=""):
-    AuditEvent.objects.create(actor=user if user and user.is_authenticated else None, action=action, entity=entity, detail=detail)
+    actor = user if user and getattr(user, "is_authenticated", False) else None
+    AuditEvent.objects.create(actor=actor, action=action, entity=entity, detail=detail)
+    # Dual-write to core.AuditLog for compliance / Django admin visibility
+    try:
+        from apps.core.models import AuditLog
+
+        entity_type, _, entity_id = (entity or "").partition(":")
+        if not entity_id and entity:
+            entity_type = entity
+            entity_id = ""
+        # Prefer "ModelName" + id from detail when entity is bare model name
+        meta = {"detail": detail} if detail else {}
+        AuditLog.objects.create(
+            actor=actor,
+            action=action[:64],
+            entity_type=(entity_type or entity or "system")[:128],
+            entity_id=(entity_id or "")[:64],
+            metadata=meta,
+        )
+    except Exception:
+        import logging
+
+        logging.getLogger("iua.audit").exception("core.AuditLog dual-write failed")
 
 
 @api_view(["GET"])

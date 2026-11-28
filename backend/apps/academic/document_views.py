@@ -10,12 +10,17 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from apps.academic.models import StudentProfile
+from apps.academic.models import Grade, StudentProfile
 
 
 def _student_or_403(user):
-    profile = StudentProfile.objects.select_related("user", "program", "cohort").filter(user=user).first()
-    return profile
+    return StudentProfile.objects.select_related("user", "program", "cohort").filter(user=user).first()
+
+
+def _pdf_response(data: bytes, filename: str) -> HttpResponse:
+    response = HttpResponse(data, content_type="application/pdf")
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    return response
 
 
 def _build_attestation_pdf(profile: StudentProfile, locale: str = "fr") -> bytes:
@@ -75,6 +80,69 @@ def _build_attestation_pdf(profile: StudentProfile, locale: str = "fr") -> bytes
     return buf.getvalue()
 
 
+def _build_transcript_pdf(profile: StudentProfile, locale: str = "fr") -> bytes:
+    grades = (
+        Grade.objects.filter(student=profile, is_published=True)
+        .select_related("subject", "academic_year")
+        .order_by("academic_year__name", "subject__name")
+    )
+    buf = BytesIO()
+    c = canvas.Canvas(buf, pagesize=A4)
+    width, height = A4
+    y = height - 72
+    title = "RELEVÉ DE NOTES" if locale.startswith("fr") else "ACADEMIC TRANSCRIPT"
+    c.setFont("Helvetica-Bold", 16)
+    c.drawCentredString(width / 2, y, "Institut Universitaire d'Abidjan")
+    y -= 24
+    c.setFont("Helvetica-Bold", 13)
+    c.drawCentredString(width / 2, y, title)
+    y -= 36
+    c.setFont("Helvetica", 10)
+    c.drawString(72, y, f"{profile.user.full_name} · {profile.student_number}")
+    y -= 16
+    program = profile.program.name if profile.program_id else "—"
+    c.drawString(72, y, program)
+    y -= 28
+
+    c.setFont("Helvetica-Bold", 9)
+    headers = (
+        ["Matière", "Année", "Type", "Note", "Max"]
+        if locale.startswith("fr")
+        else ["Subject", "Year", "Kind", "Score", "Max"]
+    )
+    xs = [72, 250, 340, 400, 460]
+    for i, h in enumerate(headers):
+        c.drawString(xs[i], y, h)
+    y -= 14
+    c.setFont("Helvetica", 9)
+    if not grades.exists():
+        c.drawString(72, y, "—" if locale.startswith("fr") else "No published grades.")
+    for g in grades[:80]:
+        if y < 72:
+            c.showPage()
+            y = height - 72
+            c.setFont("Helvetica", 9)
+        score = f"{g.score}" if g.score is not None else g.entry_status
+        row = [
+            (g.subject.name if g.subject_id else "—")[:40],
+            g.academic_year.name if g.academic_year_id else "—",
+            g.kind,
+            str(score),
+            str(g.max_score),
+        ]
+        for i, val in enumerate(row):
+            c.drawString(xs[i], y, str(val)[:28])
+        y -= 12
+
+    y -= 20
+    c.setFont("Helvetica", 8)
+    today = timezone.localdate().strftime("%d/%m/%Y")
+    c.drawString(72, y, f"Abidjan · {today} · IUA Digital Campus")
+    c.showPage()
+    c.save()
+    return buf.getvalue()
+
+
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def student_attestation_pdf(request):
@@ -83,7 +151,15 @@ def student_attestation_pdf(request):
         return Response({"detail": "Profil étudiant requis."}, status=403)
     locale = (request.query_params.get("lang") or "fr").lower()
     pdf = _build_attestation_pdf(profile, locale=locale)
-    filename = f"attestation-{profile.student_number}-{locale}.pdf"
-    response = HttpResponse(pdf, content_type="application/pdf")
-    response["Content-Disposition"] = f'attachment; filename="{filename}"'
-    return response
+    return _pdf_response(pdf, f"attestation-{profile.student_number}-{locale}.pdf")
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def student_transcript_pdf(request):
+    profile = _student_or_403(request.user)
+    if not profile:
+        return Response({"detail": "Profil étudiant requis."}, status=403)
+    locale = (request.query_params.get("lang") or "fr").lower()
+    pdf = _build_transcript_pdf(profile, locale=locale)
+    return _pdf_response(pdf, f"releve-{profile.student_number}-{locale}.pdf")

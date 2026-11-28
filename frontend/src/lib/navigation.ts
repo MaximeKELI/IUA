@@ -171,6 +171,7 @@ export const adminNav: PortalGroup[] = [
       { href: "/portail/admin/bourses", labelKey: "portal.admin.scholarships", status: "active" },
       { href: "/portail/admin/notifications", labelKey: "portal.admin.notifications", status: "active" },
       { href: "/portail/admin/file", labelKey: "portal.admin.queue", status: "active" },
+      { href: "/portail/admin/securite", labelKey: "portal.admin.security", status: "active" },
     ],
   },
 ];

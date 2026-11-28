@@ -203,6 +203,16 @@ class MeView(APIView):
                     {"code": "invalid", "message": "Fichier image requis (JPG/PNG/WebP)."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
+            header = avatar.read(12)
+            avatar.seek(0)
+            is_jpeg = header[:3] == b"\xff\xd8\xff"
+            is_png = header[:8] == b"\x89PNG\r\n\x1a\n"
+            is_webp = header[:4] == b"RIFF" and header[8:12] == b"WEBP"
+            if not (is_jpeg or is_png or is_webp):
+                return Response(
+                    {"code": "invalid", "message": "Signature fichier invalide (JPG/PNG/WebP uniquement)."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
             if user.avatar:
                 user.avatar.delete(save=False)
             user.avatar = avatar

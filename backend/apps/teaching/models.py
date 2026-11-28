@@ -205,8 +205,12 @@ class VideoMeeting(UUIDModel, TimeStampedModel):
 
     @property
     def jitsi_url(self) -> str:
+        from django.conf import settings
+
         room = self.room_name.replace(" ", "-")
-        return f"https://meet.jit.si/{room}"
+        base = getattr(settings, "JITSI_BASE_URL", "https://meet.jit.si").rstrip("/")
+        # Prefer private/institutional Jitsi when configured (never hardcode only public)
+        return f"{base}/{room}"
 
 
 class CatchUpRequest(UUIDModel, TimeStampedModel):

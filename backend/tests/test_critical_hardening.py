@@ -167,6 +167,17 @@ def test_attestation_pdf(seeded):
 
 
 @pytest.mark.django_db
+def test_transcript_pdf(seeded):
+    student_user = _user("tr@demo.iua.local", "student")
+    StudentProfile.objects.create(user=student_user, student_number="TR1")
+    client = APIClient()
+    client.force_authenticate(user=student_user)
+    res = client.get(reverse("documents-transcript") + "?lang=en")
+    assert res.status_code == 200
+    assert res.content[:4] == b"%PDF"
+
+
+@pytest.mark.django_db
 def test_international_kpis_not_hardcoded(seeded):
     from apps.teaching.ops_views import _international_kpis
 

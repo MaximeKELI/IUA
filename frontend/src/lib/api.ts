@@ -3,6 +3,7 @@ import {
   clearSession,
   getAccessToken,
   getRefreshToken,
+  getStoredUser,
   updateAccessToken,
 } from "./auth";
 
@@ -117,9 +118,12 @@ async function refreshAccessToken(): Promise<string | null> {
       }
       const data = (await res.json()) as { access: string; refresh?: string };
       updateAccessToken(data.access, data.refresh);
+      const nextRefresh = data.refresh || refresh;
+      void syncSessionCookies(data.access, nextRefresh, getStoredUser()?.roles);
       return data.access;
     } catch {
       clearSession();
+      void clearSessionCookies();
       return null;
     } finally {
       refreshPromise = null;

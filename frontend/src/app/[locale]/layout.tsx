@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { WhatsAppFloat } from "@/components/intl/WhatsAppFloat";
 import { buildLocaleAlternates } from "@/lib/intl/seo";
 import { locales, rtlLocales, type AppLocale, routing } from "@/i18n/routing";
@@ -56,8 +57,10 @@ export default async function LocaleLayout({
       </head>
       <body className="font-sans antialiased">
         <NextIntlClientProvider locale={locale} messages={messages} timeZone="Africa/Abidjan">
-          {children}
-          <WhatsAppFloat />
+          <ErrorBoundary>
+            {children}
+            <WhatsAppFloat />
+          </ErrorBoundary>
         </NextIntlClientProvider>
       </body>
     </html>

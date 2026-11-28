@@ -1,7 +1,7 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
 
-from apps.academic.document_views import student_attestation_pdf
+from apps.academic.document_views import student_attestation_pdf, student_transcript_pdf
 from apps.academic.views import (
     AcademicYearViewSet,
     AdminRequestViewSet,
@@ -37,5 +37,6 @@ router.register(r"admin-requests", AdminRequestViewSet, basename="admin-requests
 
 urlpatterns = [
     path("documents/attestation/", student_attestation_pdf, name="documents-attestation"),
+    path("documents/transcript/", student_transcript_pdf, name="documents-transcript"),
     *router.urls,
 ]

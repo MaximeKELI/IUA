@@ -3,7 +3,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { Link, useRouter } from "@/i18n/navigation";
 import { BrandLogo } from "@/components/BrandLogo";
-import { apiLogin } from "@/lib/api";
+import { apiLogin, apiMfaVerify, syncSessionCookies } from "@/lib/api";
 import { getAccessToken, getStoredUser, resolveHomePath, saveSession } from "@/lib/auth";
 
 const presets = [
@@ -21,6 +21,8 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(true);
+  const [mfaToken, setMfaToken] = useState<string | null>(null);
+  const [mfaCode, setMfaCode] = useState("");
 
   useEffect(() => {
     if (!getAccessToken()) {
@@ -35,14 +37,35 @@ export default function LoginPage() {
     setChecking(false);
   }, [router]);
 
+  async function finishLogin(access: string, refresh: string, user: Parameters<typeof saveSession>[2]) {
+    saveSession(access, refresh, user);
+    await syncSessionCookies(access, refresh, user.roles);
+    router.push(resolveHomePath(user.roles));
+  }
+
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError(null);
     try {
+      if (mfaToken) {
+        const data = await apiMfaVerify(mfaToken, mfaCode);
+        await finishLogin(data.access, data.refresh, data.user);
+        return;
+      }
       const data = await apiLogin(email, password);
-      saveSession(data.access, data.refresh, data.user);
-      router.push(resolveHomePath(data.user.roles));
+      if ("mfa_enrollment_required" in data && data.mfa_enrollment_required) {
+        setError(data.message || "Inscription MFA obligatoire pour ce grade.");
+        return;
+      }
+      if ("mfa_required" in data && data.mfa_required) {
+        setMfaToken(data.mfa_token);
+        setMfaCode("");
+        return;
+      }
+      if ("access" in data) {
+        await finishLogin(data.access, data.refresh, data.user);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Connexion impossible");
     } finally {
@@ -75,7 +98,7 @@ export default function LoginPage() {
             </h1>
             <p className="mt-4 max-w-sm text-sm text-white/70">
               Étudiants, enseignants et administration se connectent ici, avec un menu adapté
-              à chaque rôle.
+              à chaque rôle. MFA disponible pour les grades sensibles.
             </p>
           </div>
         </div>
@@ -89,55 +112,81 @@ export default function LoginPage() {
           <div className="mt-8 lg:hidden">
             <BrandLogo className="h-11 w-auto" />
           </div>
-          <h2 className="mt-6 font-display text-3xl text-iua-navy">Connexion</h2>
+          <h2 className="mt-6 font-display text-3xl text-iua-navy">
+            {mfaToken ? "Vérification MFA" : "Connexion"}
+          </h2>
           <p className="mt-2 text-sm text-iua-muted">
-            Profils de démonstration ou vos identifiants.
+            {mfaToken
+              ? "Saisissez le code à 6 chiffres de votre application d'authentification."
+              : "Profils de démonstration ou vos identifiants."}
           </p>
 
-          <div className="mt-6 flex flex-wrap gap-2">
-            {presets.map((p) => (
-              <button
-                key={p.label}
-                type="button"
-                onClick={() => {
-                  setEmail(p.email);
-                  setPassword(p.password);
-                  setError(null);
-                }}
-                className={`rounded-md px-3 py-2 text-xs font-semibold transition ${
-                  email === p.email
-                    ? "bg-iua-navy text-white"
-                    : "bg-white text-iua-navy ring-1 ring-iua-navy/10 hover:bg-white"
-                }`}
-              >
-                {p.label}
-              </button>
-            ))}
-          </div>
+          {!mfaToken && (
+            <div className="mt-6 flex flex-wrap gap-2">
+              {presets.map((p) => (
+                <button
+                  key={p.label}
+                  type="button"
+                  onClick={() => {
+                    setEmail(p.email);
+                    setPassword(p.password);
+                    setError(null);
+                  }}
+                  className={`rounded-md px-3 py-2 text-xs font-semibold transition ${
+                    email === p.email
+                      ? "bg-iua-navy text-white"
+                      : "bg-white text-iua-navy ring-1 ring-iua-navy/10 hover:bg-white"
+                  }`}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+          )}
 
           <form onSubmit={onSubmit} className="mt-6 space-y-4 rounded-xl bg-white p-6 shadow-soft">
-            <label className="block text-sm">
-              <span className="mb-1.5 block font-medium text-iua-navy">Email</span>
-              <input
-                type="email"
-                required
-                autoComplete="username"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-md border border-iua-navy/15 px-3 py-2.5 outline-none ring-iua-cyan transition focus:ring-2"
-              />
-            </label>
-            <label className="block text-sm">
-              <span className="mb-1.5 block font-medium text-iua-navy">Mot de passe</span>
-              <input
-                type="password"
-                required
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-md border border-iua-navy/15 px-3 py-2.5 outline-none ring-iua-cyan transition focus:ring-2"
-              />
-            </label>
+            {mfaToken ? (
+              <label className="block text-sm">
+                <span className="mb-1.5 block font-medium text-iua-navy">Code TOTP</span>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]{6}"
+                  maxLength={6}
+                  required
+                  autoComplete="one-time-code"
+                  value={mfaCode}
+                  onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                  className="w-full rounded-md border border-iua-navy/15 px-3 py-2.5 tracking-[0.3em] outline-none ring-iua-cyan transition focus:ring-2"
+                  placeholder="••••••"
+                />
+              </label>
+            ) : (
+              <>
+                <label className="block text-sm">
+                  <span className="mb-1.5 block font-medium text-iua-navy">Email</span>
+                  <input
+                    type="email"
+                    required
+                    autoComplete="username"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full rounded-md border border-iua-navy/15 px-3 py-2.5 outline-none ring-iua-cyan transition focus:ring-2"
+                  />
+                </label>
+                <label className="block text-sm">
+                  <span className="mb-1.5 block font-medium text-iua-navy">Mot de passe</span>
+                  <input
+                    type="password"
+                    required
+                    autoComplete="current-password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full rounded-md border border-iua-navy/15 px-3 py-2.5 outline-none ring-iua-cyan transition focus:ring-2"
+                  />
+                </label>
+              </>
+            )}
             {error && (
               <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
                 {error}
@@ -148,8 +197,21 @@ export default function LoginPage() {
               disabled={loading}
               className="btn-shine w-full rounded-md bg-iua-navy py-3 text-sm font-semibold text-white transition hover:bg-iua-blue disabled:opacity-60"
             >
-              {loading ? "Connexion…" : "Entrer dans mon espace"}
+              {loading ? "…" : mfaToken ? "Valider le code" : "Entrer dans mon espace"}
             </button>
+            {mfaToken && (
+              <button
+                type="button"
+                className="w-full text-sm text-iua-muted hover:text-iua-navy"
+                onClick={() => {
+                  setMfaToken(null);
+                  setMfaCode("");
+                  setError(null);
+                }}
+              >
+                ← Retour
+              </button>
+            )}
           </form>
         </div>
       </section>

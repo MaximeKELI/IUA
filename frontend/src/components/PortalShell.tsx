@@ -7,9 +7,10 @@ import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { LanguageSwitcher } from "@/components/intl/LanguageSwitcher";
 import { UserAvatar } from "@/components/UserAvatar";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
-import { apiGet, apiLogout, AuthUser, clearApiMemoryCache } from "@/lib/api";
-import { getAccessToken, getStoredUser, setStoredUser } from "@/lib/auth";
+import { apiGet, apiLogout, AuthUser, clearApiMemoryCache, syncSessionCookies } from "@/lib/api";
+import { getAccessToken, getRefreshToken, getStoredUser, resolveHomePath, setStoredUser } from "@/lib/auth";
 import { PortalGroup } from "@/lib/navigation";
+import { canAccessPortalPath } from "@/lib/portalAccess";
 
 /** Visible label even if i18n key is missing or returns empty. */
 function humanizeKey(key: unknown): string {
@@ -69,20 +70,33 @@ export function PortalShell({
 
   useEffect(() => {
     const stored = getStoredUser();
-    if (!stored || !getAccessToken()) {
+    const access = getAccessToken();
+    if (!stored || !access) {
       router.replace("/connexion");
       return;
     }
+    if (!canAccessPortalPath(pathname, stored.roles || [])) {
+      router.replace(resolveHomePath(stored.roles || []));
+      return;
+    }
     setUser(stored);
+    const refresh = getRefreshToken();
+    if (refresh) {
+      void syncSessionCookies(access, refresh, stored.roles);
+    }
     apiGet<AuthUser>("/auth/me/")
       .then((fresh) => {
         setStoredUser(fresh);
         setUser(fresh);
+        if (!canAccessPortalPath(pathname, fresh.roles || [])) {
+          router.replace(resolveHomePath(fresh.roles || []));
+        }
+        if (refresh) void syncSessionCookies(access, refresh, fresh.roles);
       })
       .catch(() => {
         /* keep stored user; api layer redirects on hard 401 */
       });
-  }, [router]);
+  }, [router, pathname]);
 
   async function confirmLogout() {
     setLogoutBusy(true);

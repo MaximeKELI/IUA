@@ -175,6 +175,9 @@ IUA_REQUIRE_MFA_ENROLLMENT = os.getenv("IUA_REQUIRE_MFA_ENROLLMENT", "false").lo
 # Payment webhook HMAC (dev default — override in production)
 PAYMENT_WEBHOOK_SECRET = os.getenv("PAYMENT_WEBHOOK_SECRET", "dev-payment-webhook-secret-change-me")
 
+# Visio — set JITSI_BASE_URL to your self-hosted instance in production
+JITSI_BASE_URL = os.getenv("JITSI_BASE_URL", "https://meet.jit.si")
+
 EMAIL_HOST = os.getenv("EMAIL_HOST", "localhost")
 EMAIL_PORT = int(os.getenv("EMAIL_PORT", "1025"))
 EMAIL_USE_TLS = False
