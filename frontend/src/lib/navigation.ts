@@ -156,6 +156,7 @@ export const adminNav: PortalGroup[] = [
     titleKey: "portal.admin.groupServices",
     links: [
       { href: "/portail/admin/demandes", labelKey: "portal.admin.requests", status: "active" },
+      { href: "/portail/admin/admissions", labelKey: "portal.admin.admissions", status: "active" },
       { href: "/portail/admin/documents", labelKey: "portal.admin.documents", status: "active" },
       { href: "/portail/admin/paiements", labelKey: "portal.admin.payments", status: "active" },
       { href: "/portail/admin/annonces", labelKey: "portal.admin.announcements", status: "active" },

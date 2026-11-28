@@ -45,22 +45,43 @@ UI : http://localhost:3000
 
 ### Comptes de démonstration (synthétiques)
 
+> **Dev only.** `seed_demo` et ces mots de passe ne doivent **jamais** tourner en production.
+> Le compose de prod (`docker-compose.prod.yml`) n’appelle pas `seed_demo`.
+
 | Email | Mot de passe | Rôle |
 |-------|--------------|------|
 | `admin@demo.iua.local` | `IuaDemoAdmin2026!` | Super admin / Direction |
 | `secretariat@demo.iua.local` | `IuaDemoSecret2026!` | Secrétariat / Admin |
+| `direction@demo.iua.local` | `IuaDemoDirection2026!` | Direction |
 | `etudiant@demo.iua.local` | `IuaDemoStudent2026!` | Étudiant |
 | `enseignant@demo.iua.local` | `IuaDemoTeacher2026!` | Enseignant |
 
 **Qui autorise les accès ?** Connectez-vous en Direction/Admin → `/portail/admin/utilisateurs` → créer un compte + cocher les rôles.
 
-## Docker Compose
+## Docker Compose (développement)
 
 ```bash
 docker compose up --build
 ```
 
-Services : Postgres/PostGIS, Redis, MinIO, Mailhog, backend, celery, frontend.
+Services : Postgres/PostGIS, Redis, MinIO, Mailhog, backend (`runserver` + `seed_demo`), celery, frontend (`npm run dev`).
+
+## Docker Compose (production)
+
+```bash
+cp backend/.env.prod.example backend/.env.prod   # renseigner secrets
+export POSTGRES_PASSWORD='…'
+docker compose -f docker-compose.prod.yml up --build -d
+```
+
+- Settings : `config.settings.production` (SECRET_KEY / CORS / webhook obligatoires)
+- Backend : **Gunicorn**, migrate + collectstatic, **pas** de seed démo
+- DB/Redis non exposés sur l’hôte
+- Frontend : `npm run build && npm start`
+
+## CI
+
+GitHub Actions (`.github/workflows/ci.yml`) : pytest backend + lint/build Next.js.
 
 ## Performance & gros volumes
 

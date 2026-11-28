@@ -253,9 +253,21 @@ class CatchUpRequestViewSet(TeacherScopedMixin, viewsets.ModelViewSet):
     queryset = CatchUpRequest.objects.select_related("subject", "student__user", "teacher").all()
     filterset_fields = ("subject", "status", "student")
 
+    ALLOWED_TRANSITIONS = {
+        CatchUpRequest.Status.PENDING: {
+            CatchUpRequest.Status.APPROVED,
+            CatchUpRequest.Status.REJECTED,
+        },
+        CatchUpRequest.Status.APPROVED: {CatchUpRequest.Status.DONE},
+        CatchUpRequest.Status.REJECTED: set(),
+        CatchUpRequest.Status.DONE: set(),
+    }
+
     def get_permissions(self):
         # Enseignant (grades.manage) crée / valide ; staff ops (request.manage) supervise.
-        if self.action in ("list", "retrieve", "update", "partial_update"):
+        if self.action in ("list", "retrieve", "approve", "reject", "complete"):
+            return [IsAuthenticated()]
+        if self.action in ("update", "partial_update"):
             return [IsAuthenticated()]
         return [require_permission("academic.grades.manage")()]
 
@@ -276,15 +288,71 @@ class CatchUpRequestViewSet(TeacherScopedMixin, viewsets.ModelViewSet):
             return Response({"detail": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
         return super().retrieve(request, *args, **kwargs)
 
+    def _apply_status(self, obj: CatchUpRequest, new_status: str, note: str | None = None):
+        from rest_framework.exceptions import ValidationError
+
+        allowed = self.ALLOWED_TRANSITIONS.get(obj.status, set())
+        if new_status != obj.status and new_status not in allowed:
+            raise ValidationError(
+                {
+                    "status": (
+                        f"Transition interdite : {obj.status} → {new_status}. "
+                        f"Autorisées : {', '.join(sorted(allowed)) or 'aucune'}."
+                    )
+                }
+            )
+        obj.status = new_status
+        if note is not None:
+            obj.teacher_note = note
+        obj.save()
+        return obj
+
     def update(self, request, *args, **kwargs):
         if not self._can_oversee(request.user):
             return Response({"detail": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+        instance = self.get_object()
+        new_status = request.data.get("status", instance.status)
+        if new_status != instance.status:
+            note = request.data.get("teacher_note")
+            self._apply_status(instance, new_status, note)
+            return Response(CatchUpRequestSerializer(instance).data)
         return super().update(request, *args, **kwargs)
 
     def partial_update(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+
+    @action(detail=True, methods=["post"])
+    def approve(self, request, pk=None):
         if not self._can_oversee(request.user):
             return Response({"detail": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
-        return super().partial_update(request, *args, **kwargs)
+        obj = self._apply_status(
+            self.get_object(),
+            CatchUpRequest.Status.APPROVED,
+            request.data.get("teacher_note"),
+        )
+        return Response(CatchUpRequestSerializer(obj).data)
+
+    @action(detail=True, methods=["post"])
+    def reject(self, request, pk=None):
+        if not self._can_oversee(request.user):
+            return Response({"detail": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+        obj = self._apply_status(
+            self.get_object(),
+            CatchUpRequest.Status.REJECTED,
+            request.data.get("teacher_note"),
+        )
+        return Response(CatchUpRequestSerializer(obj).data)
+
+    @action(detail=True, methods=["post"])
+    def complete(self, request, pk=None):
+        if not self._can_oversee(request.user):
+            return Response({"detail": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+        obj = self._apply_status(
+            self.get_object(),
+            CatchUpRequest.Status.DONE,
+            request.data.get("teacher_note"),
+        )
+        return Response(CatchUpRequestSerializer(obj).data)
 
 
 class TeachingEvaluationViewSet(viewsets.ModelViewSet):

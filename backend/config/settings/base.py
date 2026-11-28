@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "apps.identity",
     "apps.academic",
     "apps.teaching",
+    "apps.admissions",
     "apps.events",
     "apps.notifications",
 ]
@@ -127,6 +128,7 @@ REST_FRAMEWORK = {
         "anon": "60/min",
         "user": "600/min",
         "login": "10/min",
+        "admission": "10/hour",
     },
 }
 
@@ -165,6 +167,13 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": 10.0,
     },
 }
+
+# MFA: sensitive roles must complete TOTP when enrolled; enrollment gate is opt-in
+MFA_SENSITIVE_ROLES = ("admin", "super_admin", "direction", "finance_dir")
+IUA_REQUIRE_MFA_ENROLLMENT = os.getenv("IUA_REQUIRE_MFA_ENROLLMENT", "false").lower() == "true"
+
+# Payment webhook HMAC (dev default — override in production)
+PAYMENT_WEBHOOK_SECRET = os.getenv("PAYMENT_WEBHOOK_SECRET", "dev-payment-webhook-secret-change-me")
 
 EMAIL_HOST = os.getenv("EMAIL_HOST", "localhost")
 EMAIL_PORT = int(os.getenv("EMAIL_PORT", "1025"))

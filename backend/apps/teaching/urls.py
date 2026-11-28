@@ -35,6 +35,7 @@ from apps.teaching.student_views import (
     StudentTeacherContactViewSet,
     student_hub,
 )
+from apps.teaching.payment_views import payment_confirm, payment_webhook
 from apps.teaching.ops_views import (
     AuditEventViewSet,
     CampusAnnouncementViewSet,
@@ -113,4 +114,6 @@ urlpatterns = [
     path("ops/attendance/", ops_attendance_export, name="ops-attendance"),
     path("ops/import-preview/", ops_import_students_preview, name="ops-import-preview"),
     path("ops/queue/", ops_queue, name="ops-queue"),
+    path("payments/webhook/", payment_webhook, name="payments-webhook"),
+    path("payments/<uuid:pk>/confirm/", payment_confirm, name="payments-confirm"),
 ] + router.urls

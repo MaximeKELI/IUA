@@ -3,26 +3,67 @@
 import { FormEvent, useState } from "react";
 import { useTranslations } from "next-intl";
 
+const API_URL = (process.env.NEXT_PUBLIC_API_URL || "/api/v1").replace(/\/$/, "");
+
 export function InternationalApplicationForm() {
   const t = useTranslations("admissions");
   const tc = useTranslations("common");
   const [sent, setSent] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  function onSubmit(e: FormEvent) {
+  async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setSent(true);
+    setError(null);
+    setBusy(true);
+    const fd = new FormData(e.currentTarget);
+    const payload = {
+      country: String(fd.get("country") || "").trim(),
+      nationality: String(fd.get("nationality") || "").trim(),
+      passport: String(fd.get("passport") || "").trim(),
+      phone: String(fd.get("phone") || "").trim(),
+      email: String(fd.get("email") || "").trim(),
+      program: String(fd.get("program") || "").trim(),
+      diploma: String(fd.get("diploma") || "").trim(),
+      payment_preference: String(fd.get("payment") || "momo"),
+    };
+    try {
+      const res = await fetch(`${API_URL}/admissions/applications/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(
+          typeof data?.message === "string"
+            ? data.message
+            : `Échec d'envoi (${res.status})`,
+        );
+      }
+      setSent(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Échec réseau");
+    } finally {
+      setBusy(false);
+    }
   }
 
   if (sent) {
     return (
       <div className="rounded-xl border border-iua-cyan/30 bg-white p-6 text-sm text-iua-navy shadow-soft">
-        ✓ {t("note")}
+        {t("note")}
       </div>
     );
   }
 
   return (
     <form onSubmit={onSubmit} className="grid gap-4 rounded-xl bg-white p-6 shadow-soft md:grid-cols-2">
+      {error && (
+        <p className="md:col-span-2 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
+          {error}
+        </p>
+      )}
       <label className="block text-sm">
         <span className="mb-1 block text-iua-muted">
           {t("fieldCountry")} · {tc("required")}
@@ -78,9 +119,10 @@ export function InternationalApplicationForm() {
       <div className="md:col-span-2">
         <button
           type="submit"
-          className="rounded-md bg-iua-navy px-5 py-3 text-sm font-semibold text-white transition hover:bg-iua-blue"
+          disabled={busy}
+          className="rounded-md bg-iua-navy px-5 py-3 text-sm font-semibold text-white transition hover:bg-iua-blue disabled:opacity-60"
         >
-          {t("submitIntl")}
+          {busy ? tc("loading") : t("submitIntl")}
         </button>
       </div>
     </form>

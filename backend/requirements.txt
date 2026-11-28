@@ -19,3 +19,5 @@ pytest>=8.3
 pytest-django>=4.8
 factory-boy>=3.3
 freezegun>=1.5
+pyotp>=2.9
+reportlab>=4.2

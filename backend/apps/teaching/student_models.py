@@ -20,6 +20,9 @@ class StudentPayment(UUIDModel, TimeStampedModel):
     status = models.CharField(max_length=16, choices=Status.choices, default=Status.DUE)
     method = models.CharField(max_length=64, blank=True)
     reference = models.CharField(max_length=64, blank=True)
+    provider_ref = models.CharField(max_length=128, blank=True, db_index=True)
+    idempotency_key = models.CharField(max_length=128, blank=True, unique=True, null=True)
+    paid_at = models.DateTimeField(null=True, blank=True)
 
 
 class Internship(UUIDModel, TimeStampedModel):

@@ -23,27 +23,128 @@ class LoginRateThrottle(AnonRateThrottle):
     scope = "login"
 
 
+def _issue_tokens(user: User, request) -> dict:
+    user.last_login = timezone.now()
+    user.last_login_ip = client_ip(request)
+    user.save(update_fields=["last_login", "last_login_ip"])
+    refresh = RefreshToken.for_user(user)
+    return {
+        "access": str(refresh.access_token),
+        "refresh": str(refresh),
+        "user": UserSerializer(user, context={"request": request}).data,
+    }
+
+
 class LoginView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
     throttle_classes = [LoginRateThrottle]
 
     def post(self, request):
+        from apps.identity.mfa import (
+            issue_mfa_token,
+            user_must_enroll_mfa,
+            user_needs_mfa_challenge,
+        )
+
         serializer = LoginSerializer(data=request.data, context={"request": request})
         serializer.is_valid(raise_exception=True)
         user: User = serializer.validated_data["user"]
-        user.last_login = timezone.now()
-        user.last_login_ip = client_ip(request)
-        user.save(update_fields=["last_login", "last_login_ip"])
 
-        refresh = RefreshToken.for_user(user)
+        if user_must_enroll_mfa(user):
+            return Response(
+                {
+                    "mfa_enrollment_required": True,
+                    "message": "L'inscription MFA est obligatoire pour ce grade. Contactez l'IT.",
+                    "user": {"id": str(user.id), "email": user.email, "roles": user.role_codes()},
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        if user_needs_mfa_challenge(user):
+            return Response(
+                {
+                    "mfa_required": True,
+                    "mfa_token": issue_mfa_token(user.id),
+                    "message": "Code TOTP requis.",
+                }
+            )
+
+        return Response(_issue_tokens(user, request))
+
+
+class MfaVerifyView(APIView):
+    permission_classes = [AllowAny]
+    authentication_classes = []
+    throttle_classes = [LoginRateThrottle]
+
+    def post(self, request):
+        from apps.identity.mfa import parse_mfa_token, verify_totp
+
+        token = request.data.get("mfa_token") or ""
+        code = request.data.get("code") or ""
+        uid = parse_mfa_token(token)
+        if not uid:
+            return Response(
+                {"code": "invalid", "message": "Jeton MFA invalide ou expiré."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            user = User.objects.get(pk=uid, is_active=True)
+        except User.DoesNotExist:
+            return Response(
+                {"code": "invalid", "message": "Utilisateur introuvable."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if not verify_totp(user.mfa_secret, code):
+            return Response(
+                {"code": "invalid", "message": "Code TOTP incorrect."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response(_issue_tokens(user, request))
+
+
+class MfaSetupView(APIView):
+    """Generate a new TOTP secret (not enabled until confirm)."""
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        from apps.identity.mfa import new_totp_secret, provisioning_uri
+
+        secret = new_totp_secret()
+        request.user.mfa_secret = secret
+        request.user.mfa_enabled = False
+        request.user.save(update_fields=["mfa_secret", "mfa_enabled"])
         return Response(
             {
-                "access": str(refresh.access_token),
-                "refresh": str(refresh),
-                "user": UserSerializer(user, context={"request": request}).data,
+                "secret": secret,
+                "otpauth_uri": provisioning_uri(secret, request.user.email),
+                "message": "Scannez le secret puis confirmez avec POST /auth/mfa/enable/.",
             }
         )
+
+
+class MfaEnableView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        from apps.identity.mfa import verify_totp
+
+        code = request.data.get("code") or ""
+        if not request.user.mfa_secret:
+            return Response(
+                {"code": "invalid", "message": "Appelez d'abord /auth/mfa/setup/."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if not verify_totp(request.user.mfa_secret, code):
+            return Response(
+                {"code": "invalid", "message": "Code TOTP incorrect."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        request.user.mfa_enabled = True
+        request.user.save(update_fields=["mfa_enabled"])
+        return Response({"mfa_enabled": True, "message": "MFA activé."})
 
 
 class LogoutView(APIView):

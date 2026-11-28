@@ -375,7 +375,12 @@ class AdminRequestViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         from apps.identity.models import User
 
-        req = serializer.save(requester=self.request.user)
+        # status / admin_note are read-only — always start pending
+        req = serializer.save(
+            requester=self.request.user,
+            status=AdminRequest.Status.PENDING,
+            admin_note="",
+        )
         admins = User.objects.filter(
             is_active=True,
             user_roles__role__code__in=[
@@ -424,17 +429,11 @@ class AdminRequestViewSet(viewsets.ModelViewSet):
             req.handled_at = timezone.now()
         req.save()
         if new_status != prev:
-            try:
-                from apps.teaching.ops_views import log_audit
-
-                log_audit(
-                    self.request.user,
-                    f"admin_request.{new_status}",
-                    "AdminRequest",
-                    f"{req.subject} ({req.id})",
-                )
-            except Exception:
-                pass
+            self._safe_audit(
+                f"admin_request.{new_status}",
+                "AdminRequest",
+                f"{req.subject} ({req.id})",
+            )
             Notification.objects.create(
                 recipient=req.requester,
                 title=f"Demande {req.get_status_display().lower()}",
@@ -443,6 +442,18 @@ class AdminRequestViewSet(viewsets.ModelViewSet):
                 data={"request_id": str(req.id), "status": req.status},
             )
         return req
+
+    def _safe_audit(self, action: str, entity: str, detail: str) -> None:
+        import logging
+
+        try:
+            from apps.teaching.ops_views import log_audit
+
+            log_audit(self.request.user, action, entity, detail)
+        except Exception:
+            logging.getLogger("iua.audit").exception(
+                "Audit log failed action=%s entity=%s detail=%s", action, entity, detail
+            )
 
     def perform_update(self, serializer):
         prev = self.get_object()
@@ -467,17 +478,11 @@ class AdminRequestViewSet(viewsets.ModelViewSet):
             req.handled_by = self.request.user
             req.handled_at = timezone.now()
             req.save(update_fields=["handled_by", "handled_at", "updated_at"])
-            try:
-                from apps.teaching.ops_views import log_audit
-
-                log_audit(
-                    self.request.user,
-                    f"admin_request.{req.status}",
-                    "AdminRequest",
-                    f"{req.subject} ({req.id})",
-                )
-            except Exception:
-                pass
+            self._safe_audit(
+                f"admin_request.{req.status}",
+                "AdminRequest",
+                f"{req.subject} ({req.id})",
+            )
             Notification.objects.create(
                 recipient=req.requester,
                 title=f"Demande {req.get_status_display().lower()}",

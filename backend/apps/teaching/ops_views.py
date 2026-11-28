@@ -34,6 +34,38 @@ DIR_ROLES = ("direction", "super_admin", "academic_dir", "finance_dir", "admin")
 # Direction incluse : pouvoirs de validation proportionnels au grade (supervision).
 MANAGE_ROLES = ("admin", "super_admin", "secretariat", "academic_dir", "direction")
 
+def _international_kpis() -> dict:
+    """Real aggregates only — never invent constants for auditors."""
+    from apps.identity.models import PersonProfile
+
+    total = StudentProfile.objects.filter(status="active").count()
+    # Blank country defaults to domestic (CI); count only explicit foreign countries.
+    foreign = (
+        PersonProfile.objects.filter(user__student_profile__status="active")
+        .exclude(country="")
+        .exclude(country__iexact="Côte d'Ivoire")
+    )
+    intl_students = foreign.count()
+    countries = foreign.values_list("country", flat=True).distinct().count()
+    alumni_abroad = (
+        PersonProfile.objects.filter(
+            user__user_roles__role__code="alumni",
+            user__user_roles__is_active=True,
+        )
+        .exclude(country="")
+        .exclude(country__iexact="Côte d'Ivoire")
+        .distinct()
+        .count()
+    )
+    share = round((intl_students / total) * 100, 1) if total else 0.0
+    return {
+        "students": intl_students,
+        "share_pct": share,
+        "countries": countries,
+        "alumni_abroad": alumni_abroad,
+        "total_active_students": total,
+    }
+
 
 def is_ops(user) -> bool:
     return user.is_superuser or user.has_any_role(*OPS_ROLES)
@@ -127,12 +159,7 @@ def direction_hub(request):
             "pv_count": GradeSheetSignature.objects.count(),
             "exams_upcoming": ExamEvent.objects.filter(starts_at__gte=timezone.now()).count(),
             "partners": MobilityPartner.objects.filter(is_active=True).count(),
-            "international": {
-                "students": 186,
-                "share_pct": 12,
-                "countries": 24,
-                "alumni_abroad": 410,
-            },
+            "international": _international_kpis(),
             "by_faculty": [
                 {"faculty": r["program__faculty__name"] or "Non affecté", "total": r["total"]}
                 for r in by_faculty
