@@ -151,15 +151,15 @@ export function PortalShell({
         <aside
           className={`${
             menuOpen ? "block" : "hidden"
-          } border-b border-iua-navy/10 bg-[#F3F6FA] px-3 py-5 lg:block lg:min-h-[calc(100svh-65px)] lg:border-b-0 lg:border-e lg:border-iua-navy/10`}
+          } bg-[#0A2342] px-3 py-5 text-white lg:block lg:min-h-[calc(100svh-65px)]`}
         >
-          <p className="px-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-iua-navy/55">
+          <p className="px-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/55">
             {safeT((k) => tp(k as Parameters<typeof tp>[0]), "nav") || "Navigation"}
           </p>
           <div className="mt-4 space-y-5">
             {filteredNav.map((group) => (
               <div key={group.titleKey}>
-                <p className="px-3 text-[11px] font-bold uppercase tracking-[0.14em] text-iua-navy">
+                <p className="px-3 text-[11px] font-bold uppercase tracking-[0.14em] text-[#3DB8E8]">
                   {tr(group.titleKey)}
                 </p>
                 <ul className="mt-2 space-y-1">
@@ -183,15 +183,17 @@ export function PortalShell({
                           }}
                           className={`flex items-center justify-between rounded-md px-3 py-2.5 text-sm font-medium transition ${
                             active
-                              ? "bg-iua-navy text-white shadow-sm"
+                              ? "bg-[#3DB8E8] text-[#0A2342] shadow-sm"
                               : soon
-                                ? "cursor-default text-iua-navy/40"
-                                : "text-iua-navy hover:bg-white"
+                                ? "cursor-default text-white/35"
+                                : "text-white/90 hover:bg-white/10"
                           }`}
                         >
                           <span>{label}</span>
                           {soon && (
-                            <span className="text-[10px] uppercase tracking-wide">{tc("soon")}</span>
+                            <span className="text-[10px] uppercase tracking-wide text-white/50">
+                              {tc("soon")}
+                            </span>
                           )}
                         </Link>
                       </li>
