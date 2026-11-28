@@ -35,7 +35,14 @@
     "errorGeneric": "Ocorreu um erro.",
     "skipToContent": "Saltar para o conteúdo",
     "retry": "Tentar novamente",
-    "empty": "Sem itens."
+    "empty": "Sem itens.",
+    "search": "Pesquisar",
+    "searchPlaceholder": "Ir para uma página…",
+    "working": "A processar…",
+    "notifications": "Notificações",
+    "menu": "Menu",
+    "profile": "Perfil",
+    "openSearch": "Abrir pesquisa"
   },
   "nav": {
     "study": "Estudar",

@@ -35,7 +35,14 @@
     "errorGeneric": "Une erreur est survenue.",
     "skipToContent": "Aller au contenu",
     "retry": "Réessayer",
-    "empty": "Aucun élément."
+    "empty": "Aucun élément.",
+    "search": "Rechercher",
+    "searchPlaceholder": "Aller à une page…",
+    "working": "En cours…",
+    "notifications": "Notifications",
+    "menu": "Menu",
+    "profile": "Profil",
+    "openSearch": "Ouvrir la recherche"
   },
   "nav": {
     "study": "Étudier",

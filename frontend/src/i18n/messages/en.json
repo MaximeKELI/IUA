@@ -35,7 +35,14 @@
     "errorGeneric": "Something went wrong.",
     "skipToContent": "Skip to content",
     "retry": "Retry",
-    "empty": "No items."
+    "empty": "No items.",
+    "search": "Search",
+    "searchPlaceholder": "Go to a page…",
+    "working": "Working…",
+    "notifications": "Notifications",
+    "menu": "Menu",
+    "profile": "Profile",
+    "openSearch": "Open search"
   },
   "nav": {
     "study": "Study",

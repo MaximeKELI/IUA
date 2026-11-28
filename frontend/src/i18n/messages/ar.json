@@ -35,7 +35,14 @@
     "errorGeneric": "حدث خطأ.",
     "skipToContent": "تخطي إلى المحتوى",
     "retry": "إعادة المحاولة",
-    "empty": "لا توجد عناصر."
+    "empty": "لا توجد عناصر.",
+    "search": "بحث",
+    "searchPlaceholder": "الانتقال إلى صفحة…",
+    "working": "جارٍ…",
+    "notifications": "الإشعارات",
+    "menu": "القائمة",
+    "profile": "الملف",
+    "openSearch": "فتح البحث"
   },
   "nav": {
     "study": "الدراسة",
