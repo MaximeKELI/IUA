@@ -1,6 +1,6 @@
 "use client";
 
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { PortalShell } from "@/components/PortalShell";
@@ -50,26 +50,26 @@ type StudentDashboard = {
 };
 
 const QUICK_LINKS = [
-  { title: "Emploi du temps", body: "Créneaux et salles", href: "/portail/etudiant/edt" },
-  { title: "Notes", body: "Résultats publiés", href: "/portail/etudiant/notes" },
-  { title: "Bulletin", body: "Export PDF", href: "/portail/etudiant/bulletin" },
-  { title: "ECTS", body: "Progression crédits", href: "/portail/etudiant/ects" },
-  { title: "Supports", body: "Cours & fichiers", href: "/portail/etudiant/supports" },
-  { title: "Devoirs", body: "Remises en ligne", href: "/portail/etudiant/devoirs" },
-  { title: "QCM", body: "Quiz & auto-évaluation", href: "/portail/etudiant/qcm" },
-  { title: "Visio", body: "Liens Jitsi", href: "/portail/etudiant/visio" },
-  { title: "Examens", body: "Calendrier", href: "/portail/etudiant/examens" },
-  { title: "Évaluer", body: "Avis sur les cours", href: "/portail/etudiant/evaluer" },
-  { title: "Annonces", body: "Messages classe", href: "/portail/etudiant/annonces" },
-  { title: "Absences", body: "Présence", href: "/portail/etudiant/absences" },
-  { title: "Finance", body: "Paiements", href: "/portail/etudiant/finance" },
-  { title: "Bourses", body: "Aides & offres", href: "/portail/etudiant/bourses" },
-  { title: "Bibliothèque", body: "Ressources", href: "/portail/etudiant/bibliotheque" },
-  { title: "Stages", body: "Offres stage", href: "/portail/etudiant/stages" },
-  { title: "Carrière", body: "Orientation", href: "/portail/etudiant/carriere" },
-  { title: "Clubs", body: "Vie étudiante", href: "/portail/etudiant/clubs" },
-  { title: "Messages", body: "Contacter enseignant", href: "/portail/etudiant/messages" },
-  { title: "Hors-ligne", body: "Cache notes", href: "/portail/etudiant/hors-ligne" },
+  { key: "edt" as const, href: "/portail/etudiant/edt" },
+  { key: "grades" as const, href: "/portail/etudiant/notes" },
+  { key: "bulletin" as const, href: "/portail/etudiant/bulletin" },
+  { key: "ects" as const, href: "/portail/etudiant/ects" },
+  { key: "materials" as const, href: "/portail/etudiant/supports" },
+  { key: "homework" as const, href: "/portail/etudiant/devoirs" },
+  { key: "quizzes" as const, href: "/portail/etudiant/qcm" },
+  { key: "visio" as const, href: "/portail/etudiant/visio" },
+  { key: "exams" as const, href: "/portail/etudiant/examens" },
+  { key: "evaluate" as const, href: "/portail/etudiant/evaluer" },
+  { key: "announcements" as const, href: "/portail/etudiant/annonces" },
+  { key: "attendance" as const, href: "/portail/etudiant/absences" },
+  { key: "finance" as const, href: "/portail/etudiant/finance" },
+  { key: "scholarships" as const, href: "/portail/etudiant/bourses" },
+  { key: "library" as const, href: "/portail/etudiant/bibliotheque" },
+  { key: "internships" as const, href: "/portail/etudiant/stages" },
+  { key: "career" as const, href: "/portail/etudiant/carriere" },
+  { key: "clubs" as const, href: "/portail/etudiant/clubs" },
+  { key: "messages" as const, href: "/portail/etudiant/messages" },
+  { key: "offline" as const, href: "/portail/etudiant/hors-ligne" },
 ];
 
 const statusLabel: Record<string, string> = {
@@ -81,6 +81,7 @@ const statusLabel: Record<string, string> = {
 
 export default function StudentPortalPage() {
   const locale = useLocale();
+  const t = useTranslations("portal.student");
   const [data, setData] = useState<StudentDashboard | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { token, ready } = useAuthToken();
@@ -97,14 +98,14 @@ export default function StudentPortalPage() {
   const subjectsWithGrades = (data?.subjects || []).filter((s) => s.grades_count > 0).slice(0, 4);
 
   return (
-    <PortalShell title="Espace étudiant" nav={studentNav}>
+    <PortalShell title={t("space")} nav={studentNav}>
       <p className="text-xs uppercase tracking-[0.18em] text-iua-cyan">
         {data?.profile.status
           ? statusLabel[data.profile.status] || data.profile.status
-          : "Parcours"}
+          : t("groupPath")}
       </p>
       <h1 className="mt-2 font-display text-3xl text-iua-navy">
-        {firstName ? `Bonjour, ${firstName}` : "Tableau de bord"}
+        {firstName ? `${t("welcome")}, ${firstName}` : t("dashboard")}
       </h1>
       <p className="mt-2 text-sm text-iua-muted">
         {[data?.profile.program, data?.profile.cohort, data?.profile.level]

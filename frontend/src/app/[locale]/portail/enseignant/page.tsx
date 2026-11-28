@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useEffect, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
@@ -57,6 +58,7 @@ const staffTypeLabel: Record<string, string> = {
 };
 
 export default function TeacherPortalPage() {
+  const t = useTranslations("portal.teacher");
   const [data, setData] = useState<TeacherDashboard | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { token, ready } = useAuthToken();
@@ -76,14 +78,14 @@ export default function TeacherPortalPage() {
   ].filter(Boolean);
 
   return (
-    <PortalShell title="Espace enseignant" nav={teacherNav}>
+    <PortalShell title={t("space")} nav={teacherNav}>
       <p className="text-xs uppercase tracking-[0.18em] text-iua-cyan">
         {data?.profile?.staff_type
           ? staffTypeLabel[data.profile.staff_type] || data.profile.staff_type
-          : "Enseignement"}
+          : t("groupTeach")}
       </p>
       <h1 className="mt-2 font-display text-3xl text-iua-navy">
-        {greetingName ? `Bonjour, ${greetingName}` : "Bonjour"}
+        {greetingName ? `${t("welcome")}, ${greetingName}` : t("welcome")}
       </h1>
       <p className="mt-2 text-sm text-iua-muted">
         {profileBits.length

@@ -5,6 +5,7 @@ from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 
+from apps.core.media_views import protected_media
 from apps.core.root_views import RootView
 
 
@@ -34,6 +35,7 @@ urlpatterns = [
         name="swagger-ui",
     ),
     path("api/v1/", include("config.api_urls")),
+    path("api/v1/media/<path:path>", protected_media, name="protected-media"),
 ]
 
 if settings.DEBUG:

@@ -18,6 +18,9 @@ async function proxy(
     headers.set(key, value);
   });
   headers.set("accept", req.headers.get("accept") || "application/json");
+  // Forward browser cookies to Django (HttpOnly JWT)
+  const cookie = req.headers.get("cookie");
+  if (cookie) headers.set("cookie", cookie);
 
   const init: RequestInit = {
     method: req.method,
@@ -49,14 +52,28 @@ async function proxy(
   const outHeaders = new Headers();
   upstream.headers.forEach((value, key) => {
     const lower = key.toLowerCase();
-    if (["transfer-encoding", "connection", "content-encoding"].includes(lower)) return;
+    if (
+      ["transfer-encoding", "connection", "content-encoding", "set-cookie"].includes(lower)
+    ) {
+      return;
+    }
     outHeaders.set(key, value);
   });
 
-  return new NextResponse(upstream.body, {
+  const res = new NextResponse(upstream.body, {
     status: upstream.status,
     headers: outHeaders,
   });
+
+  // Preserve all Set-Cookie from Django (HttpOnly JWT + CSRF)
+  const anyHeaders = upstream.headers as Headers & { getSetCookie?: () => string[] };
+  const setCookies =
+    typeof anyHeaders.getSetCookie === "function" ? anyHeaders.getSetCookie() : [];
+  for (const c of setCookies) {
+    res.headers.append("Set-Cookie", c);
+  }
+
+  return res;
 }
 
 export const GET = proxy;

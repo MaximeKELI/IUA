@@ -482,7 +482,20 @@
       "evaluate": "Rate my courses",
       "groupLife": "Campus life",
       "groupStudy": "Courses & assessment",
-      "groupServices": "Services"
+      "groupServices": "Services",
+      "space": "Student portal",
+      "welcome": "Welcome",
+      "clearCache": "Clear cache",
+      "clearCacheTitle": "Clear offline cache?",
+      "clearCacheBody": "Cached grades on this device will be removed.",
+      "network": "Network",
+      "online": "Online",
+      "offlineState": "Offline",
+      "cachedGrades": "Cached grades",
+      "refreshCache": "Cache now",
+      "noCachedGrades": "No grades in cache.",
+      "cacheNeedOnline": "Connection required to refresh the cache.",
+      "cacheUpdated": "{count} grades cached for offline use."
     },
     "teacher": {
       "dashboard": "Dashboard",
@@ -510,7 +523,9 @@
       "scheme": "Weights & scheme",
       "groupTools": "Teaching tools",
       "groupClass": "Class life",
-      "groupAdmin": "Follow-up & admin"
+      "groupAdmin": "Follow-up & admin",
+      "space": "Teacher portal",
+      "welcome": "Welcome"
     },
     "admin": {
       "overview": "Overview",

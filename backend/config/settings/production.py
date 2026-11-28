@@ -35,6 +35,8 @@ if not CORS_ALLOWED_ORIGINS:
 
 # Sensitive roles must enroll MFA when this flag is on
 IUA_REQUIRE_MFA_ENROLLMENT = os.getenv("IUA_REQUIRE_MFA_ENROLLMENT", "true").lower() == "true"
+# Never return JWTs in JSON body in production — HttpOnly cookies only
+IUA_EXPOSE_TOKENS_IN_BODY = os.getenv("IUA_EXPOSE_TOKENS_IN_BODY", "false").lower() == "true"
 
 PAYMENT_WEBHOOK_SECRET = os.getenv("PAYMENT_WEBHOOK_SECRET", "").strip()
 if not PAYMENT_WEBHOOK_SECRET:

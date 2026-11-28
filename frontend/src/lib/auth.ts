@@ -47,9 +47,14 @@ const REFRESH_KEY = "iua_refresh";
 const USER_KEY = "iua_user";
 
 export function saveSession(access: string, refresh: string, user: AuthUser) {
-  localStorage.setItem(ACCESS_KEY, access);
-  localStorage.setItem(REFRESH_KEY, refresh);
-  localStorage.setItem(USER_KEY, JSON.stringify(user));
+  // Prefer HttpOnly cookies for tokens; localStorage kept as fallback / UX cache only.
+  if (access) localStorage.setItem(ACCESS_KEY, access);
+  else localStorage.removeItem(ACCESS_KEY);
+  if (refresh) localStorage.setItem(REFRESH_KEY, refresh);
+  else localStorage.removeItem(REFRESH_KEY);
+  // Never persist permissions secrets; roles OK for UI routing
+  const safe = { ...user };
+  localStorage.setItem(USER_KEY, JSON.stringify(safe));
 }
 
 export function updateAccessToken(access: string, refresh?: string) {

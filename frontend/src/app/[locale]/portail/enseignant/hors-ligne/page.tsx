@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { PortalShell } from "@/components/PortalShell";
 import { apiSend, clearApiMemoryCache } from "@/lib/api";
 import { teacherNav } from "@/lib/navigation";
@@ -14,6 +15,7 @@ export default function HorsLignePage() {
   const [msg, setMsg] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
+  const [confirmClear, setConfirmClear] = useState(false);
 
   useEffect(() => {
     setOnline(navigator.onLine);
@@ -55,9 +57,9 @@ export default function HorsLignePage() {
   }
 
   function clearQueue() {
-    if (!window.confirm("Vider la file hors-ligne ?")) return;
     writeOfflineQueue([]);
     setQueue([]);
+    setConfirmClear(false);
   }
 
   return (
@@ -99,7 +101,7 @@ export default function HorsLignePage() {
         </button>
         <button
           type="button"
-          onClick={clearQueue}
+          onClick={() => setConfirmClear(true)}
           className="rounded-md border border-iua-navy/15 px-5 py-2.5 text-sm font-semibold text-iua-navy"
         >
           Vider la file
@@ -122,6 +124,17 @@ export default function HorsLignePage() {
           </li>
         ))}
       </ul>
+
+      <ConfirmDialog
+        open={confirmClear}
+        title="Vider la file hors-ligne ?"
+        description="Les opérations non synchronisées seront définitivement perdues."
+        confirmLabel="Vider"
+        cancelLabel="Annuler"
+        tone="danger"
+        onCancel={() => setConfirmClear(false)}
+        onConfirm={clearQueue}
+      />
     </PortalShell>
   );
 }

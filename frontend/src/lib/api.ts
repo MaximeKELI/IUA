@@ -84,18 +84,31 @@ async function fetchWithTimeout(
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    return await fetch(input, { ...init, signal: controller.signal });
+    return await fetch(input, {
+      ...init,
+      signal: controller.signal,
+      credentials: "include",
+    });
   } finally {
     clearTimeout(timer);
   }
 }
 
-function authHeaders(token: string): HeadersInit {
-  return {
-    Authorization: `Bearer ${token}`,
+function readCsrfCookie(): string | null {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie.match(/(?:^|; )iua_csrf=([^;]*)/);
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
+function authHeaders(token?: string | null): HeadersInit {
+  const headers: Record<string, string> = {
     "Content-Type": "application/json",
     Accept: "application/json",
   };
+  if (token) headers.Authorization = `Bearer ${token}`;
+  const csrf = readCsrfCookie();
+  if (csrf) headers["X-IUA-CSRF"] = csrf;
+  return headers;
 }
 
 let refreshPromise: Promise<string | null> | null = null;
@@ -104,23 +117,26 @@ async function refreshAccessToken(): Promise<string | null> {
   if (refreshPromise) return refreshPromise;
   refreshPromise = (async () => {
     const refresh = getRefreshToken();
-    if (!refresh) return null;
     try {
       const res = await fetchWithTimeout(`${API_URL}/auth/refresh/`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify({ refresh }),
+        headers: authHeaders(),
+        body: JSON.stringify(refresh ? { refresh } : {}),
         cache: "no-store",
       });
       if (!res.ok) {
         clearSession();
+        void clearSessionCookies();
         return null;
       }
-      const data = (await res.json()) as { access: string; refresh?: string };
-      updateAccessToken(data.access, data.refresh);
-      const nextRefresh = data.refresh || refresh;
-      void syncSessionCookies(data.access, nextRefresh, getStoredUser()?.roles);
-      return data.access;
+      const data = (await res.json()) as { access?: string; refresh?: string };
+      if (data.access) {
+        updateAccessToken(data.access, data.refresh);
+        void syncSessionCookies(data.access, data.refresh || refresh || data.access, getStoredUser()?.roles);
+        return data.access;
+      }
+      // Cookie-only refresh: cookies updated via Set-Cookie; keep opaque marker
+      return getAccessToken() || "cookie";
     } catch {
       clearSession();
       void clearSessionCookies();
@@ -145,15 +161,17 @@ async function authorizedFetch(
   token?: string | null,
 ): Promise<Response> {
   let access = token ?? getAccessToken();
-  if (!access) {
+  const hasUser = !!getStoredUser();
+  // Cookie auth may work without localStorage token
+  if (!access && !hasUser) {
     redirectToLogin();
     throw new Error("Session absente. Reconnectez-vous.");
   }
 
-  const doFetch = (tok: string) =>
+  const doFetch = (tok: string | null) =>
     fetchWithTimeout(`${API_URL}${path}`, {
       ...init,
-      headers: { ...authHeaders(tok), ...(init.headers || {}) },
+      headers: { ...authHeaders(tok && tok !== "cookie" ? tok : null), ...(init.headers || {}) },
       cache: "no-store",
     });
 
@@ -164,9 +182,10 @@ async function authorizedFetch(
       redirectToLogin();
       throw new Error("Session expirée. Reconnectez-vous.");
     }
-    res = await doFetch(next);
+    res = await doFetch(next === "cookie" ? null : next);
     if (res.status === 401) {
       clearSession();
+      void clearSessionCookies();
       redirectToLogin();
       throw new Error("Session expirée. Reconnectez-vous.");
     }
@@ -222,18 +241,15 @@ export async function apiMfaVerify(mfaToken: string, code: string): Promise<Logi
 
 export async function apiLogout(): Promise<void> {
   const refresh = getRefreshToken();
-  const access = getAccessToken();
-  if (access && refresh) {
-    try {
-      await fetchWithTimeout(`${API_URL}/auth/logout/`, {
-        method: "POST",
-        headers: authHeaders(access),
-        body: JSON.stringify({ refresh }),
-        cache: "no-store",
-      });
-    } catch {
-      /* ignore network errors on logout */
-    }
+  try {
+    await fetchWithTimeout(`${API_URL}/auth/logout/`, {
+      method: "POST",
+      headers: authHeaders(getAccessToken()),
+      body: JSON.stringify(refresh ? { refresh } : {}),
+      cache: "no-store",
+    });
+  } catch {
+    /* ignore network errors on logout */
   }
   clearSession();
   await clearSessionCookies();
@@ -272,22 +288,24 @@ export async function apiUpload<T>(
   formData: FormData,
   method: "POST" | "PATCH" | "PUT" = "PATCH",
 ): Promise<T> {
-  let access = token ?? getAccessToken();
-  if (!access) {
+  const access = token ?? getAccessToken();
+  if (!access && !getStoredUser()) {
     redirectToLogin();
     throw new Error("Session absente. Reconnectez-vous.");
   }
 
-  const doFetch = (tok: string) =>
-    fetchWithTimeout(`${API_URL}${path}`, {
+  const doFetch = (tok: string | null) => {
+    const headers: Record<string, string> = { Accept: "application/json" };
+    if (tok && tok !== "cookie") headers.Authorization = `Bearer ${tok}`;
+    const csrf = readCsrfCookie();
+    if (csrf) headers["X-IUA-CSRF"] = csrf;
+    return fetchWithTimeout(`${API_URL}${path}`, {
       method,
-      headers: {
-        Authorization: `Bearer ${tok}`,
-        Accept: "application/json",
-      },
+      headers,
       body: formData,
       cache: "no-store",
     });
+  };
 
   let res = await doFetch(access);
   if (res.status === 401) {
@@ -296,7 +314,7 @@ export async function apiUpload<T>(
       redirectToLogin();
       throw new Error("Session expirée. Reconnectez-vous.");
     }
-    res = await doFetch(next);
+    res = await doFetch(next === "cookie" ? null : next);
   }
   if (!res.ok) throw new Error(await parseError(res));
   return res.json();

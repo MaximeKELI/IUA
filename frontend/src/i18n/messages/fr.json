@@ -482,7 +482,20 @@
       "evaluate": "Évaluer mes cours",
       "groupLife": "Vie de campus",
       "groupStudy": "Cours & évaluation",
-      "groupServices": "Services"
+      "groupServices": "Services",
+      "space": "Espace étudiant",
+      "welcome": "Bienvenue",
+      "clearCache": "Vider le cache",
+      "clearCacheTitle": "Vider le cache hors-ligne ?",
+      "clearCacheBody": "Les notes mises en cache sur cet appareil seront effacées.",
+      "network": "Réseau",
+      "online": "En ligne",
+      "offlineState": "Hors ligne",
+      "cachedGrades": "Notes en cache",
+      "refreshCache": "Mettre en cache",
+      "noCachedGrades": "Aucune note en cache.",
+      "cacheNeedOnline": "Connexion requise pour rafraîchir le cache.",
+      "cacheUpdated": "{count} notes mises en cache hors-ligne."
     },
     "teacher": {
       "dashboard": "Tableau de bord",
@@ -510,7 +523,9 @@
       "scheme": "Barèmes & coeffs",
       "groupTools": "Outils pédagogiques",
       "groupClass": "Vie de classe",
-      "groupAdmin": "Suivi & admin"
+      "groupAdmin": "Suivi & admin",
+      "space": "Espace enseignant",
+      "welcome": "Bienvenue"
     },
     "admin": {
       "overview": "Vue d'ensemble",

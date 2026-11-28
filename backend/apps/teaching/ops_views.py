@@ -141,16 +141,23 @@ def direction_hub(request):
     if not is_dir(request.user):
         return Response({"detail": "Accès direction requis."}, status=403)
 
+    from django.db.models import ExpressionWrapper, F, FloatField
+
     payments = StudentPayment.objects.all()
     due = payments.filter(status__in=["due", "overdue", "partial"])
-    grades = Grade.objects.filter(is_published=True, entry_status="scored", score__isnull=False)
-    ratios = []
-    for g in grades:
-        if g.max_score and float(g.max_score) > 0 and g.score is not None:
-            ratios.append(float(g.score) / float(g.max_score) * 20)
-    avg = round(sum(ratios) / len(ratios), 2) if ratios else None
+    scored = Grade.objects.filter(
+        is_published=True, entry_status="scored", score__isnull=False, max_score__gt=0
+    )
+    # DB-side aggregate — avoid loading all grades into Python (audit medium finding)
+    scaled = ExpressionWrapper(F("score") * 20.0 / F("max_score"), output_field=FloatField())
+    agg = scored.aggregate(
+        avg=Avg(scaled),
+        total=Count("id"),
+        passed=Count("id", filter=Q(score__gte=F("max_score") * 0.5)),
+    )
+    avg = round(float(agg["avg"]), 2) if agg["avg"] is not None else None
     pass_rate = (
-        round(100 * sum(1 for r in ratios if r >= 10) / len(ratios), 1) if ratios else None
+        round(100 * agg["passed"] / agg["total"], 1) if agg["total"] else None
     )
 
     by_faculty = list(

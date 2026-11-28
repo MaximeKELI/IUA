@@ -55,6 +55,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "apps.core.middleware.RequestAuditMiddleware",
+    "apps.core.security_middleware.ExtremeSecurityMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -104,8 +105,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
-        "rest_framework.authentication.SessionAuthentication",
+        "apps.identity.cookie_auth.CookieJWTAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_FILTER_BACKENDS": (
@@ -125,20 +125,27 @@ REST_FRAMEWORK = {
         "rest_framework.throttling.UserRateThrottle",
     ),
     "DEFAULT_THROTTLE_RATES": {
-        "anon": "60/min",
-        "user": "600/min",
-        "login": "10/min",
-        "admission": "10/hour",
+        "anon": "30/min",
+        "user": "300/min",
+        "login": "5/min",
+        "admission": "5/hour",
     },
 }
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=3),
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
     "UPDATE_LAST_LOGIN": True,
+    "ALGORITHM": "HS256",
 }
+
+JWT_ACCESS_COOKIE = "iua_access"
+JWT_REFRESH_COOKIE = "iua_refresh"
+JWT_CSRF_COOKIE = "iua_csrf"
+# When false, login body omits access/refresh (cookies only) — extreme mode
+IUA_EXPOSE_TOKENS_IN_BODY = os.getenv("IUA_EXPOSE_TOKENS_IN_BODY", "true").lower() == "true"
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "IUA Digital Campus API",
@@ -157,6 +164,20 @@ CORS_ALLOW_ALL_ORIGINS = os.getenv("CORS_ALLOW_ALL_ORIGINS", "false").lower() in
     "true",
     "yes",
 }
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_HEADERS = list(
+    {
+        "accept",
+        "authorization",
+        "content-type",
+        "origin",
+        "user-agent",
+        "x-csrftoken",
+        "x-requested-with",
+        "x-iua-csrf",
+        "x-iua-signature",
+    }
+)
 
 CELERY_BROKER_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 CELERY_RESULT_BACKEND = os.getenv("REDIS_URL", "redis://localhost:6379/0")

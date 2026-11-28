@@ -482,7 +482,20 @@
       "evaluate": "Rate my courses",
       "groupLife": "Campus life",
       "groupStudy": "Courses & assessment",
-      "groupServices": "Services"
+      "groupServices": "Services",
+      "space": "فضاء الطالب",
+      "welcome": "مرحبًا",
+      "clearCache": "مسح الذاكرة المؤقتة",
+      "clearCacheTitle": "مسح ذاكرة التخزين دون اتصال؟",
+      "clearCacheBody": "سيتم حذف الدرجات المخزّنة على هذا الجهاز.",
+      "network": "الشبكة",
+      "online": "متصل",
+      "offlineState": "غير متصل",
+      "cachedGrades": "درجات مخزّنة",
+      "refreshCache": "تحديث الذاكرة المؤقتة",
+      "noCachedGrades": "لا توجد درجات مخزّنة.",
+      "cacheNeedOnline": "يلزم الاتصال لتحديث الذاكرة المؤقتة.",
+      "cacheUpdated": "تم تخزين {count} درجة للاستخدام دون اتصال."
     },
     "teacher": {
       "dashboard": "Dashboard",
@@ -510,7 +523,9 @@
       "scheme": "Weights & scheme",
       "groupTools": "Teaching tools",
       "groupClass": "Class life",
-      "groupAdmin": "Follow-up & admin"
+      "groupAdmin": "Follow-up & admin",
+      "space": "فضاء الأستاذ",
+      "welcome": "مرحبًا"
     },
     "admin": {
       "overview": "Overview",

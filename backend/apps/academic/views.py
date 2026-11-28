@@ -256,7 +256,20 @@ class TeachingAssignmentViewSet(AcademicReadWriteMixin, viewsets.ModelViewSet):
         user = self.request.user
         if is_teacher_only(user):
             return qs.filter(teacher__user=user)
-        return qs
+        # Staff / academic roles may list all; bare authenticated users get nothing
+        if user.has_perm_code("academic.teaching.manage") or user.has_perm_code("academic.grades.read"):
+            return qs
+        if user.has_any_role(
+            "admin",
+            "super_admin",
+            "secretariat",
+            "academic_dir",
+            "direction",
+            "faculty_head",
+            "dept_head",
+        ):
+            return qs
+        return qs.none()
 
 
 class GradeViewSet(viewsets.ModelViewSet):

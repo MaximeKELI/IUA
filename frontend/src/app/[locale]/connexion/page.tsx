@@ -6,18 +6,22 @@ import { BrandLogo } from "@/components/BrandLogo";
 import { apiLogin, apiMfaVerify, syncSessionCookies } from "@/lib/api";
 import { getAccessToken, getStoredUser, resolveHomePath, saveSession } from "@/lib/auth";
 
-const presets = [
-  { label: "Étudiant", email: "etudiant@demo.iua.local", password: "IuaDemoStudent2026!" },
-  { label: "Enseignant", email: "enseignant@demo.iua.local", password: "IuaDemoTeacher2026!" },
-  { label: "Secrétariat", email: "secretariat@demo.iua.local", password: "IuaDemoSecret2026!" },
-  { label: "Direction", email: "direction@demo.iua.local", password: "IuaDemoDirection2026!" },
-  { label: "Admin", email: "admin@demo.iua.local", password: "IuaDemoAdmin2026!" },
-];
+const DEMO_LOGIN = process.env.NEXT_PUBLIC_DEMO_LOGIN === "true";
+
+const presets = DEMO_LOGIN
+  ? [
+      { label: "Étudiant", email: "etudiant@demo.iua.local", password: "IuaDemoStudent2026!" },
+      { label: "Enseignant", email: "enseignant@demo.iua.local", password: "IuaDemoTeacher2026!" },
+      { label: "Secrétariat", email: "secretariat@demo.iua.local", password: "IuaDemoSecret2026!" },
+      { label: "Direction", email: "direction@demo.iua.local", password: "IuaDemoDirection2026!" },
+      { label: "Admin", email: "admin@demo.iua.local", password: "IuaDemoAdmin2026!" },
+    ]
+  : [];
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState(presets[0].email);
-  const [password, setPassword] = useState(presets[0].password);
+  const [email, setEmail] = useState(presets[0]?.email || "");
+  const [password, setPassword] = useState(presets[0]?.password || "");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(true);
@@ -37,9 +41,15 @@ export default function LoginPage() {
     setChecking(false);
   }, [router]);
 
-  async function finishLogin(access: string, refresh: string, user: Parameters<typeof saveSession>[2]) {
-    saveSession(access, refresh, user);
-    await syncSessionCookies(access, refresh, user.roles);
+  async function finishLogin(
+    access: string | undefined,
+    refresh: string | undefined,
+    user: Parameters<typeof saveSession>[2],
+  ) {
+    saveSession(access || "", refresh || "", user);
+    if (access && refresh) {
+      await syncSessionCookies(access, refresh, user.roles);
+    }
     router.push(resolveHomePath(user.roles));
   }
 
@@ -63,8 +73,9 @@ export default function LoginPage() {
         setMfaCode("");
         return;
       }
-      if ("access" in data) {
-        await finishLogin(data.access, data.refresh, data.user);
+      if ("user" in data && data.user) {
+        const full = data as { access?: string; refresh?: string; user: Parameters<typeof saveSession>[2] };
+        await finishLogin(full.access, full.refresh, full.user);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Connexion impossible");
@@ -121,7 +132,7 @@ export default function LoginPage() {
               : "Profils de démonstration ou vos identifiants."}
           </p>
 
-          {!mfaToken && (
+          {!mfaToken && presets.length > 0 && (
             <div className="mt-6 flex flex-wrap gap-2">
               {presets.map((p) => (
                 <button

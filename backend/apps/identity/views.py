@@ -23,16 +23,27 @@ class LoginRateThrottle(AnonRateThrottle):
     scope = "login"
 
 
-def _issue_tokens(user: User, request) -> dict:
+def _auth_response(user: User, request):
+    from django.conf import settings
+
+    from apps.identity.cookie_auth import set_jwt_cookies
+
     user.last_login = timezone.now()
     user.last_login_ip = client_ip(request)
     user.save(update_fields=["last_login", "last_login_ip"])
     refresh = RefreshToken.for_user(user)
-    return {
-        "access": str(refresh.access_token),
-        "refresh": str(refresh),
+    access = str(refresh.access_token)
+    refresh_s = str(refresh)
+    body = {
         "user": UserSerializer(user, context={"request": request}).data,
+        "cookie_auth": True,
     }
+    if getattr(settings, "IUA_EXPOSE_TOKENS_IN_BODY", True):
+        body["access"] = access
+        body["refresh"] = refresh_s
+    response = Response(body)
+    set_jwt_cookies(response, access, refresh_s)
+    return response
 
 
 class LoginView(APIView):
@@ -70,7 +81,7 @@ class LoginView(APIView):
                 }
             )
 
-        return Response(_issue_tokens(user, request))
+        return _auth_response(user, request)
 
 
 class MfaVerifyView(APIView):
@@ -101,7 +112,7 @@ class MfaVerifyView(APIView):
                 {"code": "invalid", "message": "Code TOTP incorrect."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        return Response(_issue_tokens(user, request))
+        return _auth_response(user, request)
 
 
 class MfaSetupView(APIView):
@@ -151,21 +162,56 @@ class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        refresh = request.data.get("refresh")
-        if not refresh:
+        from apps.identity.cookie_auth import REFRESH_COOKIE, clear_jwt_cookies
+
+        refresh = request.data.get("refresh") or request.COOKIES.get(REFRESH_COOKIE)
+        if refresh:
+            try:
+                token = RefreshToken(refresh)
+                token.blacklist()
+            except Exception:
+                pass
+        response = Response({"message": "Déconnexion réussie."})
+        clear_jwt_cookies(response)
+        return response
+
+
+class CookieRefreshView(APIView):
+    """Refresh access token using HttpOnly refresh cookie (or body)."""
+
+    permission_classes = [AllowAny]
+    authentication_classes = []
+
+    def post(self, request):
+        from apps.identity.cookie_auth import REFRESH_COOKIE, set_jwt_cookies
+        from django.conf import settings
+
+        raw = request.data.get("refresh") or request.COOKIES.get(REFRESH_COOKIE)
+        if not raw:
             return Response(
-                {"code": "invalid", "message": "Le token refresh est requis."},
+                {"code": "invalid", "message": "Refresh token manquant."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         try:
-            token = RefreshToken(refresh)
-            token.blacklist()
+            old = RefreshToken(raw)
+            user_id = old.get("user_id")
+            user = User.objects.get(pk=user_id, is_active=True)
+            old.blacklist()
         except Exception:
             return Response(
-                {"code": "invalid", "message": "Token refresh invalide."},
-                status=status.HTTP_400_BAD_REQUEST,
+                {"code": "invalid", "message": "Refresh token invalide."},
+                status=status.HTTP_401_UNAUTHORIZED,
             )
-        return Response({"message": "Déconnexion réussie."})
+        new_refresh = RefreshToken.for_user(user)
+        access = str(new_refresh.access_token)
+        refresh_s = str(new_refresh)
+        body: dict = {"cookie_auth": True}
+        if getattr(settings, "IUA_EXPOSE_TOKENS_IN_BODY", True):
+            body["access"] = access
+            body["refresh"] = refresh_s
+        response = Response(body)
+        set_jwt_cookies(response, access, refresh_s)
+        return response
 
 
 class MeView(APIView):
