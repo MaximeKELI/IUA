@@ -70,27 +70,40 @@ export const teacherNav: PortalGroup[] = [
     links: [
       { href: "/portail/enseignant", labelKey: "portal.teacher.dashboard", status: "active" },
       { href: "/portail/enseignant/cours", labelKey: "portal.teacher.courses", status: "active" },
-      {
-        href: "/portail/enseignant/etudiants",
-        labelKey: "portal.teacher.students",
-        status: "active",
-      },
+      { href: "/portail/enseignant/etudiants", labelKey: "portal.teacher.students", status: "active" },
       { href: "/portail/enseignant/notes", labelKey: "portal.teacher.grades", status: "active" },
+      { href: "/portail/enseignant/baremes", labelKey: "portal.teacher.scheme", status: "active" },
     ],
   },
   {
-    titleKey: "portal.teacher.groupAccount",
+    titleKey: "portal.teacher.groupTools",
     links: [
-      {
-        href: "/portail/enseignant/demandes",
-        labelKey: "portal.teacher.requests",
-        status: "active",
-      },
-      {
-        href: "/portail/enseignant/notifications",
-        labelKey: "portal.teacher.notifications",
-        status: "active",
-      },
+      { href: "/portail/enseignant/presence", labelKey: "portal.teacher.presence", status: "active" },
+      { href: "/portail/enseignant/edt", labelKey: "portal.teacher.schedule", status: "active" },
+      { href: "/portail/enseignant/supports", labelKey: "portal.teacher.materials", status: "active" },
+      { href: "/portail/enseignant/devoirs", labelKey: "portal.teacher.homework", status: "active" },
+      { href: "/portail/enseignant/qcm", labelKey: "portal.teacher.quizzes", status: "active" },
+      { href: "/portail/enseignant/visio", labelKey: "portal.teacher.visio", status: "active" },
+    ],
+  },
+  {
+    titleKey: "portal.teacher.groupClass",
+    links: [
+      { href: "/portail/enseignant/annonces", labelKey: "portal.teacher.messages", status: "active" },
+      { href: "/portail/enseignant/fiche-etudiant", labelKey: "portal.teacher.studentFile", status: "active" },
+      { href: "/portail/enseignant/rattrapages", labelKey: "portal.teacher.catchup", status: "active" },
+      { href: "/portail/enseignant/evaluations", labelKey: "portal.teacher.evaluations", status: "active" },
+    ],
+  },
+  {
+    titleKey: "portal.teacher.groupAdmin",
+    links: [
+      { href: "/portail/enseignant/alertes", labelKey: "portal.teacher.alerts", status: "active" },
+      { href: "/portail/enseignant/stats", labelKey: "portal.teacher.stats", status: "active" },
+      { href: "/portail/enseignant/pv", labelKey: "portal.teacher.pv", status: "active" },
+      { href: "/portail/enseignant/hors-ligne", labelKey: "portal.teacher.offline", status: "active" },
+      { href: "/portail/enseignant/demandes", labelKey: "portal.teacher.requests", status: "active" },
+      { href: "/portail/enseignant/notifications", labelKey: "portal.teacher.notifications", status: "active" },
     ],
   },
 ];
