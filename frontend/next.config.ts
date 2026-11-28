@@ -3,6 +3,8 @@ import createNextIntlPlugin from "next-intl/plugin";
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
+const apiProxyTarget = (process.env.API_PROXY_TARGET || "http://127.0.0.1:8001").replace(/\/$/, "");
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
@@ -12,6 +14,14 @@ const nextConfig: NextConfig = {
   skipTrailingSlashRedirect: true,
   // Allow opening the app via LAN IP / 127.0.0.1 in Next 15 dev.
   allowedDevOrigins: ["127.0.0.1", "localhost"],
+  async rewrites() {
+    return [
+      {
+        source: "/media/:path*",
+        destination: `${apiProxyTarget}/media/:path*`,
+      },
+    ];
+  },
   images: {
     formats: ["image/avif", "image/webp"],
     qualities: [55, 60, 65, 75, 85, 90],
@@ -22,6 +32,8 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "cdn.iuaci.org" },
       { protocol: "https", hostname: "images.iuaci.org" },
+      { protocol: "http", hostname: "127.0.0.1" },
+      { protocol: "http", hostname: "localhost" },
     ],
   },
   compiler: {

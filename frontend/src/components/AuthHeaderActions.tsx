@@ -1,13 +1,23 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "@/i18n/navigation";
-import { apiLogout } from "@/lib/api";
-import { getAccessToken, getStoredUser, resolveHomePath, type AuthUser } from "@/lib/auth";
+import { UserAvatar } from "@/components/UserAvatar";
+import { apiLogout, apiUpload } from "@/lib/api";
+import {
+  getAccessToken,
+  getStoredUser,
+  resolveHomePath,
+  setStoredUser,
+  type AuthUser,
+} from "@/lib/auth";
 
 export function AuthHeaderActions({ solid = false }: { solid?: boolean }) {
   const [user, setUser] = useState<AuthUser | null>(null);
+  const [open, setOpen] = useState(false);
+  const [msg, setMsg] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
   const t = useTranslations("common");
 
   useEffect(() => {
@@ -18,10 +28,25 @@ export function AuthHeaderActions({ solid = false }: { solid?: boolean }) {
     }
   }, []);
 
+  async function onPickPhoto(file: File | null) {
+    if (!file || !user) return;
+    setMsg(null);
+    try {
+      const fd = new FormData();
+      fd.append("avatar", file);
+      const updated = await apiUpload<AuthUser>("/auth/me/", getAccessToken(), fd, "PATCH");
+      setStoredUser(updated);
+      setUser(updated);
+      setMsg("Photo mise à jour.");
+    } catch (err) {
+      setMsg(err instanceof Error ? err.message : "Échec upload");
+    }
+  }
+
   if (user) {
     const home = resolveHomePath(user.roles);
     return (
-      <div className="flex items-center gap-2 sm:gap-3">
+      <div className="relative flex items-center gap-2 sm:gap-3">
         <Link
           href={home}
           className={`hidden rounded-md px-4 py-2.5 text-sm font-semibold transition sm:inline-flex ${
@@ -32,18 +57,73 @@ export function AuthHeaderActions({ solid = false }: { solid?: boolean }) {
         </Link>
         <button
           type="button"
-          onClick={async () => {
-            await apiLogout();
-            window.location.href = "/";
-          }}
-          className={`rounded-md px-3 py-2.5 text-sm font-semibold transition ${
-            solid
-              ? "border border-iua-navy/15 text-iua-navy hover:bg-iua-mist"
-              : "border border-white/30 text-white hover:bg-white/10"
+          onClick={() => setOpen((v) => !v)}
+          className={`inline-flex items-center gap-2 rounded-full p-0.5 transition ${
+            solid ? "hover:bg-iua-mist" : "hover:bg-white/10"
           }`}
+          aria-label="Menu profil"
+          aria-expanded={open}
         >
-          {t("logout")}
+          <UserAvatar
+            user={user}
+            size="sm"
+            className={solid ? "ring-iua-navy/10" : "ring-white/40"}
+          />
+          <span
+            className={`hidden text-sm font-semibold sm:inline ${solid ? "text-iua-navy" : "text-white"}`}
+          >
+            {user.first_name}
+          </span>
         </button>
+
+        {open && (
+          <div className="absolute end-0 top-full z-50 mt-2 w-64 rounded-xl bg-white p-3 text-iua-navy shadow-soft ring-1 ring-iua-navy/10">
+            <div className="flex items-center gap-3 border-b border-iua-navy/10 pb-3">
+              <UserAvatar user={user} size="md" />
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold">{user.full_name}</p>
+                <p className="truncate text-xs text-iua-muted">{user.email}</p>
+              </div>
+            </div>
+            <div className="mt-2 flex flex-col gap-1 text-sm">
+              <Link
+                href={home}
+                className="rounded-md px-3 py-2 font-medium hover:bg-iua-mist"
+                onClick={() => setOpen(false)}
+              >
+                {t("mySpace")}
+              </Link>
+              <button
+                type="button"
+                className="rounded-md px-3 py-2 text-start font-medium hover:bg-iua-mist"
+                onClick={() => fileRef.current?.click()}
+              >
+                Changer la photo
+              </button>
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="hidden"
+                onChange={(e) => {
+                  void onPickPhoto(e.target.files?.[0] || null);
+                  e.target.value = "";
+                }}
+              />
+              <button
+                type="button"
+                className="rounded-md px-3 py-2 text-start font-medium text-red-700 hover:bg-red-50"
+                onClick={async () => {
+                  await apiLogout();
+                  window.location.href = "/";
+                }}
+              >
+                {t("logout")}
+              </button>
+            </div>
+            {msg && <p className="mt-2 px-1 text-xs text-emerald-700">{msg}</p>}
+          </div>
+        )}
       </div>
     );
   }

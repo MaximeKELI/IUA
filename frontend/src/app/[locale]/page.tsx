@@ -1,5 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { AuthHomeCta } from "@/components/AuthHomeCta";
+import { AuthApplyCta, AuthHomeCta } from "@/components/AuthHomeCta";
+import { AuthIntakeCta } from "@/components/AuthIntakeCta";
 import { BrandLogo } from "@/components/BrandLogo";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -69,13 +70,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             {t("lead")}
           </p>
           <div className="mt-9 flex flex-wrap gap-3 animate-[fadeUp_0.85s_ease_both]">
-            <Link
-              href="/admissions"
-              prefetch
-              className="btn-shine rounded-md bg-iua-sun px-6 py-3 text-sm font-semibold text-iua-navy transition hover:brightness-105"
-            >
-              {t("ctaApply")}
-            </Link>
+            <AuthApplyCta className="btn-shine rounded-md bg-iua-sun px-6 py-3 text-sm font-semibold text-iua-navy transition hover:brightness-105" />
             <AuthHomeCta className="rounded-md border border-white/40 bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/20" />
             <Link
               href="/international"
@@ -183,12 +178,10 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             <h2 className="mt-3 font-display text-3xl text-iua-navy">{t("intakeTitle")}</h2>
             <p className="mt-3 text-iua-muted">{t("intakeLead")}</p>
           </div>
-          <Link
-            href="/admissions"
+          <AuthIntakeCta
+            label={t("startApply")}
             className="btn-shine inline-flex rounded-md bg-iua-navy px-6 py-3 text-sm font-semibold text-white transition hover:bg-iua-blue"
-          >
-            {t("startApply")}
-          </Link>
+          />
         </div>
       </section>
 

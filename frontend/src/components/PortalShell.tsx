@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { BrandLogo } from "@/components/BrandLogo";
 import { LanguageSwitcher } from "@/components/intl/LanguageSwitcher";
+import { UserAvatar } from "@/components/UserAvatar";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { apiGet, apiLogout, AuthUser, clearApiMemoryCache } from "@/lib/api";
 import { getAccessToken, getStoredUser, setStoredUser } from "@/lib/auth";
@@ -98,6 +99,7 @@ export function PortalShell({
               <p className="text-sm font-semibold text-iua-navy">{user.full_name}</p>
               <p className="text-xs text-iua-muted">{title}</p>
             </div>
+            <UserAvatar user={user} size="sm" className="ring-iua-navy/10" />
             <button
               onClick={() => void logout()}
               className="rounded-md border border-iua-navy/15 px-3 py-2 text-sm text-iua-navy transition hover:bg-iua-navy hover:text-white"

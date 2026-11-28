@@ -8,7 +8,37 @@ export type AuthUser = {
   full_name: string;
   roles: string[];
   mfa_enabled: boolean;
+  avatar_url?: string | null;
+  phone?: string;
 };
+
+/** Initials from first + last name (e.g. Kofi Traoré → KT). */
+export function userInitials(user: Pick<AuthUser, "first_name" | "last_name" | "full_name" | "email">): string {
+  const first = (user.first_name || "").trim();
+  const last = (user.last_name || "").trim();
+  if (first || last) {
+    return `${first.charAt(0)}${last.charAt(0)}`.toUpperCase() || "?";
+  }
+  const parts = (user.full_name || "").trim().split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) {
+    return `${parts[0].charAt(0)}${parts[parts.length - 1].charAt(0)}`.toUpperCase();
+  }
+  if (parts[0]) return parts[0].slice(0, 2).toUpperCase();
+  return (user.email || "?").charAt(0).toUpperCase();
+}
+
+/** Prefer same-origin /media path when Django returns absolute localhost URL. */
+export function resolveAvatarSrc(avatarUrl?: string | null): string | null {
+  if (!avatarUrl) return null;
+  try {
+    if (avatarUrl.startsWith("/")) return avatarUrl;
+    const u = new URL(avatarUrl);
+    if (u.pathname.startsWith("/media/")) return u.pathname + u.search;
+    return avatarUrl;
+  } catch {
+    return avatarUrl;
+  }
+}
 
 const ACCESS_KEY = "iua_access";
 const REFRESH_KEY = "iua_refresh";

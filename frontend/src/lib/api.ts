@@ -213,6 +213,43 @@ export async function apiSend<T>(
   return text ? (JSON.parse(text) as T) : (undefined as T);
 }
 
+/** Multipart upload (e.g. avatar) — does not force JSON Content-Type. */
+export async function apiUpload<T>(
+  path: string,
+  token: string | null | undefined,
+  formData: FormData,
+  method: "POST" | "PATCH" | "PUT" = "PATCH",
+): Promise<T> {
+  let access = token ?? getAccessToken();
+  if (!access) {
+    redirectToLogin();
+    throw new Error("Session absente. Reconnectez-vous.");
+  }
+
+  const doFetch = (tok: string) =>
+    fetchWithTimeout(`${API_URL}${path}`, {
+      method,
+      headers: {
+        Authorization: `Bearer ${tok}`,
+        Accept: "application/json",
+      },
+      body: formData,
+      cache: "no-store",
+    });
+
+  let res = await doFetch(access);
+  if (res.status === 401) {
+    const next = await refreshAccessToken();
+    if (!next) {
+      redirectToLogin();
+      throw new Error("Session expirée. Reconnectez-vous.");
+    }
+    res = await doFetch(next);
+  }
+  if (!res.ok) throw new Error(await parseError(res));
+  return res.json();
+}
+
 const memoryCache = new Map<string, { expires: number; data: unknown }>();
 
 export async function apiGetCached<T>(

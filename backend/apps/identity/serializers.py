@@ -49,13 +49,10 @@ class UserSerializer(serializers.ModelSerializer):
         if not obj.avatar:
             return None
         try:
-            url = obj.avatar.url
+            # Relative /media/... — Next rewrites to Django in dev.
+            return obj.avatar.url
         except ValueError:
             return None
-        request = self.context.get("request")
-        if request is not None:
-            return request.build_absolute_uri(url)
-        return url
 
 
 class UserProvisionSerializer(serializers.Serializer):
