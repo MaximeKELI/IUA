@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { apiGet, apiSend, unwrapList, type Page } from "@/lib/api";
+import { getStoredUser } from "@/lib/auth";
 import { canManageAdminRequests } from "@/lib/portalCapabilities";
 
 export type AdminRequestRow = {
@@ -55,7 +56,7 @@ export function AdminRequestWorkbench({
   lead = "Accordez, refusez ou prenez en charge les demandes étudiants et enseignants selon votre grade.",
   eyebrow = "Validation",
 }: Props) {
-  const canManage = canManageAdminRequests(roles);
+  const canManage = canManageAdminRequests(roles, getStoredUser()?.permissions);
   const [items, setItems] = useState<AdminRequestRow[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [ok, setOk] = useState<string | null>(null);

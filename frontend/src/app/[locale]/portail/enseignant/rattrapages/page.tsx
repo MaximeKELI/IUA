@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { PortalShell } from "@/components/PortalShell";
 import { apiGet, apiSend, clearApiMemoryCache, Page, unwrapList } from "@/lib/api";
 import { teacherNav } from "@/lib/navigation";
@@ -31,6 +32,8 @@ export default function RattrapagesPage() {
   });
   const [error, setError] = useState<string | null>(null);
   const [ok, setOk] = useState<string | null>(null);
+  const [pending, setPending] = useState<{ id: string; status: string } | null>(null);
+  const [busy, setBusy] = useState(false);
 
   const assignment = assignments.find((a) => a.subject === form.subject);
   const roster = studentsForAssignment(students, assignment);
@@ -64,9 +67,24 @@ export default function RattrapagesPage() {
 
   async function setStatus(id: string, status: string) {
     if (!token) return;
-    await apiSend(`/catchups/${id}/`, token, "PATCH", { status });
-    clearApiMemoryCache();
-    await reload();
+    setBusy(true);
+    try {
+      await apiSend(`/catchups/${id}/`, token, "PATCH", { status });
+      clearApiMemoryCache();
+      setPending(null);
+      setOk(
+        status === "approved"
+          ? "Rattrapage approuvé."
+          : status === "rejected"
+            ? "Rattrapage refusé."
+            : "Statut mis à jour.",
+      );
+      await reload();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Échec");
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
@@ -137,33 +155,71 @@ export default function RattrapagesPage() {
                 </p>
                 <p className="mt-2 text-sm text-iua-muted">{item.reason}</p>
               </div>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => void setStatus(item.id, "approved")}
-                  className="rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white"
-                >
-                  Approuver
-                </button>
-                <button
-                  type="button"
-                  onClick={() => void setStatus(item.id, "rejected")}
-                  className="rounded-md bg-red-600 px-3 py-1.5 text-xs font-semibold text-white"
-                >
-                  Refuser
-                </button>
-                <button
-                  type="button"
-                  onClick={() => void setStatus(item.id, "done")}
-                  className="rounded-md border border-iua-navy/15 px-3 py-1.5 text-xs font-semibold text-iua-navy"
-                >
-                  Effectué
-                </button>
-              </div>
+              {item.status === "pending" || item.status === "approved" ? (
+                <div className="flex gap-2">
+                  {item.status === "pending" && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => setPending({ id: item.id, status: "approved" })}
+                        className="rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white"
+                      >
+                        Approuver
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPending({ id: item.id, status: "rejected" })}
+                        className="rounded-md bg-red-600 px-3 py-1.5 text-xs font-semibold text-white"
+                      >
+                        Refuser
+                      </button>
+                    </>
+                  )}
+                  {item.status === "approved" && (
+                    <button
+                      type="button"
+                      onClick={() => setPending({ id: item.id, status: "done" })}
+                      className="rounded-md border border-iua-navy/15 px-3 py-1.5 text-xs font-semibold text-iua-navy"
+                    >
+                      Effectué
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <span className="text-xs text-iua-muted">Décision enregistrée</span>
+              )}
             </div>
           </li>
         ))}
       </ul>
+
+      <ConfirmDialog
+        open={!!pending}
+        title={
+          pending?.status === "approved"
+            ? "Approuver ce rattrapage ?"
+            : pending?.status === "rejected"
+              ? "Refuser ce rattrapage ?"
+              : "Marquer comme effectué ?"
+        }
+        description="La décision sera enregistrée et visible pour le suivi académique."
+        confirmLabel={
+          pending?.status === "approved"
+            ? "Approuver"
+            : pending?.status === "rejected"
+              ? "Refuser"
+              : "Confirmer"
+        }
+        cancelLabel="Annuler"
+        tone={pending?.status === "rejected" ? "danger" : "default"}
+        busy={busy}
+        onCancel={() => {
+          if (!busy) setPending(null);
+        }}
+        onConfirm={() => {
+          if (pending) void setStatus(pending.id, pending.status);
+        }}
+      />
     </PortalShell>
   );
 }

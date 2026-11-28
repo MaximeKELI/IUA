@@ -149,6 +149,7 @@ export const adminNav: PortalGroup[] = [
       { href: "/portail/admin/presences", labelKey: "portal.admin.attendance", status: "active" },
       { href: "/portail/admin/notes", labelKey: "portal.admin.grades", status: "active" },
       { href: "/portail/admin/examens", labelKey: "portal.admin.exams", status: "active" },
+      { href: "/portail/admin/rattrapages", labelKey: "portal.admin.catchup", status: "active" },
     ],
   },
   {

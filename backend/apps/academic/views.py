@@ -1,7 +1,8 @@
 from django.db.models import Q
 from django.utils import timezone
-from rest_framework import serializers, status, viewsets
+from rest_framework import serializers, viewsets
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -341,10 +342,26 @@ class AdminRequestViewSet(viewsets.ModelViewSet):
     search_fields = ("subject", "body", "requester__email")
     ordering_fields = ("created_at", "status")
 
+    # Transitions autorisées (production / auditabilité).
+    ALLOWED_TRANSITIONS = {
+        AdminRequest.Status.PENDING: {
+            AdminRequest.Status.IN_PROGRESS,
+            AdminRequest.Status.DONE,
+            AdminRequest.Status.REJECTED,
+        },
+        AdminRequest.Status.IN_PROGRESS: {
+            AdminRequest.Status.DONE,
+            AdminRequest.Status.REJECTED,
+            AdminRequest.Status.PENDING,
+        },
+        AdminRequest.Status.DONE: {AdminRequest.Status.PENDING},
+        AdminRequest.Status.REJECTED: {AdminRequest.Status.PENDING},
+    }
+
     def get_permissions(self):
         if self.action == "create":
             return [CanCreateAdminRequest()]
-        if self.action in ("update", "partial_update", "destroy"):
+        if self.action in ("update", "partial_update", "destroy", "claim", "approve", "reject"):
             return [require_permission("services.request.manage")()]
         return [IsAuthenticated()]
 
@@ -361,7 +378,13 @@ class AdminRequestViewSet(viewsets.ModelViewSet):
         req = serializer.save(requester=self.request.user)
         admins = User.objects.filter(
             is_active=True,
-            user_roles__role__code__in=["admin", "secretariat", "super_admin", "direction"],
+            user_roles__role__code__in=[
+                "admin",
+                "secretariat",
+                "super_admin",
+                "direction",
+                "academic_dir",
+            ],
             user_roles__is_active=True,
         ).distinct()[:20]
         Notification.objects.bulk_create(
@@ -377,8 +400,64 @@ class AdminRequestViewSet(viewsets.ModelViewSet):
             ]
         )
 
+    def _apply_status(self, req: AdminRequest, new_status: str, admin_note: str | None = None):
+        prev = req.status
+        allowed = self.ALLOWED_TRANSITIONS.get(prev, set())
+        if new_status != prev and new_status not in allowed:
+            raise ValidationError(
+                {
+                    "status": (
+                        f"Transition interdite : {prev} → {new_status}. "
+                        f"Autorisées : {', '.join(sorted(allowed)) or 'aucune'}."
+                    )
+                }
+            )
+        if admin_note is not None:
+            req.admin_note = admin_note
+        req.status = new_status
+        if new_status != prev and new_status in {
+            AdminRequest.Status.DONE,
+            AdminRequest.Status.REJECTED,
+            AdminRequest.Status.IN_PROGRESS,
+        }:
+            req.handled_by = self.request.user
+            req.handled_at = timezone.now()
+        req.save()
+        if new_status != prev:
+            try:
+                from apps.teaching.ops_views import log_audit
+
+                log_audit(
+                    self.request.user,
+                    f"admin_request.{new_status}",
+                    "AdminRequest",
+                    f"{req.subject} ({req.id})",
+                )
+            except Exception:
+                pass
+            Notification.objects.create(
+                recipient=req.requester,
+                title=f"Demande {req.get_status_display().lower()}",
+                body=req.admin_note or req.subject,
+                category="admin_requests",
+                data={"request_id": str(req.id), "status": req.status},
+            )
+        return req
+
     def perform_update(self, serializer):
         prev = self.get_object()
+        new_status = serializer.validated_data.get("status", prev.status)
+        if new_status != prev.status:
+            allowed = self.ALLOWED_TRANSITIONS.get(prev.status, set())
+            if new_status not in allowed:
+                raise serializers.ValidationError(
+                    {
+                        "status": (
+                            f"Transition interdite : {prev.status} → {new_status}. "
+                            f"Autorisées : {', '.join(sorted(allowed)) or 'aucune'}."
+                        )
+                    }
+                )
         req = serializer.save()
         if req.status != prev.status and req.status in {
             AdminRequest.Status.DONE,
@@ -388,6 +467,17 @@ class AdminRequestViewSet(viewsets.ModelViewSet):
             req.handled_by = self.request.user
             req.handled_at = timezone.now()
             req.save(update_fields=["handled_by", "handled_at", "updated_at"])
+            try:
+                from apps.teaching.ops_views import log_audit
+
+                log_audit(
+                    self.request.user,
+                    f"admin_request.{req.status}",
+                    "AdminRequest",
+                    f"{req.subject} ({req.id})",
+                )
+            except Exception:
+                pass
             Notification.objects.create(
                 recipient=req.requester,
                 title=f"Demande {req.get_status_display().lower()}",
@@ -395,3 +485,27 @@ class AdminRequestViewSet(viewsets.ModelViewSet):
                 category="admin_requests",
                 data={"request_id": str(req.id), "status": req.status},
             )
+
+    @action(detail=True, methods=["post"])
+    def claim(self, request, pk=None):
+        """Prise en charge (pending → in_progress)."""
+        req = self.get_object()
+        note = request.data.get("admin_note")
+        updated = self._apply_status(req, AdminRequest.Status.IN_PROGRESS, note)
+        return Response(AdminRequestSerializer(updated).data)
+
+    @action(detail=True, methods=["post"])
+    def approve(self, request, pk=None):
+        """Accorder / traiter (→ done)."""
+        req = self.get_object()
+        note = request.data.get("admin_note")
+        updated = self._apply_status(req, AdminRequest.Status.DONE, note)
+        return Response(AdminRequestSerializer(updated).data)
+
+    @action(detail=True, methods=["post"])
+    def reject(self, request, pk=None):
+        """Refuser (→ rejected)."""
+        req = self.get_object()
+        note = request.data.get("admin_note")
+        updated = self._apply_status(req, AdminRequest.Status.REJECTED, note)
+        return Response(AdminRequestSerializer(updated).data)

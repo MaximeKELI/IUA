@@ -527,6 +527,7 @@
       "schedule": "Global timetable",
       "attendance": "Attendance / absences",
       "exams": "Exam calendar",
+      "catchup": "Recuperaciones",
       "documents": "Certificates & documents",
       "payments": "Payments & dues",
       "announcements": "Campus announcements",

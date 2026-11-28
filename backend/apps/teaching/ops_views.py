@@ -31,7 +31,8 @@ from apps.teaching.student_models import ExamEvent, Internship, ScholarshipOffer
 
 OPS_ROLES = ("admin", "super_admin", "secretariat", "academic_dir", "direction", "finance_dir")
 DIR_ROLES = ("direction", "super_admin", "academic_dir", "finance_dir", "admin")
-MANAGE_ROLES = ("admin", "super_admin", "secretariat", "academic_dir")
+# Direction incluse : pouvoirs de validation proportionnels au grade (supervision).
+MANAGE_ROLES = ("admin", "super_admin", "secretariat", "academic_dir", "direction")
 
 
 def is_ops(user) -> bool:

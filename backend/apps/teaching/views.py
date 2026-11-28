@@ -75,7 +75,15 @@ class TeacherScopedMixin:
     def get_queryset(self):
         qs = super().get_queryset()
         user = self.request.user
-        if user.is_superuser or user.has_any_role("admin", "super_admin", "academic_dir", "secretariat"):
+        if user.is_superuser or user.has_any_role(
+            "admin",
+            "super_admin",
+            "academic_dir",
+            "secretariat",
+            "direction",
+            "faculty_head",
+            "dept_head",
+        ):
             return qs
         staff = self.get_teacher()
         if not staff:
@@ -246,7 +254,37 @@ class CatchUpRequestViewSet(TeacherScopedMixin, viewsets.ModelViewSet):
     filterset_fields = ("subject", "status", "student")
 
     def get_permissions(self):
+        # Enseignant (grades.manage) crée / valide ; staff ops (request.manage) supervise.
+        if self.action in ("list", "retrieve", "update", "partial_update"):
+            return [IsAuthenticated()]
         return [require_permission("academic.grades.manage")()]
+
+    def _can_oversee(self, user) -> bool:
+        return (
+            user.is_superuser
+            or user.has_perm_code("academic.grades.manage")
+            or user.has_perm_code("services.request.manage")
+        )
+
+    def list(self, request, *args, **kwargs):
+        if not self._can_oversee(request.user):
+            return Response({"detail": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+        return super().list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        if not self._can_oversee(request.user):
+            return Response({"detail": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+        return super().retrieve(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        if not self._can_oversee(request.user):
+            return Response({"detail": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+        return super().update(request, *args, **kwargs)
+
+    def partial_update(self, request, *args, **kwargs):
+        if not self._can_oversee(request.user):
+            return Response({"detail": "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+        return super().partial_update(request, *args, **kwargs)
 
 
 class TeachingEvaluationViewSet(viewsets.ModelViewSet):

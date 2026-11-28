@@ -33,7 +33,8 @@ export function canEditGrades(roles: string[]): boolean {
 }
 
 /** Traiter / accorder / refuser les demandes admin (proportionnel au grade). */
-export function canManageAdminRequests(roles: string[]): boolean {
+export function canManageAdminRequests(roles: string[], permissions?: string[]): boolean {
+  if (permissions?.includes("services.request.manage")) return true;
   return roles.some((r) =>
     [
       "super_admin",
