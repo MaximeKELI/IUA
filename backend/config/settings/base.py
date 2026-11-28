@@ -149,6 +149,11 @@ CORS_ALLOWED_ORIGINS = [
     for o in os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:3000").split(",")
     if o.strip()
 ]
+CORS_ALLOW_ALL_ORIGINS = os.getenv("CORS_ALLOW_ALL_ORIGINS", "false").lower() in {
+    "1",
+    "true",
+    "yes",
+}
 
 CELERY_BROKER_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 CELERY_RESULT_BACKEND = os.getenv("REDIS_URL", "redis://localhost:6379/0")

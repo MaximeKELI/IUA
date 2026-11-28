@@ -8,7 +8,8 @@ import {
 
 export type { AuthUser };
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8001/api/v1";
+/** Prefer relative `/api/v1` (Next rewrite) so LAN / localhost both work. */
+const API_URL = (process.env.NEXT_PUBLIC_API_URL || "/api/v1").replace(/\/$/, "");
 
 export type LoginResponse = {
   access: string;

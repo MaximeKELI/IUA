@@ -1,131 +1,143 @@
-/** Information architecture — public site + role portals */
+/** Information architecture — public site + role portals (labels via i18n keys) */
 
-export const publicNav = [
+export type NavChild = { labelKey: string; href: string };
+export type NavItem = { labelKey: string; href: string; children?: NavChild[] };
+
+export const publicNav: NavItem[] = [
   {
-    label: "Étudier",
+    labelKey: "study",
     href: "/etudier",
     children: [
-      { label: "Formations", href: "/formations" },
-      { label: "Admissions", href: "/admissions" },
-      { label: "Étudiants internationaux", href: "/international" },
+      { labelKey: "programs", href: "/formations" },
+      { labelKey: "admissions", href: "/admissions" },
+      { labelKey: "international", href: "/international" },
     ],
   },
   {
-    label: "Institution",
+    labelKey: "institution",
     href: "/institution",
     children: [
-      { label: "Présentation", href: "/institution" },
-      { label: "Facultés", href: "/facultes" },
-      { label: "Campus", href: "/campus" },
+      { labelKey: "about", href: "/institution" },
+      { labelKey: "faculties", href: "/facultes" },
+      { labelKey: "campus", href: "/campus" },
     ],
   },
-  { label: "Contact", href: "/contact" },
-] as const;
+  { labelKey: "contact", href: "/contact" },
+];
 
 export type PortalLink = {
   href: string;
-  label: string;
-  description?: string;
+  labelKey: string;
+  descriptionKey?: string;
   status?: "active" | "soon";
 };
 
 export type PortalGroup = {
-  title: string;
+  titleKey: string;
   links: PortalLink[];
 };
 
 export const studentNav: PortalGroup[] = [
   {
-    title: "Mon parcours",
+    titleKey: "portal.student.groupPath",
     links: [
-      { href: "/portail/etudiant", label: "Tableau de bord", status: "active" },
-      { href: "/portail/etudiant/cours", label: "Cours & matières", status: "active" },
-      { href: "/portail/etudiant/notes", label: "Notes & résultats", status: "active" },
+      { href: "/portail/etudiant", labelKey: "portal.student.dashboard", status: "active" },
+      { href: "/portail/etudiant/cours", labelKey: "portal.student.courses", status: "active" },
+      { href: "/portail/etudiant/notes", labelKey: "portal.student.grades", status: "active" },
+      {
+        href: "/portail/etudiant/documents",
+        labelKey: "portal.student.docsBilingual",
+        status: "active",
+      },
     ],
   },
   {
-    title: "Démarches",
+    titleKey: "portal.student.groupAdmin",
     links: [
-      { href: "/portail/etudiant/demandes", label: "Demandes admin.", status: "active" },
-      { href: "/portail/etudiant/notifications", label: "Notifications", status: "active" },
+      { href: "/portail/etudiant/demandes", labelKey: "portal.student.requests", status: "active" },
+      {
+        href: "/portail/etudiant/notifications",
+        labelKey: "portal.student.notifications",
+        status: "active",
+      },
     ],
   },
 ];
 
 export const teacherNav: PortalGroup[] = [
   {
-    title: "Enseignement",
+    titleKey: "portal.teacher.groupTeach",
     links: [
-      { href: "/portail/enseignant", label: "Tableau de bord", status: "active" },
-      { href: "/portail/enseignant/cours", label: "Mes cours", status: "active" },
-      { href: "/portail/enseignant/etudiants", label: "Mes étudiants", status: "active" },
-      { href: "/portail/enseignant/notes", label: "Notes", status: "active" },
+      { href: "/portail/enseignant", labelKey: "portal.teacher.dashboard", status: "active" },
+      { href: "/portail/enseignant/cours", labelKey: "portal.teacher.courses", status: "active" },
+      {
+        href: "/portail/enseignant/etudiants",
+        labelKey: "portal.teacher.students",
+        status: "active",
+      },
+      { href: "/portail/enseignant/notes", labelKey: "portal.teacher.grades", status: "active" },
     ],
   },
   {
-    title: "Compte",
+    titleKey: "portal.teacher.groupAccount",
     links: [
-      { href: "/portail/enseignant/demandes", label: "Demandes", status: "active" },
-      { href: "/portail/enseignant/notifications", label: "Notifications", status: "active" },
+      {
+        href: "/portail/enseignant/demandes",
+        labelKey: "portal.teacher.requests",
+        status: "active",
+      },
+      {
+        href: "/portail/enseignant/notifications",
+        labelKey: "portal.teacher.notifications",
+        status: "active",
+      },
     ],
   },
 ];
 
 export const adminNav: PortalGroup[] = [
   {
-    title: "Pilotage",
+    titleKey: "portal.admin.groupPilot",
     links: [
-      { href: "/portail/admin", label: "Vue d'ensemble", status: "active" },
-      { href: "/portail/direction", label: "Direction", status: "active" },
+      { href: "/portail/admin", labelKey: "portal.admin.overview", status: "active" },
+      { href: "/portail/direction", labelKey: "portal.admin.direction", status: "active" },
     ],
   },
   {
-    title: "Gestion",
+    titleKey: "portal.admin.groupManage",
     links: [
-      { href: "/portail/admin/utilisateurs", label: "Utilisateurs & rôles", status: "active" },
-      { href: "/portail/admin/formations", label: "Formations", status: "active" },
-      { href: "/portail/admin/enseignements", label: "Affectations enseignants", status: "active" },
-      { href: "/portail/admin/inscriptions", label: "Inscriptions", status: "active" },
-      { href: "/portail/admin/demandes", label: "Demandes", status: "active" },
-      { href: "/portail/admin/notes", label: "Notes", status: "active" },
+      { href: "/portail/admin/utilisateurs", labelKey: "portal.admin.users", status: "active" },
+      { href: "/portail/admin/formations", labelKey: "portal.admin.programs", status: "active" },
+      { href: "/portail/admin/enseignements", labelKey: "portal.admin.teach", status: "active" },
+      { href: "/portail/admin/inscriptions", labelKey: "portal.admin.enroll", status: "active" },
+      { href: "/portail/admin/demandes", labelKey: "portal.admin.requests", status: "active" },
+      { href: "/portail/admin/notes", labelKey: "portal.admin.grades", status: "active" },
     ],
   },
 ];
 
-/** Direction : gestion globale + consultation notes/cours (sans modification). */
 export const directionNav: PortalGroup[] = [
   {
-    title: "Pilotage",
+    titleKey: "portal.admin.groupPilot",
     links: [
-      { href: "/portail/direction", label: "Tableau de bord", status: "active" },
-      { href: "/portail/admin", label: "Vue opérationnelle", status: "active" },
+      { href: "/portail/direction", labelKey: "portal.direction.dashboard", status: "active" },
+      { href: "/portail/admin", labelKey: "portal.direction.ops", status: "active" },
     ],
   },
   {
-    title: "Gestion",
+    titleKey: "portal.admin.groupManage",
     links: [
-      { href: "/portail/admin/utilisateurs", label: "Utilisateurs & rôles", status: "active" },
-      { href: "/portail/admin/formations", label: "Formations", status: "active" },
-      { href: "/portail/admin/inscriptions", label: "Inscriptions", status: "active" },
-      { href: "/portail/admin/demandes", label: "Demandes admin.", status: "active" },
+      { href: "/portail/admin/utilisateurs", labelKey: "portal.admin.users", status: "active" },
+      { href: "/portail/admin/formations", labelKey: "portal.admin.programs", status: "active" },
+      { href: "/portail/admin/inscriptions", labelKey: "portal.admin.enroll", status: "active" },
+      { href: "/portail/admin/demandes", labelKey: "portal.admin.requests", status: "active" },
     ],
   },
   {
-    title: "Consultation",
+    titleKey: "portal.admin.groupManage",
     links: [
-      {
-        href: "/portail/admin/enseignements",
-        label: "Cours & affectations",
-        description: "Lecture seule",
-        status: "active",
-      },
-      {
-        href: "/portail/admin/notes",
-        label: "Notes des enseignants",
-        description: "Lecture seule",
-        status: "active",
-      },
+      { href: "/portail/admin/enseignements", labelKey: "portal.admin.teach", status: "active" },
+      { href: "/portail/admin/notes", labelKey: "portal.admin.grades", status: "active" },
     ],
   },
 ];
-

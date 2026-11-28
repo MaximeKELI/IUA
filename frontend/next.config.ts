@@ -1,16 +1,28 @@
 import type { NextConfig } from "next";
+import createNextIntlPlugin from "next-intl/plugin";
+
+const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   compress: true,
   productionBrowserSourceMaps: false,
+  // Keep Django trailing-slash URLs intact for the /api/v1 proxy route.
+  skipTrailingSlashRedirect: true,
+  // Allow opening the app via LAN IP / 127.0.0.1 in Next 15 dev.
+  allowedDevOrigins: ["127.0.0.1", "localhost"],
   images: {
     formats: ["image/avif", "image/webp"],
     qualities: [55, 60, 65, 75, 85, 90],
     minimumCacheTTL: 60 * 60 * 24 * 30,
     deviceSizes: [640, 750, 828, 1080, 1200, 1600, 1920],
     imageSizes: [16, 32, 48, 64, 96, 128, 256],
+    // CDN-ready remote patterns (production can point brand assets to a CDN host)
+    remotePatterns: [
+      { protocol: "https", hostname: "cdn.iuaci.org" },
+      { protocol: "https", hostname: "images.iuaci.org" },
+    ],
   },
   compiler: {
     removeConsole: process.env.NODE_ENV === "production" ? { exclude: ["error"] } : false,
@@ -18,15 +30,11 @@ const nextConfig: NextConfig = {
   headers: async () => [
     {
       source: "/brand/:path*",
-      headers: [
-        { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
-      ],
+      headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
     },
     {
       source: "/_next/static/:path*",
-      headers: [
-        { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
-      ],
+      headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
     },
     {
       source: "/(.*)",
@@ -39,4 +47,4 @@ const nextConfig: NextConfig = {
   ],
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);

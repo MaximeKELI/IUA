@@ -1,0 +1,507 @@
+{
+  "meta": {
+    "siteName": "IUA Digital Campus",
+    "defaultDescription": "Institut Universitaire d'Abidjan portal: studies, international services and administration."
+  },
+  "common": {
+    "continue": "Continue",
+    "learnMore": "Learn more",
+    "contact": "Contact",
+    "download": "Download",
+    "apply": "Apply",
+    "login": "Sign in",
+    "logout": "Sign out",
+    "register": "Apply",
+    "mySpace": "My space",
+    "soon": "Soon",
+    "loading": "Loading…",
+    "openingSpace": "Opening your workspace…",
+    "navigation": "Navigation",
+    "timezone": "GMT timezone (Abidjan)",
+    "required": "Required",
+    "optional": "Optional",
+    "submit": "Submit",
+    "back": "Back",
+    "whatsapp": "Welcome WhatsApp",
+    "linkedin": "IUA Alumni on LinkedIn",
+    "currencyNote": "Indicative amounts · internal IUA rates"
+  },
+  "nav": {
+    "study": "Study",
+    "programs": "Programs",
+    "admissions": "Admissions",
+    "international": "International students",
+    "institution": "Institution",
+    "about": "About",
+    "faculties": "Faculties",
+    "campus": "Campus",
+    "contact": "Contact",
+    "portal": "Digital Campus portal",
+    "scholarships": "International scholarships",
+    "mobility": "Mobility & partners",
+    "visa": "Student visa",
+    "equivalences": "Equivalences",
+    "faq": "International FAQ",
+    "arrival": "Arrival checklist",
+    "legal": "Legal & data",
+    "guides": "Mobile guides"
+  },
+  "header": {
+    "location": "Abidjan · Côte d'Ivoire",
+    "language": "Language"
+  },
+  "footer": {
+    "tagline": "Teaching, research and campus life in Abidjan. Digital Campus brings your services online — including for international students.",
+    "paths": "Pathways",
+    "international": "International",
+    "contact": "Contact",
+    "address": "II Plateaux, 7th Tranche, Abidjan",
+    "rights": "Institut Universitaire d'Abidjan · Digital Campus",
+    "officeHours": "International office · Mon–Fri 08:00–17:00 GMT"
+  },
+  "home": {
+    "ariaHero": "Students of the Institut Universitaire d'Abidjan",
+    "brand": "Institut Universitaire d'Abidjan",
+    "title": "Excellence starts with you",
+    "lead": "Apply, study and follow your journey on the IUA portal — open to students worldwide.",
+    "ctaApply": "Apply now",
+    "ctaLogin": "Sign in",
+    "journeyLabel": "Pathway",
+    "j1Title": "I apply",
+    "j1Body": "Submit your file and track your admission.",
+    "j2Title": "I sign in",
+    "j2Body": "Grades, courses, payments and documents in one place.",
+    "j3Title": "I explore",
+    "j3Body": "Bachelor's and master's programs to build your project.",
+    "portalEyebrow": "Portal",
+    "portalTitle": "Access tailored to each role",
+    "portalLead": "Students, teachers, administration and leadership find their tools without clutter.",
+    "roleStudent": "Student",
+    "roleStudentBody": "Timetable, grades, payments, documents",
+    "roleTeacher": "Teacher",
+    "roleTeacherBody": "Courses, assessments and student follow-up",
+    "roleAdmin": "Administration",
+    "roleAdminBody": "Enrollments, files and validations",
+    "roleDirection": "Leadership",
+    "roleDirectionBody": "Indicators and steering decisions",
+    "campusEyebrow": "Campus",
+    "campusTitle": "Abidjan — learning and student life",
+    "campusLead": "IUA brings together teaching, services and campus life. Digital Campus extends this online.",
+    "discoverCampus": "Discover the campus",
+    "theInstitution": "The institution",
+    "campusPlace": "II Plateaux, Abidjan",
+    "intakeEyebrow": "Intake 2026-2027 · GMT",
+    "intakeTitle": "Applications are open",
+    "intakeLead": "Submit your application online and track progress — including from abroad.",
+    "startApply": "Start my application",
+    "intlBanner": "International student?",
+    "intlBannerCta": "Full guide",
+    "ticker": [
+      "Bachelor's & Master's",
+      "Digital Campus",
+      "Online admissions",
+      "Abidjan campus",
+      "International",
+      "ECTS & mobility"
+    ]
+  },
+  "admissions": {
+    "eyebrow": "Admissions",
+    "title": "How to apply",
+    "lead": "Four steps from program choice to activating your student space — national and international tracks.",
+    "s1": "Choose a program",
+    "s1b": "Browse the catalogue and pick the right pathway.",
+    "s2": "Submit your file",
+    "s2b": "Single form, supporting documents and online tracking.",
+    "s3": "Receive the decision",
+    "s3b": "You are notified at each validation step.",
+    "s4": "Finalize enrollment",
+    "s4b": "Payment (Mobile Money, card, Wise) then account activation.",
+    "seePrograms": "View programs",
+    "haveAccount": "I already have an account",
+    "intlTitle": "International application",
+    "intlLead": "Enter nationality, passport and international contact details. Fees show in XOF, USD and EUR.",
+    "fieldCountry": "Country of residence",
+    "fieldNationality": "Nationality",
+    "fieldPassport": "Passport number",
+    "fieldPhone": "International phone",
+    "fieldEmail": "Email",
+    "fieldProgram": "Intended program",
+    "fieldDiploma": "Highest diploma earned",
+    "fieldPayment": "Intended payment method",
+    "payMom": "Mobile Money (CI)",
+    "payCard": "International card",
+    "payWise": "Wise / bank transfer",
+    "feesTitle": "Application fee (indicative)",
+    "feesAmount": 25000,
+    "submitIntl": "Prepare my international file",
+    "note": "Full submission will connect to the Admissions module. Data is handled under our international policy."
+  },
+  "international": {
+    "eyebrow": "International",
+    "title": "Study at IUA from anywhere",
+    "lead": "Visa, equivalences, ECTS, housing, scholarships, partnerships and welcome — one international hub.",
+    "hubVisa": "Student visa",
+    "hubVisaBody": "Entry and stay framework in Côte d'Ivoire",
+    "hubEquiv": "Equivalences",
+    "hubEquivBody": "Recognition of foreign diplomas",
+    "hubEcts": "ECTS & credits",
+    "hubEctsBody": "LMD / mobility mappings",
+    "hubPartners": "Partners",
+    "hubPartnersBody": "Universities and exchange networks",
+    "hubFaq": "FAQ",
+    "hubFaqBody": "Cost of living, insurance, housing",
+    "hubArrival": "Arrival",
+    "hubArrivalBody": "Airport → campus checklist",
+    "hubOffice": "IRO office",
+    "hubOfficeBody": "International relations contacts",
+    "hubScholar": "Scholarships",
+    "hubScholarBody": "Aids and international criteria",
+    "hubGuides": "Mobile guides",
+    "hubGuidesBody": "Phone PDF / PWA",
+    "hubLegal": "Data & GDPR",
+    "hubLegalBody": "Cross-border processing",
+    "hubAlumni": "Alumni abroad",
+    "hubAlumniBody": "IUA LinkedIn network",
+    "stayTitle": "Living in Côte d'Ivoire",
+    "stayBody": "Daily life, safety and welcome procedures in Abidjan.",
+    "housingTitle": "Transport & housing",
+    "housingBody": "Options near the II Plateaux campus.",
+    "admitTitle": "Admission",
+    "admitBody": "Application, equivalences and account activation."
+  },
+  "visa": {
+    "eyebrow": "Visa",
+    "title": "Student visa — Côte d'Ivoire",
+    "lead": "Indicative steps for a study stay in Abidjan. Always verify with your embassy/consulate.",
+    "steps": [
+      {
+        "t": "IUA admission letter",
+        "b": "Get official acceptance via the portal."
+      },
+      {
+        "t": "Consular file",
+        "b": "Passport, photos, financial proof, insurance."
+      },
+      {
+        "t": "Visa application",
+        "b": "Submit to the competent Ivorian representation."
+      },
+      {
+        "t": "Arrival & residence permit",
+        "b": "Local formalities with IRO support."
+      }
+    ],
+    "note": "IUA supports but does not issue visas. Timelines vary by country of origin."
+  },
+  "equivalences": {
+    "eyebrow": "Equivalences",
+    "title": "Foreign diplomas & LMD access",
+    "lead": "How a high-school or foreign degree maps into Licence–Master–Doctorate.",
+    "rows": [
+      {
+        "from": "Baccalauréat / High School Diploma / A-Levels",
+        "to": "Access Licence 1 (conditions apply)"
+      },
+      {
+        "from": "Associate Degree / BTS / DUT",
+        "to": "Access Licence 2–3 (file review)"
+      },
+      {
+        "from": "Bachelor (3–4 years)",
+        "to": "Access Master 1 (by field)"
+      },
+      {
+        "from": "Master / MSc",
+        "to": "Access Doctorate / research (file)"
+      }
+    ],
+    "cta": "Submit an equivalence request"
+  },
+  "ects": {
+    "eyebrow": "Credits",
+    "title": "ECTS and IUA mappings",
+    "lead": "Benchmarks for mobility and academic exchanges.",
+    "rows": [
+      {
+        "iua": "1 full IUA semester",
+        "ects": "≈ 30 ECTS"
+      },
+      {
+        "iua": "1 academic year",
+        "ects": "≈ 60 ECTS"
+      },
+      {
+        "iua": "Bachelor (6 semesters)",
+        "ects": "≈ 180 ECTS"
+      },
+      {
+        "iua": "Master (4 semesters)",
+        "ects": "≈ 120 ECTS"
+      }
+    ],
+    "note": "Detailed UE grids will be published per program catalogue."
+  },
+  "partners": {
+    "eyebrow": "Partnerships",
+    "title": "Partner universities & networks",
+    "lead": "Exchanges, dual degrees and mobility (International Mobility module).",
+    "items": [
+      {
+        "name": "West Africa network",
+        "region": "ECOWAS",
+        "focus": "Bachelor / Master exchanges"
+      },
+      {
+        "name": "Europe partners (pilot)",
+        "region": "EU",
+        "focus": "Erasmus+-style mobility"
+      },
+      {
+        "name": "Maghreb & Gulf partners",
+        "region": "MENA",
+        "focus": "Internships & research"
+      },
+      {
+        "name": "Latin America (exploratory)",
+        "region": "LATAM",
+        "focus": "Language cooperation"
+      }
+    ],
+    "mapNote": "Interactive partners map — richer version coming soon."
+  },
+  "testimonials": {
+    "eyebrow": "Testimonials",
+    "title": "International students at IUA",
+    "items": [
+      {
+        "name": "Aïcha K.",
+        "country": "Senegal",
+        "quote": "The portal let me track admission before I even arrived in Abidjan."
+      },
+      {
+        "name": "Marco S.",
+        "country": "Brazil",
+        "quote": "Arrival guides and the IRO helped with housing and paperwork."
+      },
+      {
+        "name": "Yasmine H.",
+        "country": "Morocco",
+        "quote": "Equivalences were clear and fees also showed in euros."
+      }
+    ]
+  },
+  "faq": {
+    "eyebrow": "FAQ",
+    "title": "International FAQ",
+    "items": [
+      {
+        "q": "What is the approximate cost of living in Abidjan?",
+        "a": "Indicative student budget: 150,000–350,000 XOF / month depending on housing and lifestyle."
+      },
+      {
+        "q": "Is insurance required?",
+        "a": "Yes — travel/student health insurance is recommended before departure."
+      },
+      {
+        "q": "Is there campus housing?",
+        "a": "Partner options and housing guidance via the IRO."
+      },
+      {
+        "q": "Can I pay from abroad?",
+        "a": "International card, Wise/transfer, and Mobile Money once in Côte d'Ivoire."
+      },
+      {
+        "q": "Are courses in French?",
+        "a": "Mostly French; progressive EN materials on some pathways."
+      }
+    ]
+  },
+  "office": {
+    "eyebrow": "IRO",
+    "title": "International relations office",
+    "lead": "Your contact point for mobility, visas and welcome.",
+    "email": "international@iua-ci.org",
+    "phone": "+225 27 224 222 65",
+    "hours": "Monday–Friday · 08:00–17:00 GMT (Abidjan)",
+    "whatsappCta": "Message on WhatsApp (EN/FR)",
+    "address": "II Plateaux, 7th Tranche · Abidjan"
+  },
+  "arrival": {
+    "eyebrow": "Arrival",
+    "title": "Airport → campus checklist",
+    "lead": "Essential steps for your first days in Abidjan.",
+    "items": [
+      "Flight to Abidjan (FHB airport) + passport/visa/admission copies",
+      "Insurance + emergency contacts saved",
+      "Transfer to housing / II Plateaux campus",
+      "IRO appointment + Digital Campus account activation",
+      "Tuition payment / installment plan",
+      "Student card & service access"
+    ]
+  },
+  "scholarships": {
+    "eyebrow": "Scholarships",
+    "title": "International scholarships & aid",
+    "lead": "Criteria, files and follow-up — open to non-CI applicants depending on campaigns.",
+    "criteria": [
+      "Academic merit",
+      "Documented social need",
+      "Government partnerships",
+      "Exchange mobility"
+    ],
+    "cta": "Prepare a scholarship file"
+  },
+  "guides": {
+    "eyebrow": "Guides",
+    "title": "Mobile welcome guides",
+    "lead": "Lightweight phone versions (PWA / PDF) — visa, arrival, campus.",
+    "items": [
+      {
+        "t": "Visa guide (PDF)",
+        "b": "Steps and documents to prepare"
+      },
+      {
+        "t": "Arrival guide (PDF)",
+        "b": "Airport, transport, first days"
+      },
+      {
+        "t": "Campus guide (PWA)",
+        "b": "Digital Campus services — offline soon"
+      }
+    ]
+  },
+  "legal": {
+    "eyebrow": "Compliance",
+    "title": "Legal notice & cross-border data",
+    "lead": "Processing of personal data for international applicants and students.",
+    "points": [
+      "Purposes: admission, academics, mobility, account security",
+      "Bases: contract performance / institutional legitimate interest",
+      "Transfers: hosting and processors under adapted clauses",
+      "Rights: access, rectification, objection via dpo@iua-ci.org",
+      "Retention: linked to academic file and legal duties"
+    ]
+  },
+  "calendar": {
+    "eyebrow": "Calendar",
+    "title": "Academic calendar (GMT)",
+    "lead": "Intake landmarks — times in Abidjan timezone (GMT).",
+    "items": [
+      {
+        "when": "Jun–Aug 2026",
+        "what": "International applications"
+      },
+      {
+        "when": "September 2026",
+        "what": "Bachelor / Master intake"
+      },
+      {
+        "when": "January 2027",
+        "what": "Semester 2"
+      },
+      {
+        "when": "June 2027",
+        "what": "Exams & deliberation"
+      }
+    ]
+  },
+  "programs": {
+    "eyebrow": "Programs",
+    "title": "Bachelor's & Master's",
+    "lead": "IUA catalogue — keywords: Business, IT, Law, Management, Engineering pathways.",
+    "seoKeywords": "MBA · Computer Science · Business Administration · Law · Finance · International Relations"
+  },
+  "contact": {
+    "eyebrow": "Contact",
+    "title": "Contact us",
+    "lead": "Institution, admissions and international relations."
+  },
+  "campus": {
+    "eyebrow": "Campus",
+    "title": "Campus life in Abidjan",
+    "lead": "II Plateaux — teaching, services and international welcome."
+  },
+  "institution": {
+    "eyebrow": "Institution",
+    "title": "Institut Universitaire d'Abidjan",
+    "lead": "Academic excellence, rooted in Abidjan, open to the world."
+  },
+  "faculties": {
+    "eyebrow": "Faculties",
+    "title": "Faculties & schools",
+    "lead": "IUA academic organization."
+  },
+  "etudier": {
+    "eyebrow": "Study",
+    "title": "Your study project",
+    "lead": "Programs, admissions and international pathways."
+  },
+  "connexion": {
+    "eyebrow": "Portal",
+    "title": "Digital Campus sign-in",
+    "lead": "Access your student, teacher or admin space."
+  },
+  "portal": {
+    "logout": "Sign out",
+    "nav": "Navigation",
+    "student": {
+      "dashboard": "Dashboard",
+      "courses": "Courses",
+      "grades": "Grades",
+      "requests": "Admin requests",
+      "notifications": "Notifications",
+      "groupPath": "My path",
+      "groupAdmin": "Procedures",
+      "docsBilingual": "Bilingual documents",
+      "docsLead": "Transcripts, certificates and admission letters in FR/EN."
+    },
+    "teacher": {
+      "dashboard": "Dashboard",
+      "courses": "My courses",
+      "students": "My students",
+      "grades": "Grades",
+      "requests": "Requests",
+      "notifications": "Notifications",
+      "groupTeach": "Teaching",
+      "groupAccount": "Account"
+    },
+    "admin": {
+      "overview": "Overview",
+      "direction": "Leadership",
+      "users": "Users & roles",
+      "programs": "Programs",
+      "teach": "Teaching assignments",
+      "enroll": "Enrollments",
+      "requests": "Requests",
+      "grades": "Grades",
+      "groupPilot": "Steering",
+      "groupManage": "Management"
+    },
+    "direction": {
+      "dashboard": "Dashboard",
+      "ops": "Operations view",
+      "intlKpiTitle": "International reach",
+      "intlStudents": "International students",
+      "intlShare": "International share",
+      "intlCountries": "Countries of origin",
+      "intlPartners": "Active partners",
+      "alumniAbroad": "Alumni abroad"
+    }
+  },
+  "payments": {
+    "title": "International payments",
+    "lead": "Local Mobile Money, card and transfers (Wise) depending on your situation.",
+    "methods": [
+      "Mobile Money (CI)",
+      "Visa/Mastercard",
+      "Wise / SWIFT transfer"
+    ]
+  },
+  "alumni": {
+    "eyebrow": "Alumni",
+    "title": "IUA network abroad",
+    "lead": "Find alumni on LinkedIn and country communities.",
+    "cta": "Open IUA Alumni LinkedIn"
+  }
+}

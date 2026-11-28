@@ -16,7 +16,7 @@ export function PublicPage({
     <main className="min-h-[100svh] bg-iua-mist">
       <SiteHeader variant="solid" />
       <section className="relative overflow-hidden border-b border-iua-navy/10 bg-white">
-        <div className="pointer-events-none absolute -right-16 top-0 h-40 w-40 rounded-full bg-iua-cyan/15 blur-3xl" />
+        <div className="pointer-events-none absolute -end-16 top-0 h-40 w-40 rounded-full bg-iua-cyan/15 blur-3xl" />
         <div className="mx-auto max-w-6xl px-6 py-14 pt-28">
           {eyebrow && (
             <p className="text-xs uppercase tracking-[0.2em] text-iua-cyan animate-[fadeUp_0.4s_ease_both]">

@@ -1,9 +1,11 @@
 "use client";
 
-import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { AuthHeaderActions } from "@/components/AuthHeaderActions";
 import { BrandLogo } from "@/components/BrandLogo";
+import { LanguageSwitcher } from "@/components/intl/LanguageSwitcher";
+import { Link } from "@/i18n/navigation";
 import { getAccessToken, getStoredUser, resolveHomePath } from "@/lib/auth";
 import { publicNav } from "@/lib/navigation";
 
@@ -11,6 +13,9 @@ export function SiteHeader({ variant = "overlay" }: { variant?: "overlay" | "sol
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const solid = variant === "solid" || scrolled;
+  const t = useTranslations("nav");
+  const th = useTranslations("header");
+  const tc = useTranslations("common");
 
   useEffect(() => {
     if (variant === "solid") return;
@@ -51,7 +56,10 @@ export function SiteHeader({ variant = "overlay" }: { variant?: "overlay" | "sol
               +225 27 224 222 65
             </a>
           </p>
-          <p className="tracking-[0.12em] uppercase">Abidjan · Côte d&apos;Ivoire</p>
+          <div className="flex items-center gap-4">
+            <p className="tracking-[0.12em] uppercase">{th("location")}</p>
+            <LanguageSwitcher solid={false} />
+          </div>
         </div>
       </div>
 
@@ -63,7 +71,7 @@ export function SiteHeader({ variant = "overlay" }: { variant?: "overlay" | "sol
             className="h-10 w-auto transition duration-300 group-hover:scale-[1.02] sm:h-11"
           />
           <span
-            className={`hidden border-l pl-3 text-[11px] uppercase leading-tight tracking-[0.16em] sm:block ${
+            className={`hidden border-s ps-3 text-[11px] uppercase leading-tight tracking-[0.16em] sm:block ${
               solid ? "border-iua-navy/15 text-iua-navy/55" : "border-white/25 text-white/70"
             }`}
           >
@@ -79,16 +87,19 @@ export function SiteHeader({ variant = "overlay" }: { variant?: "overlay" | "sol
               key={item.href}
               href={item.href}
               prefetch
-              className={`relative text-sm font-medium transition after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:bg-iua-cyan after:transition-all hover:after:w-full ${
+              className={`relative text-sm font-medium transition after:absolute after:-bottom-1 after:start-0 after:h-0.5 after:w-0 after:bg-iua-cyan after:transition-all hover:after:w-full ${
                 solid ? "text-iua-navy/75 hover:text-iua-navy" : "text-white/85 hover:text-white"
               }`}
             >
-              {item.label}
+              {t(item.labelKey)}
             </Link>
           ))}
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-3">
+          <div className="sm:hidden">
+            <LanguageSwitcher solid={solid} />
+          </div>
           <AuthHeaderActions solid={solid} />
           <button
             type="button"
@@ -117,13 +128,13 @@ export function SiteHeader({ variant = "overlay" }: { variant?: "overlay" | "sol
                   className="block py-2 text-base font-semibold"
                   onClick={() => setOpen(false)}
                 >
-                  {item.label}
+                  {t(item.labelKey)}
                 </Link>
-                {"children" in item && item.children && (
-                  <div className="ml-3 flex flex-col gap-1 border-l border-current/15 pl-3 text-sm opacity-80">
+                {item.children && (
+                  <div className="ms-3 flex flex-col gap-1 border-s border-current/15 ps-3 text-sm opacity-80">
                     {item.children.map((child) => (
                       <Link key={child.href} href={child.href} onClick={() => setOpen(false)}>
-                        {child.label}
+                        {t(child.labelKey)}
                       </Link>
                     ))}
                   </div>
@@ -136,11 +147,11 @@ export function SiteHeader({ variant = "overlay" }: { variant?: "overlay" | "sol
                 className="pt-2 font-semibold"
                 onClick={() => setOpen(false)}
               >
-                Mon espace
+                {tc("mySpace")}
               </Link>
             ) : (
               <Link href="/connexion" className="pt-2 font-semibold" onClick={() => setOpen(false)}>
-                Connexion au portail
+                {tc("login")}
               </Link>
             )}
           </div>
