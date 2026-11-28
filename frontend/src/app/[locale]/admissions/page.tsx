@@ -1,36 +1,40 @@
-import Link from "next/link";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { CurrencyFees } from "@/components/intl/CurrencyFees";
+import { InternationalApplicationForm } from "@/components/intl/InternationalApplicationForm";
 import { PublicPage } from "@/components/PublicPage";
+import { Link } from "@/i18n/navigation";
+import { buildPageMetadata } from "@/lib/intl/seo";
+import type { AppLocale } from "@/i18n/routing";
 
-const steps = [
-  {
-    n: "01",
-    title: "Choisir une formation",
-    body: "Parcourez le catalogue et sélectionnez le programme adapté.",
-  },
-  {
-    n: "02",
-    title: "Déposer le dossier",
-    body: "Formulaire unique, pièces justificatives et suivi en ligne.",
-  },
-  {
-    n: "03",
-    title: "Recevoir la décision",
-    body: "Vous êtes informé à chaque étape de validation.",
-  },
-  {
-    n: "04",
-    title: "Finaliser l'inscription",
-    body: "Paiement puis activation de votre compte étudiant.",
-  },
-];
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "admissions" });
+  return buildPageMetadata({
+    locale: locale as AppLocale,
+    title: t("title"),
+    description: t("lead"),
+    path: "/admissions",
+  });
+}
 
-export default function AdmissionsPage() {
+export default async function AdmissionsPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations("admissions");
+
+  const steps = [
+    { n: "01", title: t("s1"), body: t("s1b") },
+    { n: "02", title: t("s2"), body: t("s2b") },
+    { n: "03", title: t("s3"), body: t("s3b") },
+    { n: "04", title: t("s4"), body: t("s4b") },
+  ];
+
   return (
-    <PublicPage
-      eyebrow="Admissions"
-      title="Comment s'inscrire"
-      lead="Quatre étapes, du choix de formation à l'activation de votre espace étudiant."
-    >
+    <PublicPage eyebrow={t("eyebrow")} title={t("title")} lead={t("lead")}>
       <ol className="grid gap-6 md:grid-cols-2">
         {steps.map((step) => (
           <li key={step.n} className="rounded-xl bg-white p-6 shadow-soft">
@@ -46,19 +50,31 @@ export default function AdmissionsPage() {
           href="/formations"
           className="rounded-md bg-iua-navy px-5 py-3 text-sm font-semibold text-white"
         >
-          Voir les formations
+          {t("seePrograms")}
         </Link>
         <Link
           href="/connexion"
           className="rounded-md border border-iua-navy/15 bg-white px-5 py-3 text-sm font-semibold text-iua-navy"
         >
-          J&apos;ai déjà un compte
+          {t("haveAccount")}
+        </Link>
+        <Link
+          href="/international"
+          className="rounded-md border border-iua-cyan/40 bg-iua-cyan/10 px-5 py-3 text-sm font-semibold text-iua-navy"
+        >
+          International
         </Link>
       </div>
 
-      <p className="mt-8 text-sm text-iua-muted">
-        Le dépôt de candidature en ligne sera bientôt disponible sur ce parcours.
-      </p>
+      <section className="mt-14 space-y-6">
+        <div>
+          <h2 className="font-display text-3xl text-iua-navy">{t("intlTitle")}</h2>
+          <p className="mt-2 max-w-2xl text-sm text-iua-muted">{t("intlLead")}</p>
+        </div>
+        <CurrencyFees amountXof={t.raw("feesAmount") as number} title={t("feesTitle")} />
+        <InternationalApplicationForm />
+        <p className="text-sm text-iua-muted">{t("note")}</p>
+      </section>
     </PublicPage>
   );
 }

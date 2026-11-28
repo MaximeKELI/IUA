@@ -1,28 +1,37 @@
-import Link from "next/link";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { PublicPage } from "@/components/PublicPage";
+import { Link } from "@/i18n/navigation";
+import { buildPageMetadata } from "@/lib/intl/seo";
+import type { AppLocale } from "@/i18n/routing";
 
-export default function EtudierPage() {
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "etudier" });
+  return buildPageMetadata({
+    locale: locale as AppLocale,
+    title: t("title"),
+    description: t("lead"),
+    path: "/etudier",
+  });
+}
+
+export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations("etudier");
+  const n = await getTranslations("nav");
   return (
-    <PublicPage
-      eyebrow="Étudier à l'IUA"
-      title="Choisissez votre porte d'entrée"
-      lead="Formations, admissions ou accueil international : choisissez votre entrée."
-    >
-      <div className="grid gap-4 md:grid-cols-3">
-        {[
-          ["Formations", "Comparer licences et masters", "/formations"],
-          ["Admissions", "Démarrer une candidature", "/admissions"],
-          ["International", "Accueil des étudiants étrangers", "/international"],
-        ].map(([title, body, href]) => (
-          <Link
-            key={title}
-            href={href}
-            className="rounded-xl bg-white p-6 shadow-soft transition hover:-translate-y-0.5"
-          >
-            <h2 className="font-display text-2xl text-iua-navy">{title}</h2>
-            <p className="mt-2 text-sm text-iua-muted">{body}</p>
-          </Link>
-        ))}
+    <PublicPage eyebrow={t("eyebrow")} title={t("title")} lead={t("lead")}>
+      <div className="flex flex-wrap gap-3">
+        <Link href="/international" className="rounded-md bg-iua-navy px-5 py-3 text-sm font-semibold text-white">
+          {n("international")}
+        </Link>
+        <Link href="/admissions" className="rounded-md bg-iua-sun px-5 py-3 text-sm font-semibold text-iua-navy">
+          {n("admissions")}
+        </Link>
+        <Link href="/formations" className="rounded-md border border-iua-navy/15 bg-white px-5 py-3 text-sm font-semibold text-iua-navy">
+          {n("programs")}
+        </Link>
       </div>
     </PublicPage>
   );

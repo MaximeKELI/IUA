@@ -1,8 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { BrandLogo } from "@/components/BrandLogo";
 import { apiLogin } from "@/lib/api";
 import { getAccessToken, getStoredUser, resolveHomePath, saveSession } from "@/lib/auth";

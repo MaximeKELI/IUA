@@ -1,7 +1,8 @@
 "use client";
 
+import { useLocale } from "next-intl";
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { PortalShell } from "@/components/PortalShell";
 import { apiGetCached } from "@/lib/api";
 import { useAuthToken } from "@/lib/useAuthToken";
@@ -55,6 +56,7 @@ const statusLabel: Record<string, string> = {
 };
 
 export default function StudentPortalPage() {
+  const locale = useLocale();
   const [data, setData] = useState<StudentDashboard | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { token, ready } = useAuthToken();
@@ -212,7 +214,7 @@ export default function StudentPortalPage() {
                           <p className="text-xs text-iua-muted">
                             {g.label}
                             {g.created_at
-                              ? ` · ${new Date(g.created_at).toLocaleDateString("fr-FR")}`
+                              ? ` · ${new Date(g.created_at).toLocaleDateString(locale)}`
                               : ""}
                           </p>
                         </div>

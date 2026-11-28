@@ -1,5 +1,6 @@
 "use client";
 
+import { useLocale } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
 import { apiGet, apiGetCached, Page, unwrapList } from "@/lib/api";
@@ -43,6 +44,7 @@ function toOver20(score: string, max: string) {
 }
 
 export default function StudentNotesPage() {
+  const locale = useLocale();
   const { token, ready } = useAuthToken();
   const [grades, setGrades] = useState<Grade[]>([]);
   const [avgGlobal, setAvgGlobal] = useState<number | null>(null);
@@ -75,7 +77,7 @@ export default function StudentNotesPage() {
         });
       }
     }
-    return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name, "fr"));
+    return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name, locale));
   }, [grades]);
 
   const filtered = useMemo(() => {
@@ -123,7 +125,7 @@ export default function StudentNotesPage() {
         (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
       );
     }
-    return Array.from(groups.values()).sort((a, b) => a.name.localeCompare(b.name, "fr"));
+    return Array.from(groups.values()).sort((a, b) => a.name.localeCompare(b.name, locale));
   }, [filtered]);
 
   const filterAvg = useMemo(() => {
@@ -249,7 +251,7 @@ export default function StudentNotesPage() {
                     </td>
                     <td className="px-4 py-3 text-iua-muted">
                       {g.created_at
-                        ? new Date(g.created_at).toLocaleDateString("fr-FR")
+                        ? new Date(g.created_at).toLocaleDateString(locale)
                         : "—"}
                     </td>
                     <td className="px-4 py-3 font-display text-lg text-iua-navy">
@@ -300,7 +302,7 @@ export default function StudentNotesPage() {
                           <p className="text-xs text-iua-muted">
                             {kindLabels[g.kind] || g.kind}
                             {g.created_at
-                              ? ` · ${new Date(g.created_at).toLocaleDateString("fr-FR")}`
+                              ? ` · ${new Date(g.created_at).toLocaleDateString(locale)}`
                               : ""}
                           </p>
                         </div>

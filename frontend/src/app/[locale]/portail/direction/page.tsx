@@ -1,8 +1,9 @@
 "use client";
 
-import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
+import { Link } from "@/i18n/navigation";
 import { apiGetCached } from "@/lib/api";
 import { getStoredUser } from "@/lib/auth";
 import { resolveOpsNav, resolveOpsTitle } from "@/lib/portalCapabilities";
@@ -69,11 +70,20 @@ const consultLinks = [
   },
 ];
 
+const intlDemo = {
+  international_students: 186,
+  international_share_pct: 12,
+  countries: 24,
+  partners: 8,
+  alumni_abroad: 410,
+};
+
 export default function DirectionPortalPage() {
   const [data, setData] = useState<DirectionDashboard | null>(null);
   const [error, setError] = useState<string | null>(null);
   const roles = getStoredUser()?.roles || [];
   const { token, ready } = useAuthToken();
+  const ti = useTranslations("portal.direction");
 
   useEffect(() => {
     if (!ready || !token) return;
@@ -102,6 +112,32 @@ export default function DirectionPortalPage() {
               </div>
             ))}
           </div>
+
+          <section className="mt-8 rounded-xl bg-iua-navy p-6 text-white">
+            <h2 className="font-display text-xl">{ti("intlKpiTitle")}</h2>
+            <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+              <div>
+                <p className="text-xs uppercase tracking-[0.14em] text-white/60">{ti("intlStudents")}</p>
+                <p className="mt-1 font-display text-3xl">{intlDemo.international_students}</p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-[0.14em] text-white/60">{ti("intlShare")}</p>
+                <p className="mt-1 font-display text-3xl">{intlDemo.international_share_pct}%</p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-[0.14em] text-white/60">{ti("intlCountries")}</p>
+                <p className="mt-1 font-display text-3xl">{intlDemo.countries}</p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-[0.14em] text-white/60">{ti("intlPartners")}</p>
+                <p className="mt-1 font-display text-3xl">{intlDemo.partners}</p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-[0.14em] text-white/60">{ti("alumniAbroad")}</p>
+                <p className="mt-1 font-display text-3xl">{intlDemo.alumni_abroad}</p>
+              </div>
+            </div>
+          </section>
 
           <div className="mt-8 grid gap-6 lg:grid-cols-2">
             <section className="rounded-xl bg-white p-5 shadow-soft">

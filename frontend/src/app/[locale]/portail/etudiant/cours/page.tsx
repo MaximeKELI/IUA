@@ -1,7 +1,8 @@
 "use client";
 
+import { useLocale } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { PortalShell } from "@/components/PortalShell";
 import { apiGet, apiGetCached, Page, unwrapList } from "@/lib/api";
 import { useAuthToken } from "@/lib/useAuthToken";
@@ -61,6 +62,7 @@ const enrollmentStatus: Record<string, string> = {
 };
 
 export default function StudentCoursPage() {
+  const locale = useLocale();
   const { token, ready } = useAuthToken();
   const [dash, setDash] = useState<Dashboard | null>(null);
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
@@ -122,7 +124,7 @@ export default function StudentCoursPage() {
       ue.subjects.push(s);
     }
     return Array.from(map.values()).sort(
-      (a, b) => a.semester - b.semester || a.code.localeCompare(b.code, "fr"),
+      (a, b) => a.semester - b.semester || a.code.localeCompare(b.code, locale),
     );
   }, [filtered]);
 

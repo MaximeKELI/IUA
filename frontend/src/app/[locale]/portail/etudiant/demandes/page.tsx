@@ -1,5 +1,6 @@
 "use client";
 
+import { useLocale } from "next-intl";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { PortalShell } from "@/components/PortalShell";
 import { apiGet, apiSend, Page, unwrapList } from "@/lib/api";
@@ -54,6 +55,7 @@ const presets: Record<string, { subject: string; body: string }> = {
 };
 
 export default function StudentDemandesPage() {
+  const locale = useLocale();
   const { token, ready } = useAuthToken();
   const [items, setItems] = useState<AdminRequest[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -249,7 +251,7 @@ export default function StudentDemandesPage() {
                     <p className="font-medium text-iua-navy">{item.subject}</p>
                     <p className="mt-1 text-xs text-iua-muted">
                       {kindLabels[item.kind] || item.kind} ·{" "}
-                      {new Date(item.created_at).toLocaleDateString("fr-FR")}
+                      {new Date(item.created_at).toLocaleDateString(locale)}
                     </p>
                   </div>
                   <span

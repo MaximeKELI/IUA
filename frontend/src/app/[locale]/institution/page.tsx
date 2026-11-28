@@ -1,28 +1,37 @@
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { PublicPage } from "@/components/PublicPage";
+import { Link } from "@/i18n/navigation";
+import { buildPageMetadata } from "@/lib/intl/seo";
+import type { AppLocale } from "@/i18n/routing";
 
-export default function InstitutionPage() {
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "institution" });
+  return buildPageMetadata({
+    locale: locale as AppLocale,
+    title: t("title"),
+    description: t("lead"),
+    path: "/institution",
+  });
+}
+
+export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations("institution");
+  const n = await getTranslations("nav");
   return (
-    <PublicPage
-      eyebrow="Institution"
-      title="Institut Universitaire d'Abidjan"
-      lead="Université privée à Abidjan, engagée pour former des professionnels qualifiés et dynamiques."
-    >
-      <div className="grid gap-8 md:grid-cols-2">
-        <article className="rounded-xl bg-white p-6 shadow-soft">
-          <h2 className="font-display text-xl text-iua-navy">Notre ambition</h2>
-          <p className="mt-3 text-sm leading-relaxed text-iua-muted">
-            Former des talents prêts pour un marché de l&apos;emploi exigeant, grâce à des
-            programmes accrédités, des partenariats internationaux et un accompagnement
-            professionnel structuré.
-          </p>
-        </article>
-        <article className="rounded-xl bg-white p-6 shadow-soft">
-          <h2 className="font-display text-xl text-iua-navy">Digital Campus</h2>
-          <p className="mt-3 text-sm leading-relaxed text-iua-muted">
-            Le SIU centralise académique, finance, pédagogie et services de campus derrière
-            une identité numérique unique.
-          </p>
-        </article>
+    <PublicPage eyebrow={t("eyebrow")} title={t("title")} lead={t("lead")}>
+      <div className="flex flex-wrap gap-3">
+        <Link href="/international" className="rounded-md bg-iua-navy px-5 py-3 text-sm font-semibold text-white">
+          {n("international")}
+        </Link>
+        <Link href="/admissions" className="rounded-md bg-iua-sun px-5 py-3 text-sm font-semibold text-iua-navy">
+          {n("admissions")}
+        </Link>
+        <Link href="/formations" className="rounded-md border border-iua-navy/15 bg-white px-5 py-3 text-sm font-semibold text-iua-navy">
+          {n("programs")}
+        </Link>
       </div>
     </PublicPage>
   );

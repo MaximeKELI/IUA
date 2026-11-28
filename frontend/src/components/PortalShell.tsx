@@ -1,9 +1,10 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { BrandLogo } from "@/components/BrandLogo";
+import { LanguageSwitcher } from "@/components/intl/LanguageSwitcher";
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { apiGet, apiLogout, AuthUser, clearApiMemoryCache } from "@/lib/api";
 import { getAccessToken, getStoredUser, setStoredUser } from "@/lib/auth";
 import { PortalGroup } from "@/lib/navigation";
@@ -21,6 +22,9 @@ export function PortalShell({
   const pathname = usePathname();
   const [user, setUser] = useState<AuthUser | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const t = useTranslations();
+  const tc = useTranslations("common");
+  const tp = useTranslations("portal");
 
   useEffect(() => {
     const stored = getStoredUser();
@@ -63,7 +67,7 @@ export function PortalShell({
   if (!user) {
     return (
       <main className="flex min-h-[100svh] items-center justify-center bg-iua-mist text-iua-navy">
-        Ouverture de votre espace…
+        {tc("openingSpace")}
       </main>
     );
   }
@@ -77,7 +81,7 @@ export function PortalShell({
               type="button"
               className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-iua-mist text-iua-navy lg:hidden"
               onClick={() => setMenuOpen((v) => !v)}
-              aria-label="Menu portail"
+              aria-label="Menu"
             >
               {menuOpen ? "×" : "☰"}
             </button>
@@ -89,7 +93,8 @@ export function PortalShell({
             </Link>
           </div>
           <div className="flex items-center gap-3">
-            <div className="hidden text-right sm:block">
+            <LanguageSwitcher solid />
+            <div className="hidden text-end sm:block">
               <p className="text-sm font-semibold text-iua-navy">{user.full_name}</p>
               <p className="text-xs text-iua-muted">{title}</p>
             </div>
@@ -97,7 +102,7 @@ export function PortalShell({
               onClick={() => void logout()}
               className="rounded-md border border-iua-navy/15 px-3 py-2 text-sm text-iua-navy transition hover:bg-iua-navy hover:text-white"
             >
-              Déconnexion
+              {tp("logout")}
             </button>
           </div>
         </div>
@@ -107,14 +112,14 @@ export function PortalShell({
         <aside
           className={`${
             menuOpen ? "block" : "hidden"
-          } border-b border-iua-navy/10 bg-white px-4 py-5 lg:block lg:min-h-[calc(100svh-65px)] lg:border-b-0 lg:border-r`}
+          } border-b border-iua-navy/10 bg-white px-4 py-5 lg:block lg:min-h-[calc(100svh-65px)] lg:border-b-0 lg:border-e`}
         >
-          <p className="px-2 text-[11px] uppercase tracking-[0.18em] text-iua-muted">Navigation</p>
+          <p className="px-2 text-[11px] uppercase tracking-[0.18em] text-iua-muted">{tp("nav")}</p>
           <div className="mt-4 space-y-6">
             {filteredNav.map((group) => (
-              <div key={group.title}>
+              <div key={group.titleKey}>
                 <p className="px-2 text-xs font-semibold uppercase tracking-[0.12em] text-iua-navy/45">
-                  {group.title}
+                  {t(group.titleKey)}
                 </p>
                 <ul className="mt-2 space-y-1">
                   {group.links.map((link) => {
@@ -136,8 +141,10 @@ export function PortalShell({
                                 : "text-iua-navy/80 hover:bg-iua-mist"
                           }`}
                         >
-                          <span>{link.label}</span>
-                          {soon && <span className="text-[10px] uppercase tracking-wide">Bientôt</span>}
+                          <span>{t(link.labelKey)}</span>
+                          {soon && (
+                            <span className="text-[10px] uppercase tracking-wide">{tc("soon")}</span>
+                          )}
                         </Link>
                       </li>
                     );

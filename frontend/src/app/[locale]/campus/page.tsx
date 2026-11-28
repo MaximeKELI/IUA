@@ -1,29 +1,37 @@
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { PublicPage } from "@/components/PublicPage";
+import { Link } from "@/i18n/navigation";
+import { buildPageMetadata } from "@/lib/intl/seo";
+import type { AppLocale } from "@/i18n/routing";
 
-export default function CampusPage() {
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "campus" });
+  return buildPageMetadata({
+    locale: locale as AppLocale,
+    title: t("title"),
+    description: t("lead"),
+    path: "/campus",
+  });
+}
+
+export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations("campus");
+  const n = await getTranslations("nav");
   return (
-    <PublicPage
-      eyebrow="Campus"
-      title="Un cadre d'apprentissage moderne"
-      lead="Infrastructures, vie étudiante et services du quotidien à Abidjan."
-    >
-      <div
-        className="h-64 overflow-hidden rounded-2xl bg-cover bg-[position:center_18%] sm:h-80 md:h-[28rem]"
-        style={{ backgroundImage: "url('/brand/campus-hero.png')" }}
-        role="img"
-        aria-label="Étudiantes IUA sur le campus"
-      />
-      <div className="mt-8 grid gap-6 md:grid-cols-3">
-        {[
-          ["Infrastructures", "Salles équipées, ressources numériques, bibliothèque"],
-          ["Vie étudiante", "Clubs, sport, entraide et activités"],
-          ["Services", "Transport, restauration, accompagnement"],
-        ].map(([title, body]) => (
-          <article key={title} className="border-t border-iua-navy/15 pt-4">
-            <h2 className="font-display text-xl text-iua-navy">{title}</h2>
-            <p className="mt-2 text-sm text-iua-muted">{body}</p>
-          </article>
-        ))}
+    <PublicPage eyebrow={t("eyebrow")} title={t("title")} lead={t("lead")}>
+      <div className="flex flex-wrap gap-3">
+        <Link href="/international" className="rounded-md bg-iua-navy px-5 py-3 text-sm font-semibold text-white">
+          {n("international")}
+        </Link>
+        <Link href="/admissions" className="rounded-md bg-iua-sun px-5 py-3 text-sm font-semibold text-iua-navy">
+          {n("admissions")}
+        </Link>
+        <Link href="/formations" className="rounded-md border border-iua-navy/15 bg-white px-5 py-3 text-sm font-semibold text-iua-navy">
+          {n("programs")}
+        </Link>
       </div>
     </PublicPage>
   );
