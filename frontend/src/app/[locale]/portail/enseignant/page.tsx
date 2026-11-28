@@ -192,13 +192,7 @@ export default function TeacherPortalPage() {
                           href={`/portail/enseignant/notes?subject=${s.id}`}
                           className="text-xs font-semibold text-iua-cyan"
                         >
-                          Notes
-                        </Link>
-                        <Link
-                          href={`/portail/enseignant/notes?subject=${s.id}&mode=bulk`}
-                          className="text-xs text-iua-muted hover:text-iua-navy"
-                        >
-                          Saisie collective
+                          Ouvrir le carnet
                         </Link>
                       </div>
                     </div>

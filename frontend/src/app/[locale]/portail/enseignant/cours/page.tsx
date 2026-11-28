@@ -168,13 +168,7 @@ export default function TeacherCoursPage() {
                   href={`/portail/enseignant/notes?subject=${a.subject}`}
                   className="rounded-md bg-iua-navy px-3 py-2 text-xs font-semibold text-white"
                 >
-                  Saisir des notes
-                </Link>
-                <Link
-                  href={`/portail/enseignant/notes?subject=${a.subject}&mode=bulk`}
-                  className="rounded-md border border-iua-navy/15 px-3 py-2 text-xs font-semibold text-iua-navy"
-                >
-                  Saisie collective
+                  Ouvrir le carnet
                 </Link>
                 <Link
                   href={

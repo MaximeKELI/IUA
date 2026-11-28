@@ -235,6 +235,8 @@ class Grade(UUIDModel, TimeStampedModel):
     """Note saisie par un enseignant — consultable par l'étudiant."""
 
     class Kind(models.TextChoices):
+        INTERRO = "interro", "Interrogation"
+        DEVOIR = "devoir", "Devoir"
         CC = "cc", "Contrôle continu"
         EXAM = "exam", "Examen"
         TP = "tp", "Travaux pratiques"
