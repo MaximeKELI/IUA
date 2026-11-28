@@ -149,17 +149,16 @@ export function PortalShell({
 
       <div className="mx-auto grid max-w-7xl lg:grid-cols-[260px_1fr]">
         <aside
-          className={`${
-            menuOpen ? "block" : "hidden"
-          } bg-[#0A2342] px-3 py-5 text-white lg:block lg:min-h-[calc(100svh-65px)]`}
+          className={`${menuOpen ? "block" : "hidden"} px-3 py-5 lg:block lg:min-h-[calc(100svh-65px)]`}
+          style={{ backgroundColor: "#0A2342", color: "#ffffff" }}
         >
-          <p className="px-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/55">
+          <p className="px-3 text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color: "rgba(255,255,255,0.55)" }}>
             {safeT((k) => tp(k as Parameters<typeof tp>[0]), "nav") || "Navigation"}
           </p>
           <div className="mt-4 space-y-5">
             {filteredNav.map((group) => (
               <div key={group.titleKey}>
-                <p className="px-3 text-[11px] font-bold uppercase tracking-[0.14em] text-[#3DB8E8]">
+                <p className="px-3 text-[11px] font-bold uppercase tracking-[0.14em]" style={{ color: "#3DB8E8" }}>
                   {tr(group.titleKey)}
                 </p>
                 <ul className="mt-2 space-y-1">
@@ -181,17 +180,18 @@ export function PortalShell({
                             if (soon) e.preventDefault();
                             setMenuOpen(false);
                           }}
-                          className={`flex items-center justify-between rounded-md px-3 py-2.5 text-sm font-medium transition ${
+                          className="flex items-center justify-between rounded-md px-3 py-2.5 text-sm font-medium transition"
+                          style={
                             active
-                              ? "bg-[#3DB8E8] text-[#0A2342] shadow-sm"
+                              ? { backgroundColor: "#3DB8E8", color: "#0A2342" }
                               : soon
-                                ? "cursor-default text-white/35"
-                                : "text-white/90 hover:bg-white/10"
-                          }`}
+                                ? { color: "rgba(255,255,255,0.35)", cursor: "default" }
+                                : { color: "rgba(255,255,255,0.92)" }
+                          }
                         >
                           <span>{label}</span>
                           {soon && (
-                            <span className="text-[10px] uppercase tracking-wide text-white/50">
+                            <span className="text-[10px] uppercase tracking-wide" style={{ color: "rgba(255,255,255,0.5)" }}>
                               {tc("soon")}
                             </span>
                           )}
