@@ -40,24 +40,34 @@ const nextConfig: NextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV === "production" ? { exclude: ["error"] } : false,
   },
-  headers: async () => [
-    {
-      source: "/brand/:path*",
-      headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
-    },
-    {
-      source: "/_next/static/:path*",
-      headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
-    },
-    {
-      source: "/(.*)",
-      headers: [
-        { key: "X-Content-Type-Options", value: "nosniff" },
-        { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-        { key: "X-Frame-Options", value: "SAMEORIGIN" },
-      ],
-    },
-  ],
+  headers: async () => {
+    const security = [
+      { key: "X-Content-Type-Options", value: "nosniff" },
+      { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+      { key: "X-Frame-Options", value: "SAMEORIGIN" },
+    ];
+    // Never immutable-cache /_next/static in development — chunk paths are stable
+    // (no content hash), so the browser kept serving a broken UserAvatar/PortalShell
+    // and the portal looked blank/white after code changes.
+    const staticCache =
+      process.env.NODE_ENV === "production"
+        ? [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }]
+        : [{ key: "Cache-Control", value: "no-store, must-revalidate" }];
+    return [
+      {
+        source: "/brand/:path*",
+        headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
+      },
+      {
+        source: "/_next/static/:path*",
+        headers: staticCache,
+      },
+      {
+        source: "/(.*)",
+        headers: security,
+      },
+    ];
+  },
 };
 
 export default withNextIntl(nextConfig);
